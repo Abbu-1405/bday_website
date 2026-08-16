@@ -1,0 +1,15 @@
+export const ROUTES = {
+  HOME: '/',
+  JOURNEY: '/journey',
+  SNEAK_PEEK: '/sneak-peek',
+  ADORE: '/adore',
+  MOMENTS: '/moments',
+  NOTES_365: '/365-notes',
+  OPEN_WHEN: '/open-when',
+  WISHES: '/wishes',
+  SECRET_VAULT: '/secret-vault',
+  WHAT_AM_I_TO_YOU: '/what-am-i-to-you',
+  REFLECTIONS: '/reflections',
+  SETTINGS: '/settings',
+  ADMIN: '/admin',
+} as const;

@@ -1,0 +1,32 @@
+@import "./variables.css";
+@import "./themes.css";
+@import "./typography.css";
+@import "./animations.css";
+
+/* Base Body and Theme styles */
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  transition: background-color var(--duration-normal) var(--ease-standard),
+              color var(--duration-normal) var(--ease-standard);
+}
+
+/* Custom CSS variable helper classes */
+.bg-background { background-color: var(--color-background); }
+.bg-surface { background-color: var(--color-surface); }
+.bg-card { background-color: var(--color-card); }
+.bg-primary { background-color: var(--color-primary); color: var(--color-primary-foreground); }
+.bg-secondary { background-color: var(--color-secondary); }
+.bg-accent { background-color: var(--color-accent); }
+
+.text-foreground { color: var(--color-text); }
+.text-primary { color: var(--color-primary); }
+.text-secondary { color: var(--color-secondary); }
+.text-muted { color: var(--color-muted); }
+.text-accent { color: var(--color-accent); }
+
+.border-theme { border-color: var(--color-border); }

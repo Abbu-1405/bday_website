@@ -1,0 +1,126 @@
+/* ==========================================================================
+   WHAT AM I TO YOU — INTIMATE MIDNIGHT JOURNAL PALETTE
+   Scoped exclusively to the What Am I To You sanctuary
+   ========================================================================== */
+
+/* 1. Atmospheric Deep Midnight Background (#0D1422 -> #111827 -> #172033) */
+.what-am-i-bg {
+  background: radial-gradient(circle at 50% 12%, rgba(32, 42, 61, 0.45) 0%, rgba(23, 32, 51, 0.8) 45%, #0D1422 100%),
+              linear-gradient(180deg, #0D1422 0%, #111827 50%, #172033 100%);
+}
+
+/* 2. Soft Ambient Aura (Candlelight warm gold glow) */
+@keyframes whatAmIAmbientAura {
+  0%, 100% {
+    opacity: 0.35;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+}
+
+.animate-ambient-aura {
+  animation: whatAmIAmbientAura 10s ease-in-out infinite;
+}
+
+/* 3. Inscribed Keepsake Reveal Animation (500-800ms) */
+@keyframes keepsakeReveal {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.animate-keepsake-reveal {
+  animation: keepsakeReveal 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 4. Delicate Chapter Fade */
+@keyframes chapterFadeIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-chapter-fade {
+  animation: chapterFadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 5. Intimate Warm Parchment Writing Surfaces Inside Midnight Journal */
+.stationery-parchment-sheet {
+  background-color: #F2E8D2;
+  color: #2B211B;
+  border: 1px solid #B89A6A;
+  border-radius: 1rem;
+  box-shadow:
+    inset 0 2px 6px rgba(43, 33, 27, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35),
+    0 4px 16px rgba(0, 0, 0, 0.25);
+  position: relative;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Faint physical writing paper lines */
+.stationery-parchment-lines {
+  background-color: #F2E8D2;
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 31px,
+    rgba(184, 154, 106, 0.16) 31px,
+    rgba(184, 154, 106, 0.16) 32px
+  );
+  background-attachment: local;
+  line-height: 32px;
+  color: #2B211B;
+  border: 1px solid #B89A6A;
+  box-shadow:
+    inset 0 2px 6px rgba(43, 33, 27, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35),
+    0 4px 16px rgba(0, 0, 0, 0.25);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.stationery-parchment-lines::placeholder,
+.stationery-parchment-sheet::placeholder {
+  color: #8C7965;
+  opacity: 0.85;
+}
+
+.stationery-parchment-lines:focus,
+.stationery-parchment-sheet:focus {
+  outline: none;
+  border-color: #9F7A3D;
+  box-shadow:
+    inset 0 2px 6px rgba(43, 33, 27, 0.06),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 0 0 3px rgba(197, 154, 82, 0.35),
+    0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Letterhead decorative fold crease */
+.letter-paper-crease {
+  background: linear-gradient(135deg, rgba(184, 154, 106, 0.12) 0%, transparent 50%);
+}
+
+/* 6. Respect Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-ambient-aura,
+  .animate-keepsake-reveal,
+  .animate-chapter-fade {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+

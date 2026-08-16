@@ -1,0 +1,255 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Deep Midnight Prussian Blue Base Gradient -->
+    <radialGradient id="skyDepth" cx="70%" cy="30%" r="85%">
+      <stop offset="0%" stop-color="#122856" />
+      <stop offset="35%" stop-color="#0A1838" />
+      <stop offset="70%" stop-color="#060F24" />
+      <stop offset="100%" stop-color="#030814" />
+    </radialGradient>
+
+    <!-- Oil Painting Canvas Weave & Brush Texture Filter -->
+    <filter id="oilImpasto" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="4" result="noise" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.12 0" />
+      <feComposite in2="SourceGraphic" in="gl" operator="in" />
+    </filter>
+
+    <!-- Star Glow Radiance Gradients -->
+    <!-- Major Top-Right Star Vortex -->
+    <radialGradient id="vortexGlowMajor" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFBE6" stop-opacity="1" />
+      <stop offset="12%" stop-color="#FCE692" stop-opacity="0.95" />
+      <stop offset="28%" stop-color="#E2B144" stop-opacity="0.8" />
+      <stop offset="50%" stop-color="#A87320" stop-opacity="0.5" />
+      <stop offset="75%" stop-color="#3A4D78" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#0A1838" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Medium Star Glow -->
+    <radialGradient id="starGlowMed" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFDF0" stop-opacity="1" />
+      <stop offset="20%" stop-color="#F7D878" stop-opacity="0.9" />
+      <stop offset="55%" stop-color="#C9932B" stop-opacity="0.45" />
+      <stop offset="100%" stop-color="#08142C" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Small Star Glow -->
+    <radialGradient id="starGlowSmall" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="1" />
+      <stop offset="30%" stop-color="#FCE089" stop-opacity="0.85" />
+      <stop offset="70%" stop-color="#C28722" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#0A1630" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Lavender Cosmic Tint Gradient -->
+    <linearGradient id="lavenderMist" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6B4B74" stop-opacity="0.04" />
+      <stop offset="50%" stop-color="#9A789C" stop-opacity="0.06" />
+      <stop offset="100%" stop-color="#5B3A63" stop-opacity="0.03" />
+    </linearGradient>
+  </defs>
+
+  <!-- 1. Deep Midnight Base Sky Canvas -->
+  <rect width="1920" height="1080" fill="url(#skyDepth)" />
+
+  <!-- 2. Painted Swirling Currents & Impasto Brushstroke Bands -->
+  <g opacity="0.94">
+    <!-- Deep Indigo Undertone Waves -->
+    <path d="M-100,240 C300,120 700,380 1100,220 C1500,60 1800,280 2050,180" 
+          fill="none" stroke="#061128" stroke-width="140" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M-100,560 C250,420 620,720 1020,540 C1420,360 1740,620 2050,480" 
+          fill="none" stroke="#081530" stroke-width="160" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M-100,880 C320,740 760,1020 1180,840 C1580,660 1860,940 2050,820" 
+          fill="none" stroke="#050E22" stroke-width="150" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Prussian Blue Main Flow Currents -->
+    <path d="M-50,180 C350,60 720,310 1120,160 C1520,10 1780,210 2000,120" 
+          fill="none" stroke="#0D1E42" stroke-width="90" stroke-linecap="round" />
+    <path d="M-50,340 C320,200 680,460 1080,300 C1480,140 1760,370 2000,260" 
+          fill="none" stroke="#122754" stroke-width="85" stroke-linecap="round" />
+    <path d="M-50,500 C280,360 640,620 1040,460 C1440,300 1720,530 2000,420" 
+          fill="none" stroke="#152F66" stroke-width="95" stroke-linecap="round" />
+    <path d="M-50,660 C260,520 600,780 1000,620 C1400,460 1700,690 2000,580" 
+          fill="none" stroke="#102550" stroke-width="90" stroke-linecap="round" />
+    <path d="M-50,820 C300,680 660,940 1060,780 C1460,620 1740,850 2000,740" 
+          fill="none" stroke="#0B1A3A" stroke-width="100" stroke-linecap="round" />
+
+    <!-- Vivid Cobalt & Sapphire Swirling Filaments -->
+    <path d="M-30,220 C340,110 700,340 1100,190 C1500,40 1750,230 1980,150" 
+          fill="none" stroke="#1A3B7C" stroke-width="45" stroke-linecap="round" />
+    <path d="M-30,390 C310,270 660,500 1060,350 C1460,200 1730,410 1980,310" 
+          fill="none" stroke="#1E4590" stroke-width="42" stroke-linecap="round" />
+    <path d="M-30,550 C290,430 630,660 1030,510 C1430,360 1690,570 1980,470" 
+          fill="none" stroke="#2350A5" stroke-width="48" stroke-linecap="round" />
+    <path d="M-30,710 C270,590 590,820 990,670 C1390,520 1670,730 1980,630" 
+          fill="none" stroke="#1B3E84" stroke-width="44" stroke-linecap="round" />
+    <path d="M-30,870 C310,750 650,980 1050,830 C1450,680 1710,890 1980,790" 
+          fill="none" stroke="#142C60" stroke-width="50" stroke-linecap="round" />
+
+    <!-- Fine Detailed Blue Impasto Strokes -->
+    <path d="M20,200 C360,95 710,320 1110,180 C1510,40 1740,220 1950,140" 
+          fill="none" stroke="#2B5CB8" stroke-width="20" stroke-linecap="round" opacity="0.85" />
+    <path d="M40,370 C330,255 670,480 1070,335 C1470,190 1720,395 1950,300" 
+          fill="none" stroke="#326BD4" stroke-width="18" stroke-linecap="round" opacity="0.80" />
+    <path d="M10,530 C300,415 640,640 1040,495 C1440,350 1680,555 1950,455" 
+          fill="none" stroke="#295EC0" stroke-width="22" stroke-linecap="round" opacity="0.85" />
+    <path d="M30,690 C280,575 600,800 1000,655 C1400,510 1660,715 1950,615" 
+          fill="none" stroke="#214EA0" stroke-width="20" stroke-linecap="round" opacity="0.80" />
+    <path d="M20,850 C320,735 660,960 1060,815 C1460,670 1700,875 1950,775" 
+          fill="none" stroke="#1B4084" stroke-width="24" stroke-linecap="round" opacity="0.85" />
+
+    <!-- Secondary Cerulean Highlight Ribbons -->
+    <path d="M60,190 C380,90 730,305 1120,170 C1510,35 1730,210 1920,135" 
+          fill="none" stroke="#467FE6" stroke-width="8" stroke-linecap="round" opacity="0.75" />
+    <path d="M50,520 C310,405 650,625 1050,485 C1440,345 1670,545 1920,450" 
+          fill="none" stroke="#3E75D8" stroke-width="9" stroke-linecap="round" opacity="0.70" />
+    <path d="M70,840 C330,725 670,945 1070,805 C1460,665 1690,865 1920,765" 
+          fill="none" stroke="#3668C4" stroke-width="8" stroke-linecap="round" opacity="0.70" />
+  </g>
+
+  <!-- 3. Upper Right Primary Star Vortex (Faithful to artwork) -->
+  <g transform="translate(1360, 310)">
+    <!-- Swirling concentric background aura -->
+    <circle cx="0" cy="0" r="140" fill="url(#vortexGlowMajor)" opacity="0.9" />
+
+    <!-- Swirling golden-amber brush rings around vortex -->
+    <path d="M-80,-20 C-70,-60 -20,-80 20,-75 C70,-70 90,-20 80,30 C70,75 20,85 -30,75 C-75,65 -90,10 -80,-30" 
+          fill="none" stroke="#B88028" stroke-width="14" stroke-linecap="round" opacity="0.7" />
+    <path d="M-55,-15 C-45,-45 -10,-60 20,-55 C50,-50 65,-15 55,20 C45,50 15,60 -20,50 C-50,40 -60,10 -55,-20" 
+          fill="none" stroke="#DCA23A" stroke-width="10" stroke-linecap="round" opacity="0.85" />
+    <path d="M-35,-10 C-30,-30 -5,-40 15,-35 C35,-30 45,-10 38,15 C30,35 10,42 -12,35 C-32,28 -40,5 -35,-15" 
+          fill="none" stroke="#F6C762" stroke-width="8" stroke-linecap="round" opacity="0.95" />
+    <path d="M-20,-5 C-15,-18 -2,-25 10,-20 C22,-18 28,-5 22,8 C18,20 5,24 -8,20 C-20,15 -25,2 -20,-8" 
+          fill="none" stroke="#FFF2A8" stroke-width="6" stroke-linecap="round" />
+
+    <!-- Core Radiant Nucleus -->
+    <circle cx="0" cy="0" r="16" fill="#FFFCE8" />
+    <circle cx="0" cy="0" r="8" fill="#FFFFFF" />
+  </g>
+
+  <!-- 4. Top Right Corner Star Vortex -->
+  <g transform="translate(1810, 65)">
+    <circle cx="0" cy="0" r="80" fill="url(#starGlowMed)" opacity="0.85" />
+    <path d="M-30,-8 C-25,-26 -5,-35 15,-30 C32,-25 40,-8 34,12 C28,30 8,36 -10,30 C-28,24 -35,5 -30,-12" 
+          fill="none" stroke="#DCA23A" stroke-width="6" stroke-linecap="round" opacity="0.8" />
+    <circle cx="0" cy="0" r="9" fill="#FFF9D2" />
+    <circle cx="0" cy="0" r="4.5" fill="#FFFFFF" />
+  </g>
+
+  <!-- 5. Bottom Right Corner Star Vortex -->
+  <g transform="translate(1860, 870)">
+    <circle cx="0" cy="0" r="100" fill="url(#starGlowMed)" opacity="0.9" />
+    <path d="M-45,-12 C-38,-38 -8,-50 20,-45 C48,-40 60,-12 50,18 C40,45 12,55 -15,45 C-42,35 -52,8 -45,-18" 
+          fill="none" stroke="#C98F2C" stroke-width="8" stroke-linecap="round" opacity="0.75" />
+    <path d="M-25,-8 C-20,-22 -4,-30 12,-26 C26,-22 34,-7 28,10 C22,25 6,30 -8,25 C-22,20 -28,4 -24,-10" 
+          fill="none" stroke="#F4C25A" stroke-width="6" stroke-linecap="round" opacity="0.9" />
+    <circle cx="0" cy="0" r="12" fill="#FFFBE2" />
+    <circle cx="0" cy="0" r="6" fill="#FFFFFF" />
+  </g>
+
+  <!-- 6. Bottom Left Major Glowing Star Vortex -->
+  <g transform="translate(145, 885)">
+    <circle cx="0" cy="0" r="110" fill="url(#starGlowMed)" opacity="0.92" />
+    <path d="M-50,-15 C-42,-45 -10,-60 22,-52 C55,-45 68,-15 58,20 C48,52 15,65 -18,52 C-50,40 -60,10 -50,-20" 
+          fill="none" stroke="#C48825" stroke-width="9" stroke-linecap="round" opacity="0.7" />
+    <path d="M-30,-8 C-24,-26 -5,-36 15,-30 C34,-25 42,-8 35,12 C28,30 8,38 -10,30 C-28,24 -36,5 -30,-12" 
+          fill="none" stroke="#EBB54E" stroke-width="7" stroke-linecap="round" opacity="0.85" />
+    <circle cx="0" cy="0" r="14" fill="#FFFCE6" />
+    <circle cx="0" cy="0" r="7" fill="#FFFFFF" />
+  </g>
+
+  <!-- 7. Bottom Center-Left Star -->
+  <g transform="translate(600, 805)">
+    <circle cx="0" cy="0" r="65" fill="url(#starGlowSmall)" opacity="0.9" />
+    <path d="M-20,-6 C-16,-18 -3,-24 10,-20 C22,-16 28,-5 22,8 C18,20 5,25 -6,20 C-18,16 -24,3 -20,-8" 
+          fill="none" stroke="#DCA23A" stroke-width="4" stroke-linecap="round" opacity="0.8" />
+    <circle cx="0" cy="0" r="8" fill="#FFF9D0" />
+    <circle cx="0" cy="0" r="4" fill="#FFFFFF" />
+  </g>
+
+  <!-- 8. Mid-Left Small Star (at ~390, 650) -->
+  <g transform="translate(390, 650)">
+    <circle cx="0" cy="0" r="45" fill="url(#starGlowSmall)" opacity="0.85" />
+    <circle cx="0" cy="0" r="6" fill="#FFFAD5" />
+    <circle cx="0" cy="0" r="3" fill="#FFFFFF" />
+  </g>
+
+  <!-- 9. Top-Left Floating Star (at ~310, 95) -->
+  <g transform="translate(310, 95)">
+    <circle cx="0" cy="0" r="70" fill="url(#starGlowSmall)" opacity="0.9" />
+    <path d="M-24,-7 C-18,-20 -4,-28 12,-24 C26,-20 32,-7 26,10 C20,24 6,28 -8,24 C-22,18 -28,4 -24,-9" 
+          fill="none" stroke="#E2AE44" stroke-width="5" stroke-linecap="round" opacity="0.85" />
+    <circle cx="0" cy="0" r="8" fill="#FFFCE2" />
+    <circle cx="0" cy="0" r="4" fill="#FFFFFF" />
+  </g>
+
+  <!-- 10. Upper Center Floating Star (at ~840, 120) -->
+  <g transform="translate(840, 120)">
+    <circle cx="0" cy="0" r="55" fill="url(#starGlowSmall)" opacity="0.85" />
+    <circle cx="0" cy="0" r="7" fill="#FFF8CB" />
+    <circle cx="0" cy="0" r="3.5" fill="#FFFFFF" />
+  </g>
+
+  <!-- 11. Mid-Center Golden Starlet (at ~850, 665) -->
+  <g transform="translate(850, 665)">
+    <circle cx="0" cy="0" r="45" fill="url(#starGlowSmall)" opacity="0.8" />
+    <circle cx="0" cy="0" r="5.5" fill="#FFF7C6" />
+  </g>
+
+  <!-- 12. Mid-Right Small Star (at ~1510, 570) -->
+  <g transform="translate(1510, 570)">
+    <circle cx="0" cy="0" r="45" fill="url(#starGlowSmall)" opacity="0.85" />
+    <circle cx="0" cy="0" r="6" fill="#FFF8CD" />
+    <circle cx="0" cy="0" r="3" fill="#FFFFFF" />
+  </g>
+
+  <!-- 13. Upper-Right Mid Star (at ~1680, 240) -->
+  <g transform="translate(1680, 240)">
+    <circle cx="0" cy="0" r="50" fill="url(#starGlowSmall)" opacity="0.8" />
+    <circle cx="0" cy="0" r="6.5" fill="#FFF9CE" />
+  </g>
+
+  <!-- 14. Top-Right Center Star (at ~1380, 60) -->
+  <g transform="translate(1380, 60)">
+    <circle cx="0" cy="0" r="55" fill="url(#starGlowSmall)" opacity="0.85" />
+    <circle cx="0" cy="0" r="7" fill="#FFF8CA" />
+  </g>
+
+  <!-- 15. Scattered Glowing Celestial Pinprick Stardust -->
+  <g fill="#FFF8E0" opacity="0.85">
+    <circle cx="670" cy="255" r="3.5" />
+    <circle cx="1060" cy="195" r="3.2" />
+    <circle cx="1210" cy="95" r="3" />
+    <circle cx="910" cy="770" r="3.4" />
+    <circle cx="1080" cy="915" r="3.8" />
+    <circle cx="1320" cy="840" r="3" />
+    <circle cx="1640" cy="980" r="3.6" />
+    <circle cx="1780" cy="635" r="3.2" />
+    <circle cx="1850" cy="415" r="3.5" />
+    <circle cx="210" cy="360" r="3.2" />
+    <circle cx="510" cy="450" r="2.8" />
+    <circle cx="740" cy="510" r="3" />
+    <circle cx="980" cy="420" r="2.8" />
+    <circle cx="1180" cy="980" r="3.2" />
+  </g>
+
+  <g fill="#FAD77A" opacity="0.9">
+    <circle cx="685" cy="258" r="5" fill-opacity="0.35" />
+    <circle cx="1075" cy="198" r="4.5" fill-opacity="0.35" />
+    <circle cx="925" cy="773" r="5" fill-opacity="0.35" />
+    <circle cx="1095" cy="918" r="5.5" fill-opacity="0.35" />
+    <circle cx="1655" cy="983" r="5" fill-opacity="0.35" />
+    <circle cx="1865" cy="418" r="5" fill-opacity="0.35" />
+  </g>
+
+  <!-- 16. Subtle Muted Lavender Atmospheric Mist Overlay -->
+  <rect width="1920" height="1080" fill="url(#lavenderMist)" />
+
+  <!-- 17. Delicate Midnight Vignette Edge -->
+  <radialGradient id="vignetteEdge" cx="50%" cy="50%" r="70%">
+    <stop offset="60%" stop-color="#000000" stop-opacity="0" />
+    <stop offset="100%" stop-color="#02050E" stop-opacity="0.45" />
+  </radialGradient>
+  <rect width="1920" height="1080" fill="url(#vignetteEdge)" />
+</svg>

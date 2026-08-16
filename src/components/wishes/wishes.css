@@ -1,0 +1,452 @@
+/* =========================================================================
+   WISHES & LANTERN GARDEN ATMOSPHERE (PHASES 17 + 18)
+   Scoped strictly to the Wishes section.
+   ========================================================================= */
+
+/* Flame Core Candlelight Flicker */
+@keyframes wishFlameFlicker {
+  0%, 100% {
+    transform: scale(1) translateY(0);
+    opacity: 0.95;
+    filter: drop-shadow(0 0 4px rgba(255, 190, 80, 0.8));
+  }
+  25% {
+    transform: scale(1.06, 0.94) translateY(-0.5px);
+    opacity: 1;
+    filter: drop-shadow(0 0 6px rgba(255, 210, 110, 0.9));
+  }
+  50% {
+    transform: scale(0.95, 1.04) translateY(0.5px);
+    opacity: 0.88;
+    filter: drop-shadow(0 0 3px rgba(255, 170, 60, 0.7));
+  }
+  75% {
+    transform: scale(1.03, 0.97) translateY(-0.2px);
+    opacity: 0.98;
+    filter: drop-shadow(0 0 5px rgba(255, 200, 90, 0.85));
+  }
+}
+
+/* Organic Sky Lantern Continuous Flight Animations with gentle wind drift & subtle tilt */
+@keyframes lanternFlight1 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  16% {
+    transform: translate3d(8px, -14px, 0) rotate(0.9deg);
+  }
+  33% {
+    transform: translate3d(18px, -32px, 0) rotate(1.5deg);
+  }
+  48% {
+    transform: translate3d(12px, -52px, 0) rotate(0.6deg);
+  }
+  62% {
+    transform: translate3d(-4px, -66px, 0) rotate(-1.2deg);
+  }
+  76% {
+    transform: translate3d(-14px, -46px, 0) rotate(-1.7deg);
+  }
+  88% {
+    transform: translate3d(-6px, -20px, 0) rotate(-0.7deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+}
+
+@keyframes lanternFlight2 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  18% {
+    transform: translate3d(-10px, -18px, 0) rotate(-1.3deg);
+  }
+  35% {
+    transform: translate3d(-20px, -38px, 0) rotate(-1.9deg);
+  }
+  50% {
+    transform: translate3d(-10px, -58px, 0) rotate(-0.5deg);
+  }
+  65% {
+    transform: translate3d(6px, -70px, 0) rotate(1.1deg);
+  }
+  80% {
+    transform: translate3d(16px, -48px, 0) rotate(1.6deg);
+  }
+  92% {
+    transform: translate3d(8px, -22px, 0) rotate(0.8deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+}
+
+@keyframes lanternFlight3 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-0.5deg);
+  }
+  15% {
+    transform: translate3d(9px, -12px, 0) rotate(1.2deg);
+  }
+  30% {
+    transform: translate3d(15px, -28px, 0) rotate(0.7deg);
+  }
+  45% {
+    transform: translate3d(4px, -46px, 0) rotate(-0.8deg);
+  }
+  60% {
+    transform: translate3d(-12px, -60px, 0) rotate(-1.8deg);
+  }
+  75% {
+    transform: translate3d(-16px, -42px, 0) rotate(-1.0deg);
+  }
+  88% {
+    transform: translate3d(-5px, -18px, 0) rotate(0.2deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-0.5deg);
+  }
+}
+
+@keyframes lanternFlight4 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0.4deg);
+  }
+  20% {
+    transform: translate3d(-7px, -20px, 0) rotate(-1.1deg);
+  }
+  38% {
+    transform: translate3d(8px, -40px, 0) rotate(1.3deg);
+  }
+  55% {
+    transform: translate3d(22px, -62px, 0) rotate(1.8deg);
+  }
+  70% {
+    transform: translate3d(14px, -74px, 0) rotate(0.5deg);
+  }
+  84% {
+    transform: translate3d(-4px, -50px, 0) rotate(-1.4deg);
+  }
+  94% {
+    transform: translate3d(-6px, -22px, 0) rotate(-0.6deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0.4deg);
+  }
+}
+
+@keyframes lanternFlight5 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  14% {
+    transform: translate3d(12px, -16px, 0) rotate(1.4deg);
+  }
+  29% {
+    transform: translate3d(20px, -35px, 0) rotate(1.7deg);
+  }
+  44% {
+    transform: translate3d(14px, -54px, 0) rotate(0.7deg);
+  }
+  58% {
+    transform: translate3d(0px, -68px, 0) rotate(-0.8deg);
+  }
+  73% {
+    transform: translate3d(-15px, -52px, 0) rotate(-1.6deg);
+  }
+  87% {
+    transform: translate3d(-12px, -28px, 0) rotate(-1.0deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+}
+
+@keyframes lanternFlight6 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-0.6deg);
+  }
+  17% {
+    transform: translate3d(-8px, -15px, 0) rotate(-1.4deg);
+  }
+  33% {
+    transform: translate3d(-3px, -34px, 0) rotate(-0.3deg);
+  }
+  49% {
+    transform: translate3d(14px, -52px, 0) rotate(1.6deg);
+  }
+  64% {
+    transform: translate3d(19px, -65px, 0) rotate(1.9deg);
+  }
+  79% {
+    transform: translate3d(7px, -45px, 0) rotate(0.8deg);
+  }
+  90% {
+    transform: translate3d(-4px, -24px, 0) rotate(-0.9deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-0.6deg);
+  }
+}
+
+/* Mobile-adapted flight keyframes (reduced horizontal offset to prevent canvas edge clipping) */
+@keyframes lanternFlightMobile1 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  20% {
+    transform: translate3d(4px, -8px, 0) rotate(0.8deg);
+  }
+  42% {
+    transform: translate3d(7px, -20px, 0) rotate(1.2deg);
+  }
+  64% {
+    transform: translate3d(1px, -28px, 0) rotate(-0.4deg);
+  }
+  82% {
+    transform: translate3d(-4px, -16px, 0) rotate(-1.0deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+}
+
+@keyframes lanternFlightMobile2 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  22% {
+    transform: translate3d(-5px, -10px, 0) rotate(-1.0deg);
+  }
+  44% {
+    transform: translate3d(-8px, -22px, 0) rotate(-1.3deg);
+  }
+  66% {
+    transform: translate3d(-1px, -30px, 0) rotate(0.5deg);
+  }
+  85% {
+    transform: translate3d(4px, -14px, 0) rotate(0.9deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+}
+
+@keyframes lanternFlightMobile3 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-0.5deg);
+  }
+  25% {
+    transform: translate3d(5px, -12px, 0) rotate(1.0deg);
+  }
+  50% {
+    transform: translate3d(-3px, -24px, 0) rotate(-0.8deg);
+  }
+  75% {
+    transform: translate3d(-6px, -16px, 0) rotate(-1.2deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-0.5deg);
+  }
+}
+
+@keyframes lanternFlightMobile4 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0.5deg);
+  }
+  22% {
+    transform: translate3d(-4px, -9px, 0) rotate(-0.8deg);
+  }
+  46% {
+    transform: translate3d(5px, -22px, 0) rotate(1.2deg);
+  }
+  72% {
+    transform: translate3d(7px, -28px, 0) rotate(0.9deg);
+  }
+  88% {
+    transform: translate3d(1px, -14px, 0) rotate(-0.3deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0.5deg);
+  }
+}
+
+/* Lantern Flight Animation Utility Classes */
+.lantern-flight-1 {
+  animation: lanternFlight1 var(--flight-dur, 22s) ease-in-out infinite;
+}
+.lantern-flight-2 {
+  animation: lanternFlight2 var(--flight-dur, 26s) ease-in-out infinite;
+}
+.lantern-flight-3 {
+  animation: lanternFlight3 var(--flight-dur, 20s) ease-in-out infinite;
+}
+.lantern-flight-4 {
+  animation: lanternFlight4 var(--flight-dur, 28s) ease-in-out infinite;
+}
+.lantern-flight-5 {
+  animation: lanternFlight5 var(--flight-dur, 24s) ease-in-out infinite;
+}
+.lantern-flight-6 {
+  animation: lanternFlight6 var(--flight-dur, 27s) ease-in-out infinite;
+}
+
+.lantern-flight-mobile-1 {
+  animation: lanternFlightMobile1 var(--flight-dur, 20s) ease-in-out infinite;
+}
+.lantern-flight-mobile-2 {
+  animation: lanternFlightMobile2 var(--flight-dur, 24s) ease-in-out infinite;
+}
+.lantern-flight-mobile-3 {
+  animation: lanternFlightMobile3 var(--flight-dur, 22s) ease-in-out infinite;
+}
+.lantern-flight-mobile-4 {
+  animation: lanternFlightMobile4 var(--flight-dur, 26s) ease-in-out infinite;
+}
+
+/* Distant Star Twinkle */
+@keyframes starTwinkle {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.15);
+  }
+}
+
+/* Ambient Drifting Spark / Firefly Mote */
+@keyframes sparkDrift {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.75;
+  }
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(var(--drift-x, 20px), var(--drift-y, -90px));
+    opacity: 0;
+  }
+}
+
+/* Subtle Inner Paper Glow Breathing */
+@keyframes paperBreathe {
+  0%, 100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Wish Parchment Entrance: Gentle fade + slight upward movement + very subtle scale */
+@keyframes wishParchmentReveal {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* Caught Lantern Gentle Approach at top of parchment */
+@keyframes wishCaughtLantern {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -16px, 0) scale(0.92);
+    filter: drop-shadow(0 0 4px rgba(245, 185, 75, 0.2));
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: drop-shadow(0 10px 25px rgba(245, 185, 75, 0.65));
+  }
+}
+
+/* Soft Golden Candlelight Radiance behind parchment */
+@keyframes wishGoldenAura {
+  0%, 100% {
+    opacity: 0.65;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.04);
+  }
+}
+
+.animate-wish-flame {
+  animation: wishFlameFlicker 3.2s ease-in-out infinite;
+}
+
+.animate-star-twinkle {
+  animation: starTwinkle var(--twinkle-dur, 3.5s) ease-in-out infinite;
+}
+
+.animate-spark-drift {
+  animation: sparkDrift var(--spark-dur, 9s) ease-in-out infinite;
+}
+
+.animate-paper-breathe {
+  animation: paperBreathe 4s ease-in-out infinite;
+}
+
+.animate-parchment-reveal {
+  animation: wishParchmentReveal 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-caught-lantern {
+  animation: wishCaughtLantern 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-golden-aura {
+  animation: wishGoldenAura 5s ease-in-out infinite;
+}
+
+/* Custom Scrollbar for Wish Parchment */
+.wish-parchment-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+.wish-parchment-scroll::-webkit-scrollbar-track {
+  background: rgba(180, 140, 90, 0.1);
+  border-radius: 9999px;
+}
+.wish-parchment-scroll::-webkit-scrollbar-thumb {
+  background: rgba(160, 110, 60, 0.35);
+  border-radius: 9999px;
+}
+.wish-parchment-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(140, 90, 45, 0.55);
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  .animate-wish-flame,
+  .animate-star-twinkle,
+  .animate-spark-drift,
+  .animate-paper-breathe,
+  .animate-parchment-reveal,
+  .animate-caught-lantern,
+  .animate-golden-aura,
+  .lantern-flight-1,
+  .lantern-flight-2,
+  .lantern-flight-3,
+  .lantern-flight-4,
+  .lantern-flight-5,
+  .lantern-flight-6,
+  .lantern-flight-mobile-1,
+  .lantern-flight-mobile-2,
+  .lantern-flight-mobile-3,
+  .lantern-flight-mobile-4 {
+    animation: none !important;
+    transform: none !important;
+  }
+}

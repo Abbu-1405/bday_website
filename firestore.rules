@@ -1,0 +1,98 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.admin == true ||
+        (request.auth.token.email == 'mohammedabuzarshaik@gmail.com' && request.auth.token.email_verified == true) ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+
+    // Collection Group rules for activity, feelings, and letters across all users
+    match /{path=**}/activity/{activityId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+    }
+
+    match /{path=**}/feelings/{feelingId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+    }
+
+    match /{path=**}/letters/{letterId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+    }
+
+    match /{path=**}/photoBooth/{photoId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Admin metadata & read states (Admin only)
+    match /adminMeta/{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // Public Content & Admin Content Management (365 Notes, Wishes, Open When, Secrets, Adore, Moments)
+    match /content/{category}/items/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // User Profile & Sub-collections
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && (
+        !request.resource.data.keys().hasAny(['role']) ||
+        request.resource.data.role == 'user' ||
+        isAdmin()
+      );
+      allow update: if isOwner(userId) && (
+        !request.resource.data.keys().hasAny(['role']) ||
+        request.resource.data.role == resource.data.role ||
+        request.resource.data.role == 'user' ||
+        isAdmin()
+      );
+
+      // User Feelings sub-collection
+      match /feelings/{feelingId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create, update, delete: if isOwner(userId);
+      }
+
+      // User Letters sub-collection
+      match /letters/{letterId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create, update, delete: if isOwner(userId);
+      }
+
+      // User Activity sub-collection
+      match /activity/{activityId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create, update, delete: if isOwner(userId);
+      }
+
+      // User Photo Booth sub-collection
+      match /photoBooth/{photoId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && request.resource.data.uid == userId;
+        allow update: if false;
+        allow delete: if isAdmin();
+      }
+    }
+  }
+}
+

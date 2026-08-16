@@ -1,0 +1,1261 @@
+/* Color Token System supporting Letter Archive, Midnight Journal, and Whimsical Scrapbook */
+
+:root,
+[data-theme="letter-archive"] {
+  /* Fonts */
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-heading: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-quote: 'Newsreader', 'Cormorant Garamond', Georgia, serif;
+  --font-handwritten: 'Caveat', cursive;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Dedicated Letter Archive Variables */
+  --letter-bg: #F7F2EB;
+  --letter-bg-secondary: #EDE4DC;
+  --letter-paper: #FAF6F0;
+  --letter-paper-elevated: #FFFDF9;
+  --letter-paper-subtle: #F3ECE2;
+  --letter-text: #2C221E;
+  --letter-text-secondary: #5C4A42;
+  --letter-muted: #8C776C;
+  --letter-burgundy: #7A2E3B;
+  --letter-burgundy-hover: #63242F;
+  --letter-burgundy-soft: rgba(122, 46, 59, 0.08);
+  --letter-accent: #C2934D;
+  --letter-accent-gold: #C2934D;
+  --letter-accent-gold-light: #DFB978;
+  --letter-sepia: #A37B5C;
+  --letter-brown: #4A352F;
+  --letter-border: rgba(138, 110, 89, 0.22);
+  --letter-border-subtle: rgba(138, 110, 89, 0.12);
+  --letter-border-gold: rgba(194, 147, 77, 0.35);
+  --letter-shadow: rgba(60, 42, 33, 0.08);
+  --letter-shadow-soft: 0 8px 24px -4px rgba(60, 42, 33, 0.08);
+
+  /* Semantic Color Tokens */
+  --background: #F7F2EB;
+  --surface: #EDE4D8;
+  --surface-secondary: #E5DACB;
+  --surface-elevated: #FAF6F0;
+  --paper: #FAF6F0;
+  --card: #FAF6F0;
+  --card-hover: #FFFDFC;
+
+  --primary: #7A2E3B;
+  --primary-foreground: #FAF6F0;
+  --secondary: #5C4A42;
+  --accent: #C2934D;
+  --accent-gold: #C2934D;
+  --accent-burgundy: #7A2E3B;
+
+  --text-primary: #2C221E;
+  --text-secondary: #5C4A42;
+  --text-muted: #8C776C;
+
+  --border: rgba(138, 110, 89, 0.22);
+  --border-light: rgba(138, 110, 89, 0.12);
+
+  --success: #4A7C59;
+  --warning: #C2934D;
+  --error: #A83B3B;
+  --info: #3B6B88;
+
+  --shadow-color: rgba(60, 42, 33, 0.08);
+  --shadow-soft: 0 8px 24px -4px rgba(60, 42, 33, 0.08);
+
+  /* Legacy & Helper Aliases */
+  --color-background: #F7F2EB;
+  --color-surface: var(--surface);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-card: var(--card);
+  --color-card-hover: var(--card-hover);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-text: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-muted: var(--text-muted);
+  --color-border: var(--border);
+  --color-border-light: var(--border-light);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  --color-shadow: var(--shadow-color);
+}
+
+[data-theme="midnight-journal"] {
+  /* Fonts */
+  --font-display: 'Cormorant Garamond', 'Fraunces', Georgia, serif;
+  --font-heading: 'Cormorant Garamond', 'Fraunces', Georgia, serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-quote: 'Newsreader', 'Cormorant Garamond', Georgia, serif;
+  --font-handwritten: 'Caveat', cursive;
+  --font-serif: 'Cormorant Garamond', 'Fraunces', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Primary Backgrounds */
+  --background: #050A16;
+  --bg-primary: #050A16;
+  --bg-secondary: #07101F;
+  --bg-tertiary: #0A1220;
+
+  /* Secondary Navy */
+  --navy-100: #0D1728;
+  --navy-200: #101B2D;
+  --navy-300: #142035;
+
+  /* Card Surfaces */
+  --surface: rgba(5, 10, 22, 0.78);
+  --surface-secondary: rgba(8, 15, 30, 0.82);
+  --surface-elevated: rgba(5, 10, 22, 0.80);
+  --card: rgba(5, 10, 22, 0.78);
+  --card-hover: rgba(8, 16, 32, 0.86);
+  --paper: rgba(5, 10, 22, 0.78);
+
+  /* Primary & Accent Tones */
+  --primary: #C99B58; /* Antique Gold */
+  --primary-foreground: #050A16;
+  --secondary: #9A789C; /* Muted Lavender */
+  --accent: #E2BD78; /* Light Gold */
+  --accent-gold: #C99B58;
+  --accent-light-gold: #E2BD78;
+  --accent-candlelight: #F4D18A;
+  --accent-lavender: #9A789C;
+  --accent-dusty-purple: #6D526F;
+
+  /* Typography Hierarchy */
+  --text-primary: #F2E4CF; /* Warm parchment cream */
+  --text-secondary: #C2AF99; /* Soft warm beige/tan */
+  --text-muted: #817568;
+
+  /* Borders & Shadows */
+  --border: rgba(201, 155, 88, 0.25);
+  --border-light: rgba(201, 155, 88, 0.16);
+  --shadow-color: rgba(0, 0, 0, 0.35);
+  --shadow-soft: 0 12px 35px rgba(0, 0, 0, 0.35);
+
+  --success: #4E9A70;
+  --warning: #F4D18A;
+  --error: #B85B5B;
+  --info: #9A789C;
+
+  /* Legacy & Helper Aliases */
+  --color-background: #050A16;
+  --color-surface: var(--surface);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-card: var(--card);
+  --color-card-hover: var(--card-hover);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-text: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-muted: var(--text-muted);
+  --color-border: var(--border);
+  --color-border-light: var(--border-light);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  --color-shadow: var(--shadow-color);
+}
+
+[data-theme="whimsical-scrapbook"] {
+  /* Dedicated Whimsical Typography Tokens */
+  --font-display: 'Fraunces', 'DM Serif Display', 'Cormorant Garamond', Georgia, serif;
+  --font-heading: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-quote: 'Newsreader', 'Cormorant Garamond', Georgia, serif;
+  --font-handwritten: 'Caveat', cursive;
+  --font-serif: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Semantic Color Tokens - Enchanted Night Forest */
+  --background: #0B100D;
+  --surface: rgba(8, 20, 11, 0.68);
+  --surface-secondary: rgba(12, 26, 15, 0.58);
+  --surface-elevated: rgba(8, 20, 11, 0.72);
+  --paper: rgba(8, 20, 11, 0.68);
+  --card: rgba(8, 20, 11, 0.68);
+  --card-hover: rgba(12, 28, 16, 0.78);
+
+  /* Primary Button / Active State */
+  --primary: #344A32;
+  --primary-foreground: #F7F1DF;
+  --secondary: #4A6346;
+
+  /* Magical Accents */
+  --accent: #D8B86A;
+  --accent-gold: #D8B86A;
+  --accent-soft-gold: #FFF8E8;
+  --accent-dark-green: #172218;
+  --accent-lavender: #C6A6D8;
+  --accent-rose: #E6A0C4;
+  --accent-pink: #E6A0C4;
+
+  /* Typography Hierarchy */
+  --text-primary: #F7F1DF;
+  --text-secondary: #B8C0AE;
+  --text-muted: #7F8B78;
+
+  /* Subtle Low-Opacity Borders & Shadows */
+  --border: rgba(240, 230, 190, 0.12);
+  --border-light: rgba(240, 230, 190, 0.08);
+  --shadow-color: rgba(0, 0, 0, 0.38);
+  --shadow-soft: 0 8px 28px rgba(0, 0, 0, 0.35);
+
+  --success: #4F6B48;
+  --warning: #D8B86A;
+  --error: #E6A0C4;
+  --info: #C6A6D8;
+
+  /* Legacy & Helper Aliases */
+  --color-background: transparent;
+  --color-surface: var(--surface);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-card: var(--card);
+  --color-card-hover: var(--card-hover);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-text: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-muted: var(--text-muted);
+  --color-border: var(--border);
+  --color-border-light: var(--border-light);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  --color-shadow: var(--shadow-color);
+}
+
+/* Whimsical Environmental Background Artwork - Static Full-Page SVG */
+[data-theme="whimsical-scrapbook"] body {
+  background-color: #0B100D;
+  background-image: url('/swirl-wallpaper-green.svg');
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: #F7F1DF;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* =========================================================================
+   WHIMSICAL DEDICATED TYPOGRAPHY SYSTEM
+   ========================================================================= */
+
+/* 1. Main Headings: Elegant Fantasy Storybook Serif */
+[data-theme="whimsical-scrapbook"] h1,
+[data-theme="whimsical-scrapbook"] h2,
+[data-theme="whimsical-scrapbook"] h3,
+[data-theme="whimsical-scrapbook"] h4,
+[data-theme="whimsical-scrapbook"] .text-display,
+[data-theme="whimsical-scrapbook"] .text-h1,
+[data-theme="whimsical-scrapbook"] .text-h2,
+[data-theme="whimsical-scrapbook"] .text-h3 {
+  font-family: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
+  font-optical-sizing: auto;
+  font-variation-settings: 'opsz' 144, 'SOFT' 40, 'WONK' 0;
+  font-weight: 600;
+  color: #F7F1DF;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+[data-theme="whimsical-scrapbook"] h1,
+[data-theme="whimsical-scrapbook"] .text-display,
+[data-theme="whimsical-scrapbook"] .text-h1 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 20px rgba(216, 184, 106, 0.12);
+}
+
+/* 2. Whimsical Accents: Delicate Handwritten / Script Margins */
+[data-theme="whimsical-scrapbook"] .text-handwritten,
+[data-theme="whimsical-scrapbook"] .font-handwritten,
+[data-theme="whimsical-scrapbook"] .whimsical-script,
+[data-theme="whimsical-scrapbook"] .whimsical-accent,
+[data-theme="whimsical-scrapbook"] .handwritten-note {
+  font-family: 'Caveat', cursive !important;
+  font-weight: 600;
+  font-size: 1.35rem;
+  line-height: 1.3;
+  color: #D8B86A;
+  letter-spacing: 0.015em;
+}
+
+[data-theme="whimsical-scrapbook"] .whimsical-subtitle,
+[data-theme="whimsical-scrapbook"] .whimsical-label {
+  font-family: 'Caveat', cursive !important;
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: #E6A0C4;
+  letter-spacing: 0.02em;
+}
+
+[data-theme="whimsical-scrapbook"] .whimsical-highlight {
+  font-family: 'Caveat', cursive !important;
+  font-size: 1.2em;
+  font-weight: 600;
+  color: #D8B86A;
+  display: inline-block;
+  transform: rotate(-1deg);
+}
+
+/* 3. Quotes: Tender Marginal Italic Journal Style */
+[data-theme="whimsical-scrapbook"] .text-quote,
+[data-theme="whimsical-scrapbook"] blockquote,
+[data-theme="whimsical-scrapbook"] .quote-text {
+  font-family: 'Newsreader', 'Cormorant Garamond', Georgia, serif !important;
+  font-style: italic !important;
+  font-weight: 400;
+  font-size: 1.25rem;
+  line-height: 1.7;
+  color: #FFF8E8 !important;
+  letter-spacing: 0.01em;
+}
+
+[data-theme="whimsical-scrapbook"] .quote-mark,
+[data-theme="whimsical-scrapbook"] blockquote::before {
+  color: #D8B86A;
+  opacity: 0.6;
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+[data-theme="whimsical-scrapbook"] .quote-author {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-style: normal;
+  font-size: 0.8125rem;
+  color: #B8C0AE;
+  letter-spacing: 0.04em;
+}
+
+/* 4. Body Text: Clean Refined Humanist Sans for High Readability */
+[data-theme="whimsical-scrapbook"] p,
+[data-theme="whimsical-scrapbook"] .text-body,
+[data-theme="whimsical-scrapbook"] .text-body-lg,
+[data-theme="whimsical-scrapbook"] .text-body-large,
+[data-theme="whimsical-scrapbook"] .text-small {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 400;
+  line-height: 1.68;
+  color: #B8C0AE;
+}
+
+[data-theme="whimsical-scrapbook"] strong,
+[data-theme="whimsical-scrapbook"] b {
+  color: #F7F1DF;
+  font-weight: 600;
+}
+
+/* 5. Navigation: Clean Readable Typography */
+[data-theme="whimsical-scrapbook"] nav[aria-label="Main Navigation"],
+[data-theme="whimsical-scrapbook"] nav a,
+[data-theme="whimsical-scrapbook"] nav button {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* 6. Buttons: Strictly Clean Readable Font (No Script) */
+[data-theme="whimsical-scrapbook"] button,
+[data-theme="whimsical-scrapbook"] .btn,
+[data-theme="whimsical-scrapbook"] .text-button {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+/* 7. Metadata & Captions */
+[data-theme="whimsical-scrapbook"] .text-caption,
+[data-theme="whimsical-scrapbook"] .text-xs,
+[data-theme="whimsical-scrapbook"] time {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.035em;
+  color: #7F8B78;
+}
+
+/* 8. Numbers & Important Metrics: Storybook Numerals */
+[data-theme="whimsical-scrapbook"] .font-metric,
+[data-theme="whimsical-scrapbook"] .stat-number {
+  font-family: 'Fraunces', Georgia, serif;
+  font-feature-settings: "lnum" 1, "tnum" 1;
+  color: #D8B86A;
+}
+
+/* Whimsical Cards - Translucent Dark Floating Pages over Magical Artwork */
+[data-theme="whimsical-scrapbook"] .bg-card,
+[data-theme="whimsical-scrapbook"] [class*="bg-[var(--color-card)]"],
+[data-theme="whimsical-scrapbook"] .surface-elevated,
+[data-theme="whimsical-scrapbook"] .surface-outlined {
+  background-color: rgba(8, 20, 11, 0.70) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(240, 230, 190, 0.12) !important;
+  border-radius: 20px;
+  color: #F7F1DF;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.32);
+}
+
+[data-theme="whimsical-scrapbook"] .bg-surface,
+[data-theme="whimsical-scrapbook"] [class*="bg-[var(--color-surface)]"],
+[data-theme="whimsical-scrapbook"] .surface-flat {
+  background-color: rgba(12, 26, 15, 0.60) !important;
+  border: 1px solid rgba(240, 230, 190, 0.08) !important;
+  border-radius: 16px;
+  color: #F7F1DF;
+}
+
+/* Whimsical Primary Button - Dark Forest + Cream Text + Subtle Gold Shimmer */
+[data-theme="whimsical-scrapbook"] button.bg-\[var\(--color-primary\)\],
+[data-theme="whimsical-scrapbook"] .bg-\[var\(--color-primary\)\] {
+  background-color: #2E452C;
+  color: #F7F1DF;
+  border: 1px solid rgba(216, 184, 106, 0.35);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="whimsical-scrapbook"] button.bg-\[var\(--color-primary\)\]:hover,
+[data-theme="whimsical-scrapbook"] .bg-\[var\(--color-primary\)\]:hover {
+  background-color: #385435;
+  border-color: rgba(216, 184, 106, 0.65);
+  box-shadow: 0 6px 20px rgba(216, 184, 106, 0.22);
+  transform: translateY(-1px);
+}
+
+/* Whimsical Secondary Button */
+[data-theme="whimsical-scrapbook"] button.bg-\[var\(--color-surface\)\],
+[data-theme="whimsical-scrapbook"] .bg-\[var\(--color-surface\)\] {
+  background-color: rgba(12, 26, 15, 0.65);
+  border: 1px solid rgba(240, 230, 190, 0.12);
+  color: #F7F1DF;
+}
+
+[data-theme="whimsical-scrapbook"] button.bg-\[var\(--color-surface\)\]:hover,
+[data-theme="whimsical-scrapbook"] .bg-\[var\(--color-surface\)\]:hover {
+  background-color: rgba(18, 36, 22, 0.78);
+  border-color: rgba(216, 184, 106, 0.35);
+}
+
+/* Floating Navigation - Dark Translucent Enchanted Bar */
+[data-theme="whimsical-scrapbook"] nav[aria-label="Main Navigation"] {
+  background-color: rgba(6, 16, 9, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(240, 230, 190, 0.14);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="whimsical-scrapbook"] nav[aria-label="Main Navigation"] a {
+  color: #B8C0AE;
+}
+
+[data-theme="whimsical-scrapbook"] nav[aria-label="Main Navigation"] a:hover {
+  color: #F7F1DF;
+  background-color: rgba(20, 36, 22, 0.60);
+}
+
+[data-theme="whimsical-scrapbook"] nav[aria-label="Main Navigation"] a.bg-\[var\(--color-primary\)\],
+[data-theme="whimsical-scrapbook"] nav[aria-label="Main Navigation"] button.bg-\[var\(--color-primary\)\] {
+  background-color: #2D442A;
+  color: #F7F1DF;
+  border: 1px solid rgba(216, 184, 106, 0.45);
+  box-shadow: 0 0 12px rgba(216, 184, 106, 0.18);
+}
+
+/* Floating Controls (Theme, Audio, Auth Buttons) */
+[data-theme="whimsical-scrapbook"] .fixed.top-4 button,
+[data-theme="whimsical-scrapbook"] .fixed.top-4 .rounded-full {
+  background-color: rgba(8, 20, 11, 0.85);
+  border: 1px solid rgba(240, 230, 190, 0.12);
+  color: #F7F1DF;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+/* Popovers & Dropdowns - Theme Menu, User Menu, Audio Mixer */
+[data-theme="whimsical-scrapbook"] [role="menu"],
+[data-theme="whimsical-scrapbook"] [role="region"][aria-label="Audio Mixer Controls"] {
+  background-color: rgba(8, 20, 11, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(240, 230, 190, 0.14);
+  color: #F7F1DF;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* Audio Mixer Slider Range */
+[data-theme="whimsical-scrapbook"] [role="region"][aria-label="Audio Mixer Controls"] input[type="range"] {
+  background-color: #293D25;
+  accent-color: #D8B86A;
+}
+
+/* Inputs & Form Controls */
+[data-theme="whimsical-scrapbook"] input,
+[data-theme="whimsical-scrapbook"] textarea,
+[data-theme="whimsical-scrapbook"] select {
+  background-color: rgba(30, 43, 31, 0.65);
+  border-color: rgba(255, 248, 232, 0.12);
+  color: #F7F1DF;
+}
+
+[data-theme="whimsical-scrapbook"] input::placeholder,
+[data-theme="whimsical-scrapbook"] textarea::placeholder {
+  color: #7F8B78;
+}
+
+[data-theme="whimsical-scrapbook"] input:focus,
+[data-theme="whimsical-scrapbook"] textarea:focus {
+  border-color: #D8B86A;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(216, 184, 106, 0.25);
+}
+
+/* Hide default cursor on desktop when whimsical magical wand is active */
+@media (pointer: fine) {
+  [data-theme="whimsical-scrapbook"],
+  [data-theme="whimsical-scrapbook"] * {
+    cursor: none !important;
+  }
+}
+
+/* =========================================================================
+   MIDNIGHT JOURNAL DEDICATED TYPOGRAPHY & VISUAL SYSTEM
+   ========================================================================= */
+
+/* Environmental Body Background */
+[data-theme="midnight-journal"] body {
+  background-color: #050A16;
+  color: #F2E4CF;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* 1. Main Headings: Elegant High-Contrast Antique Serif */
+[data-theme="midnight-journal"] h1,
+[data-theme="midnight-journal"] h2,
+[data-theme="midnight-journal"] h3,
+[data-theme="midnight-journal"] h4,
+[data-theme="midnight-journal"] .text-display,
+[data-theme="midnight-journal"] .text-h1,
+[data-theme="midnight-journal"] .text-h2,
+[data-theme="midnight-journal"] .text-h3 {
+  font-family: 'Cormorant Garamond', 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  color: #F2E4CF;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+[data-theme="midnight-journal"] h1,
+[data-theme="midnight-journal"] .text-display,
+[data-theme="midnight-journal"] .text-h1 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 24px rgba(201, 155, 88, 0.18);
+}
+
+/* 2. Journal Accents: Handwritten Annotations & Margin Phrases */
+[data-theme="midnight-journal"] .text-handwritten,
+[data-theme="midnight-journal"] .font-handwritten,
+[data-theme="midnight-journal"] .midnight-script,
+[data-theme="midnight-journal"] .midnight-accent,
+[data-theme="midnight-journal"] .handwritten-note {
+  font-family: 'Caveat', cursive !important;
+  font-weight: 600;
+  font-size: 1.3rem;
+  line-height: 1.3;
+  color: #C99B58;
+  letter-spacing: 0.015em;
+}
+
+[data-theme="midnight-journal"] .midnight-subtitle,
+[data-theme="midnight-journal"] .midnight-label {
+  font-family: 'Caveat', cursive !important;
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: #E2BD78;
+  letter-spacing: 0.02em;
+}
+
+/* 3. Quotes: Tender Marginal Italic Journal Style */
+[data-theme="midnight-journal"] .text-quote,
+[data-theme="midnight-journal"] blockquote,
+[data-theme="midnight-journal"] .quote-text {
+  font-family: 'Newsreader', 'Cormorant Garamond', Georgia, serif !important;
+  font-style: italic !important;
+  font-weight: 400;
+  font-size: 1.25rem;
+  line-height: 1.7;
+  color: #F2E4CF !important;
+  letter-spacing: 0.01em;
+}
+
+[data-theme="midnight-journal"] .quote-mark,
+[data-theme="midnight-journal"] blockquote::before {
+  color: #C99B58;
+  opacity: 0.7;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+[data-theme="midnight-journal"] .quote-author {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-style: normal;
+  font-size: 0.8125rem;
+  color: #C2AF99;
+  letter-spacing: 0.04em;
+}
+
+/* 4. Body Text: Clean Refined Humanist Sans for High Readability */
+[data-theme="midnight-journal"] p,
+[data-theme="midnight-journal"] .text-body,
+[data-theme="midnight-journal"] .text-body-lg,
+[data-theme="midnight-journal"] .text-body-large,
+[data-theme="midnight-journal"] .text-small {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 400;
+  line-height: 1.68;
+  color: #C2AF99;
+}
+
+[data-theme="midnight-journal"] strong,
+[data-theme="midnight-journal"] b {
+  color: #F2E4CF;
+  font-weight: 600;
+}
+
+/* 5. Navigation: Clean Readable Typography */
+[data-theme="midnight-journal"] nav[aria-label="Main Navigation"],
+[data-theme="midnight-journal"] nav a,
+[data-theme="midnight-journal"] nav button {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* 6. Buttons: Strictly Clean Readable Font */
+[data-theme="midnight-journal"] button,
+[data-theme="midnight-journal"] .btn,
+[data-theme="midnight-journal"] .text-button {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+/* 7. Metadata & Captions */
+[data-theme="midnight-journal"] .text-caption,
+[data-theme="midnight-journal"] .text-xs,
+[data-theme="midnight-journal"] time {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.035em;
+  color: #817568;
+}
+
+/* 8. Numbers & Important Metrics: Antique Gold Numerals */
+[data-theme="midnight-journal"] .font-metric,
+[data-theme="midnight-journal"] .stat-number {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-feature-settings: "lnum" 1, "tnum" 1;
+  color: #E2BD78;
+}
+
+/* =========================================================================
+   MIDNIGHT JOURNAL CARDS & SURFACES
+   ========================================================================= */
+
+[data-theme="midnight-journal"] .bg-card,
+[data-theme="midnight-journal"] [class*="bg-[var(--color-card)]"],
+[data-theme="midnight-journal"] .surface-elevated,
+[data-theme="midnight-journal"] .surface-outlined {
+  background-color: rgba(5, 10, 22, 0.78) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(201, 155, 88, 0.25) !important;
+  border-radius: 18px;
+  color: #F2E4CF;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(226, 189, 120, 0.08) !important;
+}
+
+[data-theme="midnight-journal"] .bg-surface,
+[data-theme="midnight-journal"] [class*="bg-[var(--color-surface)]"],
+[data-theme="midnight-journal"] .surface-flat {
+  background-color: rgba(6, 12, 25, 0.76) !important;
+  border: 1px solid rgba(201, 155, 88, 0.20) !important;
+  border-radius: 16px;
+  color: #F2E4CF;
+}
+
+[data-theme="midnight-journal"] .bg-surface-secondary,
+[data-theme="midnight-journal"] [class*="bg-[var(--color-surface-secondary)]"] {
+  background-color: rgba(8, 16, 32, 0.80) !important;
+  border: 1px solid rgba(201, 155, 88, 0.16) !important;
+  color: #F2E4CF;
+}
+
+/* Midnight Primary Button: Antique Gold Accent over Dark Navy with Candlelight Glow */
+[data-theme="midnight-journal"] button.bg-\[var\(--color-primary\)\],
+[data-theme="midnight-journal"] .bg-\[var\(--color-primary\)\] {
+  background-color: #101B2D;
+  color: #F2E4CF;
+  border: 1px solid rgba(201, 155, 88, 0.45);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="midnight-journal"] button.bg-\[var\(--color-primary\)\]:hover,
+[data-theme="midnight-journal"] .bg-\[var\(--color-primary\)\]:hover {
+  background-color: #142035;
+  border-color: rgba(226, 189, 120, 0.70);
+  box-shadow: 0 0 20px rgba(244, 209, 138, 0.22);
+  color: #F4D18A;
+  transform: translateY(-1px);
+}
+
+/* Midnight Secondary Button */
+[data-theme="midnight-journal"] button.bg-\[var\(--color-surface\)\],
+[data-theme="midnight-journal"] .bg-\[var\(--color-surface\)\] {
+  background-color: rgba(13, 23, 40, 0.65);
+  border: 1px solid rgba(201, 155, 88, 0.22);
+  color: #C2AF99;
+}
+
+[data-theme="midnight-journal"] button.bg-\[var\(--color-surface\)\]:hover,
+[data-theme="midnight-journal"] .bg-\[var\(--color-surface\)\]:hover {
+  background-color: rgba(16, 27, 45, 0.85);
+  border-color: rgba(201, 155, 88, 0.40);
+  color: #F2E4CF;
+}
+
+/* Floating Navigation - Midnight Navy & Antique Gold */
+[data-theme="midnight-journal"] nav[aria-label="Main Navigation"] {
+  background-color: rgba(8, 15, 29, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(201, 155, 88, 0.28);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.50), inset 0 1px 0 rgba(226, 189, 120, 0.08);
+}
+
+[data-theme="midnight-journal"] nav[aria-label="Main Navigation"] a {
+  color: #C2AF99;
+}
+
+[data-theme="midnight-journal"] nav[aria-label="Main Navigation"] a:hover {
+  color: #F2E4CF;
+  background-color: rgba(16, 27, 45, 0.60);
+}
+
+[data-theme="midnight-journal"] nav[aria-label="Main Navigation"] a.bg-\[var\(--color-primary\)\],
+[data-theme="midnight-journal"] nav[aria-label="Main Navigation"] button.bg-\[var\(--color-primary\)\] {
+  background-color: #101B2D;
+  color: #F4D18A;
+  border: 1px solid rgba(201, 155, 88, 0.50);
+  box-shadow: 0 0 12px rgba(201, 155, 88, 0.20);
+}
+
+/* Floating Top Controls (Theme, Audio, Auth Buttons) */
+[data-theme="midnight-journal"] .fixed.top-4 button,
+[data-theme="midnight-journal"] .fixed.top-4 .rounded-full {
+  background-color: rgba(8, 15, 29, 0.90);
+  border: 1px solid rgba(201, 155, 88, 0.28);
+  color: #F2E4CF;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.40);
+}
+
+[data-theme="midnight-journal"] .fixed.top-4 button:hover,
+[data-theme="midnight-journal"] .fixed.top-4 .rounded-full:hover {
+  border-color: rgba(226, 189, 120, 0.60);
+  color: #F4D18A;
+}
+
+/* Popovers & Dropdowns - Theme Menu, User Menu, Audio Mixer */
+[data-theme="midnight-journal"] [role="menu"],
+[data-theme="midnight-journal"] [role="region"][aria-label="Audio Mixer Controls"] {
+  background-color: rgba(8, 15, 29, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(201, 155, 88, 0.30);
+  color: #F2E4CF;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(226, 189, 120, 0.08);
+}
+
+/* Audio Mixer Slider Range */
+[data-theme="midnight-journal"] [role="region"][aria-label="Audio Mixer Controls"] input[type="range"] {
+  background-color: #142035;
+  accent-color: #C99B58;
+}
+
+/* Inputs & Form Controls */
+[data-theme="midnight-journal"] input,
+[data-theme="midnight-journal"] textarea,
+[data-theme="midnight-journal"] select {
+  background-color: rgba(10, 18, 33, 0.80);
+  border-color: rgba(201, 155, 88, 0.25);
+  color: #F2E4CF;
+}
+
+[data-theme="midnight-journal"] input::placeholder,
+[data-theme="midnight-journal"] textarea::placeholder {
+  color: #817568;
+}
+
+[data-theme="midnight-journal"] input:focus,
+[data-theme="midnight-journal"] textarea:focus {
+  border-color: #C99B58;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(201, 155, 88, 0.25);
+}
+
+/* Badges & Pills */
+[data-theme="midnight-journal"] .badge,
+[data-theme="midnight-journal"] [class*="rounded-full"][class*="text-xs"] {
+  border-color: rgba(201, 155, 88, 0.20);
+}
+
+/* =========================================================================
+   LETTER ARCHIVE DEDICATED TYPOGRAPHY & VISUAL SYSTEM (VINTAGE CORRESPONDENCE)
+   ========================================================================= */
+
+/* Environmental Body Background */
+[data-theme="letter-archive"] body,
+.letter-archive-theme body {
+  background-color: var(--letter-bg, #F7F2EB);
+  color: var(--letter-text, #2C221E);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* 1. Main Headings: Elegant Vintage Bookprint Serif */
+[data-theme="letter-archive"] h1,
+[data-theme="letter-archive"] h2,
+[data-theme="letter-archive"] h3,
+[data-theme="letter-archive"] h4,
+[data-theme="letter-archive"] .text-display,
+[data-theme="letter-archive"] .text-h1,
+[data-theme="letter-archive"] .text-h2,
+[data-theme="letter-archive"] .text-h3,
+.letter-archive-theme h1,
+.letter-archive-theme h2,
+.letter-archive-theme h3,
+.letter-archive-theme h4,
+.letter-archive-theme .text-display,
+.letter-archive-theme .text-h1,
+.letter-archive-theme .text-h2,
+.letter-archive-theme .text-h3 {
+  font-family: 'Cormorant Garamond', 'EB Garamond', Georgia, serif;
+  font-weight: 600;
+  color: var(--letter-text, #2C221E);
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+[data-theme="letter-archive"] h1,
+[data-theme="letter-archive"] .text-display,
+[data-theme="letter-archive"] .text-h1,
+.letter-archive-theme h1,
+.letter-archive-theme .text-display,
+.letter-archive-theme .text-h1 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--letter-text, #2C221E);
+}
+
+/* 2. Letter Accents: Handwritten Annotations & Intimate Scripts */
+[data-theme="letter-archive"] .text-handwritten,
+[data-theme="letter-archive"] .font-handwritten,
+[data-theme="letter-archive"] .letter-script,
+[data-theme="letter-archive"] .letter-accent,
+[data-theme="letter-archive"] .handwritten-note,
+.letter-archive-theme .text-handwritten,
+.letter-archive-theme .font-handwritten,
+.letter-archive-theme .letter-script,
+.letter-archive-theme .letter-accent,
+.letter-archive-theme .handwritten-note {
+  font-family: 'Caveat', cursive !important;
+  font-weight: 600;
+  font-size: 1.35rem;
+  line-height: 1.3;
+  color: var(--letter-burgundy, #7A2E3B);
+  letter-spacing: 0.015em;
+}
+
+[data-theme="letter-archive"] .letter-subtitle,
+[data-theme="letter-archive"] .letter-label,
+.letter-archive-theme .letter-subtitle,
+.letter-archive-theme .letter-label {
+  font-family: 'Caveat', cursive !important;
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--letter-sepia, #A37B5C);
+  letter-spacing: 0.02em;
+}
+
+/* 3. Quotes & Excerpts: Tender Antique Italic */
+[data-theme="letter-archive"] .text-quote,
+[data-theme="letter-archive"] blockquote,
+[data-theme="letter-archive"] .quote-text,
+.letter-archive-theme .text-quote,
+.letter-archive-theme blockquote,
+.letter-archive-theme .quote-text {
+  font-family: 'Newsreader', 'Cormorant Garamond', Georgia, serif !important;
+  font-style: italic !important;
+  font-weight: 400;
+  font-size: 1.25rem;
+  line-height: 1.7;
+  color: var(--letter-brown, #4A352F) !important;
+  letter-spacing: 0.01em;
+}
+
+[data-theme="letter-archive"] .quote-mark,
+[data-theme="letter-archive"] blockquote::before,
+.letter-archive-theme .quote-mark,
+.letter-archive-theme blockquote::before {
+  color: var(--letter-burgundy, #7A2E3B);
+  opacity: 0.75;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+[data-theme="letter-archive"] .quote-author,
+.letter-archive-theme .quote-author {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-style: normal;
+  font-size: 0.8125rem;
+  color: var(--letter-muted, #8C776C);
+  letter-spacing: 0.04em;
+}
+
+/* 4. Body Text: Warm Sepia & Clean Humanist Sans */
+[data-theme="letter-archive"] p,
+[data-theme="letter-archive"] .text-body,
+[data-theme="letter-archive"] .text-body-lg,
+[data-theme="letter-archive"] .text-body-large,
+[data-theme="letter-archive"] .text-small,
+.letter-archive-theme p,
+.letter-archive-theme .text-body,
+.letter-archive-theme .text-body-lg,
+.letter-archive-theme .text-body-large,
+.letter-archive-theme .text-small {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 400;
+  line-height: 1.68;
+  color: var(--letter-text-secondary, #5C4A42);
+}
+
+[data-theme="letter-archive"] strong,
+[data-theme="letter-archive"] b,
+.letter-archive-theme strong,
+.letter-archive-theme b {
+  color: var(--letter-text, #2C221E);
+  font-weight: 600;
+}
+
+/* 5. Navigation: Antique Parchment Typography */
+[data-theme="letter-archive"] nav[aria-label="Main Navigation"],
+[data-theme="letter-archive"] nav a,
+[data-theme="letter-archive"] nav button,
+.letter-archive-theme nav[aria-label="Main Navigation"],
+.letter-archive-theme nav a,
+.letter-archive-theme nav button {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* 6. Buttons: Refined Readable Sans */
+[data-theme="letter-archive"] button,
+[data-theme="letter-archive"] .btn,
+[data-theme="letter-archive"] .text-button,
+.letter-archive-theme button,
+.letter-archive-theme .btn,
+.letter-archive-theme .text-button {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+/* 7. Metadata & Captions */
+[data-theme="letter-archive"] .text-caption,
+[data-theme="letter-archive"] .text-xs,
+[data-theme="letter-archive"] time,
+.letter-archive-theme .text-caption,
+.letter-archive-theme .text-xs,
+.letter-archive-theme time {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.035em;
+  color: var(--letter-muted, #8C776C);
+}
+
+/* 8. Numerals & Dates: Antique Postmark Style */
+[data-theme="letter-archive"] .font-metric,
+[data-theme="letter-archive"] .stat-number,
+.letter-archive-theme .font-metric,
+.letter-archive-theme .stat-number {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-feature-settings: "lnum" 1, "tnum" 1;
+  color: var(--letter-burgundy, #7A2E3B);
+}
+
+/* =========================================================================
+   LETTER ARCHIVE CARDS & SURFACES (AGED PARCHMENT & WARM PAPER)
+   ========================================================================= */
+
+[data-theme="letter-archive"] .bg-card,
+[data-theme="letter-archive"] [class*="bg-[var(--color-card)]"],
+[data-theme="letter-archive"] .surface-elevated,
+[data-theme="letter-archive"] .surface-outlined,
+.letter-archive-theme .bg-card,
+.letter-archive-theme [class*="bg-[var(--color-card)]"],
+.letter-archive-theme .surface-elevated,
+.letter-archive-theme .surface-outlined {
+  background-color: var(--letter-paper, #FAF6F0) !important;
+  border: 1px solid var(--letter-border, rgba(138, 110, 89, 0.22)) !important;
+  border-radius: 16px;
+  color: var(--letter-text, #2C221E);
+  box-shadow: 0 6px 20px -2px rgba(60, 42, 33, 0.07), 0 2px 6px -1px rgba(60, 42, 33, 0.04) !important;
+}
+
+[data-theme="letter-archive"] .bg-surface,
+[data-theme="letter-archive"] [class*="bg-[var(--color-surface)]"],
+[data-theme="letter-archive"] .surface-flat,
+.letter-archive-theme .bg-surface,
+.letter-archive-theme [class*="bg-[var(--color-surface)]"],
+.letter-archive-theme .surface-flat {
+  background-color: var(--letter-bg-secondary, #EDE4D8) !important;
+  border: 1px solid var(--letter-border-subtle, rgba(138, 110, 89, 0.16)) !important;
+  border-radius: 14px;
+  color: var(--letter-text, #2C221E);
+}
+
+[data-theme="letter-archive"] .bg-surface-secondary,
+[data-theme="letter-archive"] [class*="bg-[var(--color-surface-secondary)]"],
+.letter-archive-theme .bg-surface-secondary,
+.letter-archive-theme [class*="bg-[var(--color-surface-secondary)]"] {
+  background-color: var(--letter-paper-subtle, #E5DACB) !important;
+  border: 1px solid var(--letter-border-subtle, rgba(138, 110, 89, 0.14)) !important;
+  color: var(--letter-text, #2C221E);
+}
+
+/* Letter Archive Primary Button: Vintage Burgundy Wax Seal with Antique Gold Accent */
+[data-theme="letter-archive"] button.bg-\[var\(--color-primary\)\],
+[data-theme="letter-archive"] .bg-\[var\(--color-primary\)\],
+.letter-archive-theme button.bg-\[var\(--color-primary\)\],
+.letter-archive-theme .bg-\[var\(--color-primary\)\] {
+  background-color: var(--letter-burgundy, #7A2E3B);
+  color: var(--letter-paper, #FAF6F0);
+  border: 1px solid var(--letter-border-gold, rgba(194, 147, 77, 0.40));
+  box-shadow: 0 3px 12px rgba(122, 46, 59, 0.22);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="letter-archive"] button.bg-\[var\(--color-primary\)\]:hover,
+[data-theme="letter-archive"] .bg-\[var\(--color-primary\)\]:hover,
+.letter-archive-theme button.bg-\[var\(--color-primary\)\]:hover,
+.letter-archive-theme .bg-\[var\(--color-primary\)\]:hover {
+  background-color: var(--letter-burgundy-hover, #63242F);
+  border-color: rgba(194, 147, 77, 0.70);
+  box-shadow: 0 4px 16px rgba(122, 46, 59, 0.32);
+  color: #FFFDF9;
+  transform: translateY(-1px);
+}
+
+/* Letter Archive Secondary Button */
+[data-theme="letter-archive"] button.bg-\[var\(--color-surface\)\],
+[data-theme="letter-archive"] .bg-\[var\(--color-surface\)\],
+.letter-archive-theme button.bg-\[var\(--color-surface\)\],
+.letter-archive-theme .bg-\[var\(--color-surface\)\] {
+  background-color: var(--letter-bg-secondary, #EDE4D8);
+  border: 1px solid var(--letter-border, rgba(138, 110, 89, 0.22));
+  color: var(--letter-brown, #4A352F);
+}
+
+[data-theme="letter-archive"] button.bg-\[var\(--color-surface\)\]:hover,
+[data-theme="letter-archive"] .bg-\[var\(--color-surface\)\]:hover,
+.letter-archive-theme button.bg-\[var\(--color-surface\)\]:hover,
+.letter-archive-theme .bg-\[var\(--color-surface\)\]:hover {
+  background-color: #E2D7C9;
+  border-color: rgba(138, 110, 89, 0.38);
+  color: var(--letter-text, #2C221E);
+}
+
+/* Floating Navigation - Vintage Aged Paper & Burgundy Trim */
+[data-theme="letter-archive"] nav[aria-label="Main Navigation"],
+.letter-archive-theme nav[aria-label="Main Navigation"] {
+  background-color: rgba(250, 246, 240, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--letter-border, rgba(138, 110, 89, 0.25));
+  box-shadow: 0 10px 30px rgba(60, 42, 33, 0.10);
+}
+
+[data-theme="letter-archive"] nav[aria-label="Main Navigation"] a,
+.letter-archive-theme nav[aria-label="Main Navigation"] a {
+  color: var(--letter-text-secondary, #5C4A42);
+}
+
+[data-theme="letter-archive"] nav[aria-label="Main Navigation"] a:hover,
+.letter-archive-theme nav[aria-label="Main Navigation"] a:hover {
+  color: var(--letter-text, #2C221E);
+  background-color: rgba(237, 228, 216, 0.70);
+}
+
+[data-theme="letter-archive"] nav[aria-label="Main Navigation"] a.bg-\[var\(--color-primary\)\],
+[data-theme="letter-archive"] nav[aria-label="Main Navigation"] button.bg-\[var\(--color-primary\)\],
+.letter-archive-theme nav[aria-label="Main Navigation"] a.bg-\[var\(--color-primary\)\],
+.letter-archive-theme nav[aria-label="Main Navigation"] button.bg-\[var\(--color-primary\)\] {
+  background-color: var(--letter-burgundy, #7A2E3B);
+  color: var(--letter-paper, #FAF6F0);
+  border: 1px solid var(--letter-border-gold, rgba(194, 147, 77, 0.40));
+  box-shadow: 0 2px 8px rgba(122, 46, 59, 0.20);
+}
+
+/* Floating Top Controls (Theme, Audio, Auth Buttons) */
+[data-theme="letter-archive"] .fixed.top-4 button,
+[data-theme="letter-archive"] .fixed.top-4 .rounded-full,
+.letter-archive-theme .fixed.top-4 button,
+.letter-archive-theme .fixed.top-4 .rounded-full {
+  background-color: rgba(250, 246, 240, 0.94);
+  border: 1px solid var(--letter-border, rgba(138, 110, 89, 0.25));
+  color: var(--letter-text, #2C221E);
+  box-shadow: 0 4px 14px rgba(60, 42, 33, 0.08);
+}
+
+[data-theme="letter-archive"] .fixed.top-4 button:hover,
+[data-theme="letter-archive"] .fixed.top-4 .rounded-full:hover,
+.letter-archive-theme .fixed.top-4 button:hover,
+.letter-archive-theme .fixed.top-4 .rounded-full:hover {
+  border-color: rgba(194, 147, 77, 0.55);
+  color: var(--letter-burgundy, #7A2E3B);
+}
+
+/* Popovers & Dropdowns - Theme Menu, User Menu, Audio Mixer */
+[data-theme="letter-archive"] [role="menu"],
+[data-theme="letter-archive"] [role="region"][aria-label="Audio Mixer Controls"],
+.letter-archive-theme [role="menu"],
+.letter-archive-theme [role="region"][aria-label="Audio Mixer Controls"] {
+  background-color: rgba(250, 246, 240, 0.98);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--letter-border, rgba(138, 110, 89, 0.25));
+  color: var(--letter-text, #2C221E);
+  box-shadow: 0 12px 36px rgba(60, 42, 33, 0.14);
+}
+
+/* Audio Mixer Slider Range */
+[data-theme="letter-archive"] [role="region"][aria-label="Audio Mixer Controls"] input[type="range"],
+.letter-archive-theme [role="region"][aria-label="Audio Mixer Controls"] input[type="range"] {
+  background-color: #EDE4D8;
+  accent-color: var(--letter-burgundy, #7A2E3B);
+}
+
+/* Inputs & Form Controls */
+[data-theme="letter-archive"] input,
+[data-theme="letter-archive"] textarea,
+[data-theme="letter-archive"] select,
+.letter-archive-theme input,
+.letter-archive-theme textarea,
+.letter-archive-theme select {
+  background-color: var(--letter-paper, #FAF6F0);
+  border-color: var(--letter-border, rgba(138, 110, 89, 0.28));
+  color: var(--letter-text, #2C221E);
+}
+
+[data-theme="letter-archive"] input::placeholder,
+[data-theme="letter-archive"] textarea::placeholder,
+.letter-archive-theme input::placeholder,
+.letter-archive-theme textarea::placeholder {
+  color: var(--letter-muted, #8C776C);
+}
+
+[data-theme="letter-archive"] input:focus,
+[data-theme="letter-archive"] textarea:focus,
+.letter-archive-theme input:focus,
+.letter-archive-theme textarea:focus {
+  border-color: var(--letter-burgundy, #7A2E3B);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(122, 46, 59, 0.18);
+}
+
+/* Badges & Pills */
+[data-theme="letter-archive"] .badge,
+[data-theme="letter-archive"] [class*="rounded-full"][class*="text-xs"],
+.letter-archive-theme .badge,
+.letter-archive-theme [class*="rounded-full"][class*="text-xs"] {
+  border-color: var(--letter-border-subtle, rgba(138, 110, 89, 0.20));
+}
+
+/* =========================================================================
+   LETTER ARCHIVE CUSTOM CURSOR & TACTILE POLISH (PHASES 15 + 16)
+   ========================================================================= */
+
+/* Scoped Custom Letter Archive Cursor (pointer: fine only) */
+@media (pointer: fine) {
+  [data-theme="letter-archive"],
+  .letter-archive-theme {
+    cursor: url('../assets/icons/Letter-archive.cur'), auto;
+  }
+
+  [data-theme="letter-archive"] button,
+  [data-theme="letter-archive"] a,
+  [data-theme="letter-archive"] [role="button"],
+  [data-theme="letter-archive"] select,
+  [data-theme="letter-archive"] input[type="submit"],
+  [data-theme="letter-archive"] input[type="button"],
+  [data-theme="letter-archive"] input[type="checkbox"],
+  [data-theme="letter-archive"] input[type="radio"],
+  [data-theme="letter-archive"] .cursor-pointer,
+  .letter-archive-theme button,
+  .letter-archive-theme a,
+  .letter-archive-theme [role="button"],
+  .letter-archive-theme select,
+  .letter-archive-theme input[type="submit"],
+  .letter-archive-theme input[type="button"],
+  .letter-archive-theme input[type="checkbox"],
+  .letter-archive-theme input[type="radio"],
+  .letter-archive-theme .cursor-pointer {
+    cursor: pointer;
+  }
+}
+
+/* Antique-Gold Focus Treatment for Keyboard Navigation */
+[data-theme="letter-archive"] button:focus-visible,
+[data-theme="letter-archive"] a:focus-visible,
+[data-theme="letter-archive"] [role="button"]:focus-visible,
+[data-theme="letter-archive"] input:focus-visible,
+[data-theme="letter-archive"] textarea:focus-visible,
+[data-theme="letter-archive"] select:focus-visible,
+.letter-archive-theme button:focus-visible,
+.letter-archive-theme a:focus-visible,
+.letter-archive-theme [role="button"]:focus-visible,
+.letter-archive-theme input:focus-visible,
+.letter-archive-theme textarea:focus-visible,
+.letter-archive-theme select:focus-visible {
+  outline: 2px solid #B58A45 !important;
+  outline-offset: 2px !important;
+}
+
+/* Reduced Motion Graceful Degradation */
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="letter-archive"] *,
+  .letter-archive-theme * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    transform: none !important;
+  }
+}
+
+
+

@@ -1,0 +1,245 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User profile document containing account role and metadata",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Unique Firebase user ID"
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User display name"
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "User profile photo URL"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["user", "admin"],
+          "description": "User role authorization level"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp when account profile was created"
+        },
+        "lastSeenAt": {
+          "type": "string",
+          "description": "ISO timestamp when user was last seen"
+        },
+        "activitySummary": {
+          "type": "object",
+          "description": "Lightweight summary of meaningful user activity counts"
+        }
+      },
+      "required": ["uid", "role"]
+    },
+    "Feeling": {
+      "title": "Feeling Submission",
+      "description": "Unedited personal feeling submitted by user",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "ID of the user submitting the feeling"
+        },
+        "content": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000,
+          "description": "Content of the feeling"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when feeling was submitted"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when feeling was updated"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "feeling"
+          ],
+          "description": "Submission type identifier"
+        }
+      },
+      "required": [
+        "userId",
+        "content",
+        "type"
+      ]
+    },
+    "Letter": {
+      "title": "Letter Submission",
+      "description": "Personal letter written to recipient",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "ID of the user writing the letter"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Optional title of the letter"
+        },
+        "content": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10000,
+          "description": "Body content of the letter"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when letter was created"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when letter was updated"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "letter"
+          ],
+          "description": "Submission type identifier"
+        }
+      },
+      "required": [
+        "userId",
+        "content",
+        "type"
+      ]
+    },
+    "Activity": {
+      "title": "User Activity Event",
+      "description": "Meaningful user activity event recorded in Starlit Letters",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "ID of the user who performed the activity"
+        },
+        "type": {
+          "type": "string",
+          "description": "Activity event type identifier"
+        },
+        "section": {
+          "type": "string",
+          "description": "Section in which the activity occurred"
+        },
+        "itemId": {
+          "type": "string",
+          "description": "Identifier of the item interacted with"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when activity was recorded"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Optional metadata associated with event (excludes private text content)"
+        }
+      },
+      "required": [
+        "userId",
+        "type",
+        "section",
+        "itemId"
+      ]
+    },
+    "PhotoBoothMemory": {
+      "title": "Photo Booth Memory",
+      "description": "User photo memory metadata captured in the Photo Booth",
+      "type": "object",
+      "properties": {
+        "photoId": {
+          "type": "string",
+          "description": "Unique photo identifier"
+        },
+        "uid": {
+          "type": "string",
+          "description": "Firebase user ID who captured and owns the photo"
+        },
+        "storagePath": {
+          "type": "string",
+          "description": "Storage path where the compressed WebP photo is stored"
+        },
+        "downloadUrl": {
+          "type": "string",
+          "description": "Storage download URL for the photo"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Server timestamp when photo was saved"
+        },
+        "frameId": {
+          "type": "string",
+          "description": "Selected frame ID"
+        },
+        "filterId": {
+          "type": "string",
+          "description": "Selected filter ID"
+        },
+        "aspectRatio": {
+          "type": "string",
+          "enum": ["1:1", "4:5", "3:4", "9:16", "16:9"],
+          "description": "Aspect ratio of the photo"
+        },
+        "cameraFacing": {
+          "type": "string",
+          "enum": ["user", "environment"],
+          "description": "Camera facing mode used during capture"
+        },
+        "width": {
+          "type": "number",
+          "description": "Width in pixels"
+        },
+        "height": {
+          "type": "number",
+          "description": "Height in pixels"
+        }
+      },
+      "required": [
+        "photoId",
+        "uid",
+        "storagePath",
+        "frameId",
+        "filterId",
+        "aspectRatio",
+        "cameraFacing"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile document containing account role and timestamp information"
+    },
+    "/users/{userId}/activity/{activityId}": {
+      "schema": "Activity",
+      "description": "Collection of activity events recorded by a specific user"
+    },
+    "/users/{userId}/feelings/{feelingId}": {
+      "schema": "Feeling",
+      "description": "Collection of feelings written by a specific user"
+    },
+    "/users/{userId}/letters/{letterId}": {
+      "schema": "Letter",
+      "description": "Collection of letters written by a specific user"
+    },
+    "/users/{userId}/photoBooth/{photoId}": {
+      "schema": "PhotoBoothMemory",
+      "description": "Private collection of photo memories captured by a specific user"
+    }
+  }
+}

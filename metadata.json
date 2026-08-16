@@ -1,0 +1,8 @@
+{
+  "name": "Remix Starlit Letters_v2",
+  "description": "A production-grade React application for Starlit Letters.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

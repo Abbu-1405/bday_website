@@ -1,0 +1,267 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Environmental Forest Green Background Gradient -->
+    <radialGradient id="baseGlow" cx="50%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#4F6B48" />
+      <stop offset="45%" stop-color="#3A5334" />
+      <stop offset="85%" stop-color="#293D25" />
+      <stop offset="100%" stop-color="#1E2E1B" />
+    </radialGradient>
+
+    <!-- Watercolor textured grain filter -->
+    <filter id="canvasTexture" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.07 0" />
+      <feComposite in2="SourceGraphic" in="gl" operator="in" />
+    </filter>
+
+    <radialGradient id="centerGlow" cx="50%" cy="50%" r="40%">
+      <stop offset="0%" stop-color="#6F8D62" stop-opacity="0.6" />
+      <stop offset="50%" stop-color="#4F6B48" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#293D25" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Base canvas -->
+  <rect width="1920" height="1080" fill="url(#baseGlow)" />
+
+  <!-- Hand-painted Concentric Organic Swirling Bands (Faithful to uploaded artwork) -->
+  <g opacity="0.95">
+    <!-- Swirl Band Layer 1 - Deep Forest Wave -->
+    <path d="M960,540 C1060,540 1140,460 1140,360 C1140,220 1000,120 840,120 C620,120 440,300 440,520 C440,800 680,1020 980,1020 C1320,1020 1620,740 1620,400 C1620,-20 1260,-220 840,-220 C340,-220 -80,180 -80,680 C-80,1260 400,1720 1000,1720" 
+          fill="none" stroke="#233520" stroke-width="110" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Swirl Band Layer 2 - Medium Moss Sage Wave -->
+    <path d="M960,540 C880,540 820,480 820,400 C820,300 920,220 1040,220 C1220,220 1380,360 1380,560 C1380,800 1180,1000 920,1000 C600,1000 340,760 340,440 C340,40 640,-200 1040,-200 C1520,-200 1900,160 1900,660 C1900,1220 1460,1660 920,1660" 
+          fill="none" stroke="#3E5835" stroke-width="95" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Swirl Band Layer 3 - Lighter Sage Forest Wave -->
+    <path d="M960,540 C1020,540 1080,480 1080,420 C1080,320 980,260 880,260 C720,260 580,380 580,560 C580,780 780,960 1020,960 C1300,960 1520,740 1520,460 C1520,120 1220,-120 880,-120 C460,-120 120,200 120,640 C120,1160 540,1580 1040,1580" 
+          fill="none" stroke="#527047" stroke-width="85" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Swirl Band Layer 4 - Soft Olive Green Ribbon -->
+    <path d="M960,540 C910,540 870,500 870,450 C870,380 940,320 1020,320 C1140,320 1240,420 1240,540 C1240,700 1100,840 940,840 C740,840 560,680 560,480 C560,220 780,20 1080,20 C1440,20 1740,300 1740,680 C1740,1120 1360,1480 920,1480" 
+          fill="none" stroke="#68875B" stroke-width="70" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Swirl Center Core -->
+    <path d="M960,540 C985,540 1010,515 1010,490 C1010,450 970,420 930,420 C870,420 810,470 810,530 C810,610 880,680 960,680 C1070,680 1160,590 1160,480 C1160,340 1030,220 890,220"
+          fill="none" stroke="#364E2E" stroke-width="55" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+
+  <!-- Center highlight glow -->
+  <circle cx="960" cy="540" r="480" fill="url(#centerGlow)" />
+
+  <!-- Hand-drawn 5-Point Doodle Stars in Cream (#FFFDF5) & Soft Gold (#D8B86A) -->
+  <g fill="none" stroke="#FFFDF5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.92">
+    <!-- Center / Inner Spiral Stars -->
+    <!-- Star at 820, 560 -->
+    <polygon points="820,540 826,554 841,555 829,564 834,579 820,570 806,579 811,564 799,555 814,554" transform="rotate(12 820 560)" />
+    <!-- Star at 1080, 620 -->
+    <polygon points="1080,602 1085,614 1098,615 1088,623 1092,636 1080,628 1068,636 1072,623 1062,615 1075,614" transform="rotate(-18 1080 620)" />
+    <!-- Star at 1010, 230 -->
+    <polygon points="1010,210 1016,225 1032,226 1019,236 1024,251 1010,242 996,251 1001,236 988,226 1004,225" transform="rotate(24 1010 230)" />
+    <!-- Star at 620, 440 -->
+    <polygon points="620,422 625,434 638,435 628,443 632,456 620,448 608,456 612,443 602,435 615,434" transform="rotate(-8 620 440)" />
+    <!-- Star at 640, 780 -->
+    <polygon points="640,758 647,773 664,774 651,785 656,801 640,792 624,801 629,785 616,774 633,773" transform="rotate(35 640 780)" />
+
+    <!-- Mid-Ring Stars -->
+    <!-- Star at 1320, 760 -->
+    <polygon points="1320,735 1328,753 1348,755 1332,768 1338,787 1320,776 1302,787 1308,768 1292,755 1312,753" transform="rotate(15 1320 760)" stroke-width="2.6" />
+    <!-- Star at 1440, 190 -->
+    <polygon points="1440,168 1447,184 1464,185 1451,196 1456,212 1440,203 1424,212 1429,196 1416,185 1433,184" transform="rotate(-25 1440 190)" />
+    <!-- Star at 1580, 360 -->
+    <polygon points="1580,336 1588,354 1608,356 1592,369 1598,388 1580,377 1562,388 1568,369 1552,356 1572,354" transform="rotate(40 1580 360)" stroke-width="2.8" />
+    <!-- Star at 1760, 250 -->
+    <polygon points="1760,230 1766,245 1782,246 1769,256 1774,271 1760,262 1746,271 1751,256 1738,246 1754,245" transform="rotate(-15 1760 250)" />
+    <!-- Star at 1860, 520 -->
+    <polygon points="1860,502 1865,514 1878,515 1868,523 1872,536 1860,528 1848,536 1852,523 1842,515 1855,514" transform="rotate(30 1860 520)" />
+
+    <!-- Left Outer Ring Stars -->
+    <!-- Star at 300, 180 -->
+    <polygon points="300,155 308,173 328,175 312,188 318,207 300,196 282,207 288,188 272,175 292,173" transform="rotate(-12 300 180)" stroke-width="2.8" />
+    <!-- Star at 160, 620 -->
+    <polygon points="160,596 167,612 184,613 171,624 176,640 160,631 144,640 149,624 136,613 153,612" transform="rotate(20 160 620)" />
+    <!-- Star at 60, 660 -->
+    <polygon points="60,638 66,652 81,653 69,663 74,677 60,669 46,677 51,663 39,653 54,652" transform="rotate(-30 60 660)" />
+    <!-- Star at 120, 80 -->
+    <polygon points="120,55 128,73 148,75 132,88 138,107 120,96 102,107 108,88 92,75 112,73" transform="rotate(8 120 80)" stroke-width="3" />
+    <!-- Star at 40, 860 -->
+    <polygon points="40,842 45,854 58,855 48,863 52,876 40,868 28,876 32,863 22,855 35,854" transform="rotate(15 40 860)" />
+    <!-- Star at 200, 960 -->
+    <polygon points="200,938 206,952 221,953 209,963 214,977 200,969 186,977 191,963 179,953 194,952" transform="rotate(-10 200 960)" />
+
+    <!-- Bottom Center Stars -->
+    <!-- Star at 980, 800 -->
+    <polygon points="980,782 985,794 998,795 988,803 992,816 980,808 968,816 972,803 962,795 975,794" transform="rotate(42 980 800)" />
+    <!-- Star at 1350, 940 -->
+    <polygon points="1350,920 1356,934 1371,935 1359,945 1364,959 1350,951 1336,959 1341,945 1329,935 1344,934" transform="rotate(-22 1350 940)" />
+    <!-- Star at 1480, 660 -->
+    <polygon points="1480,655 1488,673 1508,675 1492,688 1498,707 1480,696 1462,707 1468,688 1452,675 1472,673" transform="rotate(5 1480 660)" stroke-width="2.6" />
+    <!-- Star at 1780, 840 -->
+    <polygon points="1780,818 1786,832 1801,833 1789,843 1794,857 1780,849 1766,857 1771,843 1759,833 1774,832" transform="rotate(18 1780 840)" />
+    <!-- Star at 1180, 50 -->
+    <polygon points="1180,30 1186,44 1201,45 1189,55 1194,69 1180,61 1166,69 1171,55 1159,45 1174,44" transform="rotate(-14 1180 50)" />
+    <!-- Star at 840, 70 -->
+    <polygon points="840,52 845,64 858,65 848,73 852,86 840,78 828,86 832,73 822,65 835,64" transform="rotate(28 840 70)" />
+  </g>
+
+  <!-- Golden & Starlight Stardust Flecks & Sparkling Dots -->
+  <g fill="#FFF8E8" opacity="0.85">
+    <circle cx="890" cy="500" r="2.2" />
+    <circle cx="910" cy="470" r="1.8" />
+    <circle cx="940" cy="490" r="2.5" />
+    <circle cx="990" cy="520" r="1.5" />
+    <circle cx="860" cy="530" r="2.8" />
+    <circle cx="830" cy="490" r="1.8" />
+    <circle cx="880" cy="440" r="2" />
+    <circle cx="920" cy="410" r="2.6" />
+    <circle cx="960" cy="380" r="1.6" />
+    <circle cx="1020" cy="390" r="2.2" />
+    <circle cx="1070" cy="440" r="2.8" />
+    <circle cx="1090" cy="500" r="1.8" />
+    <circle cx="1060" cy="560" r="2.4" />
+    <circle cx="1010" cy="600" r="2" />
+    <circle cx="940" cy="620" r="2.7" />
+    <circle cx="880" cy="610" r="1.5" />
+    <circle cx="820" cy="620" r="2.2" />
+    <circle cx="780" cy="580" r="2" />
+    <circle cx="760" cy="520" r="2.6" />
+    <circle cx="760" cy="450" r="1.8" />
+    <circle cx="780" cy="390" r="2.2" />
+    <circle cx="830" cy="340" r="2.5" />
+    <circle cx="900" cy="300" r="2" />
+    <circle cx="980" cy="280" r="3" />
+    <circle cx="1060" cy="290" r="1.7" />
+    <circle cx="1140" cy="330" r="2.5" />
+    <circle cx="1200" cy="390" r="2" />
+    <circle cx="1230" cy="470" r="2.8" />
+    <circle cx="1220" cy="560" r="1.8" />
+    <circle cx="1180" cy="650" r="2.5" />
+    <circle cx="1110" cy="720" r="2" />
+    <circle cx="1030" cy="760" r="2.8" />
+    <circle cx="930" cy="770" r="1.8" />
+    <circle cx="840" cy="750" r="2.2" />
+    <circle cx="750" cy="710" r="2.6" />
+    <circle cx="680" cy="640" r="2" />
+    <circle cx="640" cy="550" r="2.8" />
+    <circle cx="630" cy="460" r="1.8" />
+    <circle cx="660" cy="360" r="2.4" />
+    <circle cx="720" cy="280" r="2.2" />
+    <circle cx="800" cy="210" r="2.7" />
+    <circle cx="900" cy="170" r="2" />
+    <circle cx="1020" cy="160" r="3" />
+    <circle cx="1140" cy="180" r="1.8" />
+    <circle cx="1260" cy="220" r="2.6" />
+    <circle cx="1360" cy="290" r="2.2" />
+    <circle cx="1420" cy="380" r="2.8" />
+    <circle cx="1440" cy="490" r="1.9" />
+    <circle cx="1420" cy="610" r="2.5" />
+    <circle cx="1360" cy="710" r="2" />
+    <circle cx="1270" cy="800" r="2.7" />
+    <circle cx="1160" cy="870" r="2.2" />
+    <circle cx="1040" cy="910" r="2.9" />
+    <circle cx="910" cy="910" r="1.8" />
+    <circle cx="780" cy="880" r="2.6" />
+    <circle cx="660" cy="820" r="2.1" />
+    <circle cx="560" cy="730" r="2.8" />
+    <circle cx="490" cy="620" r="2" />
+    <circle cx="460" cy="500" r="2.7" />
+    <circle cx="480" cy="370" r="2.2" />
+    <circle cx="530" cy="260" r="2.8" />
+    <circle cx="620" cy="160" r="2" />
+    <circle cx="740" cy="90" r="3" />
+    <circle cx="880" cy="50" r="2.2" />
+    <circle cx="1040" cy="40" r="2.8" />
+    <circle cx="1200" cy="60" r="2.1" />
+    <circle cx="1350" cy="110" r="2.6" />
+    <circle cx="1490" cy="180" r="2" />
+    <circle cx="1600" cy="280" r="2.9" />
+    <circle cx="1660" cy="410" r="2.2" />
+    <circle cx="1670" cy="550" r="2.8" />
+    <circle cx="1630" cy="690" r="2" />
+    <circle cx="1540" cy="820" r="2.7" />
+    <circle cx="1420" cy="930" r="2.1" />
+    <circle cx="1270" cy="1010" r="2.8" />
+    <circle cx="1100" cy="1050" r="2.3" />
+    <circle cx="920" cy="1050" r="2.9" />
+    <circle cx="740" cy="1010" r="2.2" />
+    <circle cx="570" cy="940" r="2.7" />
+    <circle cx="430" cy="830" r="2" />
+    <circle cx="330" cy="690" r="2.9" />
+    <circle cx="280" cy="540" r="2.2" />
+    <circle cx="290" cy="380" r="2.7" />
+    <circle cx="350" cy="240" r="2.1" />
+    <circle cx="450" cy="120" r="2.8" />
+    <circle cx="580" cy="30" r="2.2" />
+  </g>
+
+  <g fill="#D8B86A" opacity="0.9">
+    <circle cx="920" cy="520" r="2" />
+    <circle cx="970" cy="480" r="2.5" />
+    <circle cx="990" cy="440" r="1.8" />
+    <circle cx="930" cy="440" r="2.2" />
+    <circle cx="870" cy="480" r="2" />
+    <circle cx="860" cy="570" r="2.5" />
+    <circle cx="920" cy="590" r="1.8" />
+    <circle cx="1040" cy="530" r="2.4" />
+    <circle cx="1040" cy="460" r="2" />
+    <circle cx="970" cy="350" r="2.6" />
+    <circle cx="870" cy="370" r="2" />
+    <circle cx="800" cy="440" r="2.5" />
+    <circle cx="810" cy="530" r="2" />
+    <circle cx="870" cy="660" r="2.6" />
+    <circle cx="980" cy="680" r="2.1" />
+    <circle cx="1120" cy="610" r="2.7" />
+    <circle cx="1160" cy="490" r="2.2" />
+    <circle cx="1130" cy="380" r="2.6" />
+    <circle cx="1030" cy="320" r="2" />
+    <circle cx="890" cy="330" r="2.5" />
+    <circle cx="770" cy="380" r="2.1" />
+    <circle cx="730" cy="480" r="2.7" />
+    <circle cx="750" cy="610" r="2" />
+    <circle cx="830" cy="710" r="2.8" />
+    <circle cx="960" cy="750" r="2.2" />
+    <circle cx="1100" cy="710" r="2.7" />
+    <circle cx="1210" cy="610" r="2.1" />
+    <circle cx="1240" cy="470" r="2.8" />
+    <circle cx="1190" cy="340" r="2" />
+    <circle cx="1070" cy="250" r="2.6" />
+    <circle cx="920" cy="230" r="2.2" />
+    <circle cx="760" cy="270" r="2.7" />
+    <circle cx="660" cy="370" r="2.1" />
+    <circle cx="630" cy="510" r="2.8" />
+    <circle cx="670" cy="660" r="2" />
+    <circle cx="770" cy="790" r="2.7" />
+    <circle cx="920" cy="850" r="2.3" />
+    <circle cx="1090" cy="840" r="2.8" />
+    <circle cx="1250" cy="760" r="2.1" />
+    <circle cx="1340" cy="630" r="2.9" />
+    <circle cx="1350" cy="470" r="2.2" />
+    <circle cx="1280" cy="320" r="2.7" />
+    <circle cx="1150" cy="210" r="2" />
+    <circle cx="980" cy="160" r="2.9" />
+    <circle cx="790" cy="180" r="2.2" />
+    <circle cx="630" cy="250" r="2.7" />
+    <circle cx="520" cy="380" r="2.1" />
+    <circle cx="490" cy="540" r="2.8" />
+    <circle cx="530" cy="710" r="2.2" />
+    <circle cx="640" cy="860" r="2.9" />
+    <circle cx="800" cy="950" r="2.2" />
+    <circle cx="1000" cy="980" r="2.8" />
+    <circle cx="1200" cy="940" r="2.1" />
+    <circle cx="1370" cy="840" r="2.9" />
+    <circle cx="1480" cy="690" r="2.2" />
+    <circle cx="1500" cy="510" r="2.8" />
+    <circle cx="1430" cy="340" r="2.1" />
+    <circle cx="1290" cy="200" r="2.9" />
+    <circle cx="1100" cy="110" r="2.2" />
+    <circle cx="890" cy="90" r="2.8" />
+    <circle cx="670" cy="130" r="2" />
+    <circle cx="490" cy="230" r="2.9" />
+    <circle cx="370" cy="390" r="2.2" />
+    <circle cx="340" cy="580" r="2.8" />
+    <circle cx="390" cy="770" r="2.1" />
+    <circle cx="520" cy="930" r="2.9" />
+  </g>
+</svg>
