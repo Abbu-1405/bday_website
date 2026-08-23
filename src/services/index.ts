@@ -9,3 +9,6 @@ export * from './adminInboxService';
 export * from './contentService';
 export * from './forYouService';
 export * from './reflectionsService';
+export * from './btsActivityService';
+export * from './doodleService';
+export * from './notificationService';

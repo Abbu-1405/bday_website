@@ -11,6 +11,8 @@ import {
   Database,
   CheckCircle2,
   AlertCircle,
+  Eye,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   ContentCategory,
@@ -23,9 +25,15 @@ import {
   getManagedMoments,
 } from '../../../services/contentService';
 import { ContentCategoryManager } from './ContentCategoryManager';
+import { AdminNotes365Preview } from '../preview/AdminNotes365Preview';
 
-export function AdminContentHub() {
+interface AdminContentHubProps {
+  onOpen365Preview?: () => void;
+}
+
+export function AdminContentHub({ onOpen365Preview }: AdminContentHubProps) {
   const [activeCategory, setActiveCategory] = useState<ContentCategory | null>(null);
+  const [showInternalPreview, setShowInternalPreview] = useState<boolean>(false);
 
   // Loaded items for each category
   const [notes, setNotes] = useState<any[]>([]);
@@ -131,6 +139,11 @@ export function AdminContentHub() {
     }
   };
 
+  // If internal 365 preview is active, render preview
+  if (showInternalPreview) {
+    return <AdminNotes365Preview onNavigateToContent={() => setShowInternalPreview(false)} />;
+  }
+
   // If a category is selected, render the manager view
   if (activeCategory) {
     const catInfo = CONTENT_CATEGORIES.find((c) => c.id === activeCategory);
@@ -144,6 +157,14 @@ export function AdminContentHub() {
       />
     );
   }
+
+  const handleOpen365 = () => {
+    if (onOpen365Preview) {
+      onOpen365Preview();
+    } else {
+      setShowInternalPreview(true);
+    }
+  };
 
   return (
     <div className="space-y-6 select-none">
@@ -167,6 +188,32 @@ export function AdminContentHub() {
             LIVE OVERRIDES ACTIVE
           </span>
         </div>
+      </div>
+
+      {/* Testing & Preview Banner Card */}
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 border border-indigo-500/30 rounded-2xl p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+        <div className="space-y-1.5">
+          <div className="flex items-center space-x-2">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3" />
+              Testing / Preview
+            </span>
+            <span className="text-xs font-semibold text-slate-200">
+              365 Notes Preview
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 max-w-xl">
+            Preview every note without affecting user progress or unlock state.
+          </p>
+        </div>
+
+        <button
+          onClick={handleOpen365}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white text-xs font-semibold shadow-md transition-all shrink-0"
+        >
+          <Eye className="w-4 h-4" />
+          <span>Open 365 Notes Preview</span>
+        </button>
       </div>
 
       {/* Categories Grid */}

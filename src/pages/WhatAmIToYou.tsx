@@ -9,11 +9,13 @@ import {
   Loader2,
   BookOpen,
   AlertCircle,
+  Pen,
 } from 'lucide-react';
-import { Container } from '../components';
+import { Container, DoodleCanvasModal, DoodlesDrawer } from '../components';
 import { useAuth } from '../hooks';
 import { ROUTES } from '../constants';
 import { submitFeeling, submitLetter } from '../services';
+import { DoodleItem } from '../types/doodle';
 import { KeepsakeReveal } from '../components/whatAmIToYou';
 import '../components/whatAmIToYou/whatAmIToYou.css';
 
@@ -22,6 +24,11 @@ export default function WhatAmIToYou() {
   const { currentUser, loginWithGoogle } = useAuth();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+
+  // Doodle State
+  const [isDoodleModalOpen, setIsDoodleModalOpen] = useState(false);
+  const [isDoodlesDrawerOpen, setIsDoodlesDrawerOpen] = useState(false);
+  const [editingDoodle, setEditingDoodle] = useState<DoodleItem | null>(null);
 
   // Mode selection: 'feeling' (quiet thought) vs 'letter' (written letter)
   const [activeMode, setActiveMode] = useState<'feeling' | 'letter'>('feeling');
@@ -145,8 +152,8 @@ export default function WhatAmIToYou() {
             </p>
           </div>
 
-          {/* User Sanctuary Status Row */}
-          <div className="relative z-10 pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+          {/* User Sanctuary Status Row & Doodle Controls */}
+          <div className="relative z-10 pt-2 flex flex-col sm:flex-row items-center justify-center gap-3 flex-wrap">
             {currentUser ? (
               <button
                 type="button"
@@ -191,6 +198,42 @@ export default function WhatAmIToYou() {
                 )}
               </div>
             )}
+
+            {/* Doodling System Action Buttons */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingDoodle(null);
+                  setIsDoodleModalOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-serif shadow-xs transition-all cursor-pointer touch-manipulation hover:brightness-115"
+                style={{
+                  backgroundColor: '#6E3E42',
+                  color: '#F2E8D2',
+                  border: '1px solid #9F7A3D',
+                }}
+                title="Open drawing desk to doodle"
+              >
+                <Pen className="h-3.5 w-3.5 text-[#F2E8D2]" />
+                <span>Doodle</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsDoodlesDrawerOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-serif shadow-xs transition-all cursor-pointer touch-manipulation hover:brightness-115"
+                style={{
+                  backgroundColor: '#172033',
+                  color: '#E8D8B8',
+                  border: '1px solid rgba(197, 154, 82, 0.4)',
+                }}
+                title="View your saved doodles"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-[#C59A52]" />
+                <span>My Doodles</span>
+              </button>
+            </div>
           </div>
         </header>
 
@@ -533,6 +576,36 @@ export default function WhatAmIToYou() {
             <span>Starlit Letters — What Am I To You Sanctuary</span>
           </p>
         </footer>
+
+        {/* Doodling System Modals */}
+        <DoodleCanvasModal
+          isOpen={isDoodleModalOpen}
+          onClose={() => {
+            setIsDoodleModalOpen(false);
+            setEditingDoodle(null);
+          }}
+          section="what-am-i-to-you"
+          initialDoodle={editingDoodle}
+          onDoodleSaved={() => {
+            // Keep modal open or let user continue editing
+          }}
+        />
+
+        <DoodlesDrawer
+          isOpen={isDoodlesDrawerOpen}
+          onClose={() => setIsDoodlesDrawerOpen(false)}
+          section="what-am-i-to-you"
+          onSelectDoodle={(doodle) => {
+            setEditingDoodle(doodle);
+            setIsDoodlesDrawerOpen(false);
+            setIsDoodleModalOpen(true);
+          }}
+          onNewDoodle={() => {
+            setEditingDoodle(null);
+            setIsDoodlesDrawerOpen(false);
+            setIsDoodleModalOpen(true);
+          }}
+        />
 
       </Container>
     </div>

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Sparkles, X, Compass, Calendar, Camera, Heart, Mail, Feather, Lock, Clock, Star, Award, BookOpen } from 'lucide-react';
 import { BadgeItem } from '../types/achievements';
 import { Surface, Button } from '../components';
@@ -54,7 +55,7 @@ export const AchievementCelebrationModal: React.FC<AchievementCelebrationModalPr
 
   const IconComp = ICON_MAP[badge.iconName] || Sparkles;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
       onClick={onClose}
@@ -118,6 +119,7 @@ export const AchievementCelebrationModal: React.FC<AchievementCelebrationModalPr
           </div>
         </Surface>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

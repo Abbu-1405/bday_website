@@ -15,6 +15,7 @@ import {
   SecretVault,
   WhatAmIToYou,
   Reflections,
+  Bts,
   Settings,
   Admin,
 } from '../pages';
@@ -33,6 +34,7 @@ export const AppRoutes: React.FC = () => {
         <Route path={ROUTES.WISHES} element={<Wishes />} />
         <Route path={ROUTES.WHAT_AM_I_TO_YOU} element={<WhatAmIToYou />} />
         <Route path={ROUTES.REFLECTIONS} element={<Reflections />} />
+        <Route path={ROUTES.BTS} element={<Bts />} />
 
         <Route path={ROUTES.SECRET_VAULT} element={<SecretVault />} />
         <Route path={ROUTES.SETTINGS} element={<Settings />} />

@@ -469,6 +469,23 @@ export default function Notes365() {
             </div>
           )}
 
+          {/* Non-Letter Archive Favorites Header */}
+          {!isLetterArchive && favoriteOnly && (
+            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 pb-1.5 pt-1 border-b border-[var(--color-border-light)] animate-in fade-in duration-200">
+              <div className="space-y-0.5">
+                <h3 className="text-lg sm:text-xl font-serif text-[var(--color-text)] font-medium">
+                  Favorited Notes
+                </h3>
+                <p className="text-xs text-[var(--color-text-secondary)] font-serif italic">
+                  Special entries marked to remember
+                </p>
+              </div>
+              <span className="text-xs font-serif text-[var(--color-accent)] italic">
+                ♥ {sortedNotes.length} {sortedNotes.length === 1 ? 'favorite entry' : 'favorite entries'}
+              </span>
+            </div>
+          )}
+
           {/* Notes Grid */}
           <NotesGrid
             notes={sortedNotes}

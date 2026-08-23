@@ -180,7 +180,8 @@ export const VintageOpenWhenCard: React.FC<VintageOpenWhenCardProps> = ({
         'bg-[#FAF5EC] border border-[rgba(138,110,89,0.35)]',
         'shadow-[0_8px_24px_-4px_rgba(60,42,33,0.12),0_2px_6px_rgba(60,42,33,0.06)]',
         'hover:-translate-y-1.5 hover:shadow-[0_18px_38px_-6px_rgba(60,42,33,0.2),0_4px_12px_rgba(60,42,33,0.08)] hover:border-[rgba(138,110,89,0.55)]',
-        'transition-all duration-300 min-h-[260px] overflow-hidden',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7A2E3B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF5EC]',
+        'transition-all duration-300 min-h-[260px] overflow-hidden motion-reduce:transition-none motion-reduce:hover:transform-none',
         className
       )}
       {...props}

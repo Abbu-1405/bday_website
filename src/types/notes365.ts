@@ -22,6 +22,7 @@ export interface Note365 {
   title: string;
   content: string;
   preview: string;
+  category?: string;
   media?: NoteMediaItem;
   mediaItems?: NoteMediaItem[];
   isRead: boolean;

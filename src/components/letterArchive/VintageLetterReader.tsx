@@ -28,6 +28,7 @@ export interface VintageLetterReaderProps extends React.HTMLAttributes<HTMLDivEl
   hasNextNote?: boolean;
   onToggleFavorite?: (noteId: string) => void;
   onMarkAsRead?: (noteId: string) => void;
+  isAdminPreview?: boolean;
 }
 
 export const VintageLetterReader: React.FC<VintageLetterReaderProps> = ({
@@ -40,6 +41,7 @@ export const VintageLetterReader: React.FC<VintageLetterReaderProps> = ({
   hasNextNote = false,
   onToggleFavorite,
   onMarkAsRead,
+  isAdminPreview = false,
   ...props
 }) => {
   if (!note) {
@@ -49,7 +51,7 @@ export const VintageLetterReader: React.FC<VintageLetterReaderProps> = ({
   const dayIndex = note.dayIndex ?? 1;
 
   // Render Locked Letter in Vintage Stationery Style
-  if (!note.isUnlocked) {
+  if (!note.isUnlocked && !isAdminPreview) {
     return (
       <div
         className={cn(
@@ -245,6 +247,11 @@ export const VintageLetterReader: React.FC<VintageLetterReaderProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {isAdminPreview && (
+              <span className="px-2 py-0.5 rounded bg-[#C2934D]/15 text-[#8A5B20] border border-[#C2934D]/30 text-[10px] sm:text-[11px] font-mono font-semibold uppercase tracking-wider">
+                ADMIN PREVIEW
+              </span>
+            )}
             {/* Antique-Gold Favorite Toggle */}
             <button
               type="button"

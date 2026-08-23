@@ -9,6 +9,7 @@ import {
   Award,
   KeyRound,
   RefreshCw,
+  Film,
 } from 'lucide-react';
 import { AdminOverviewStats } from '../../services/adminService';
 
@@ -19,6 +20,7 @@ interface AdminOverviewProps {
   onNavigateToActivity: () => void;
   onNavigateToFeelings?: () => void;
   onNavigateToLetters?: () => void;
+  onNavigateToBts?: () => void;
 }
 
 export const AdminOverview: React.FC<AdminOverviewProps> = ({
@@ -28,6 +30,7 @@ export const AdminOverview: React.FC<AdminOverviewProps> = ({
   onNavigateToActivity,
   onNavigateToFeelings,
   onNavigateToLetters,
+  onNavigateToBts,
 }) => {
   const statCards = [
     {
@@ -43,6 +46,13 @@ export const AdminOverview: React.FC<AdminOverviewProps> = ({
       icon: Activity,
       color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
       onClick: onNavigateToActivity,
+    },
+    {
+      label: 'BTS Activity Hub',
+      value: 'Live',
+      icon: Film,
+      color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+      onClick: onNavigateToBts,
     },
     {
       label: 'Notes Opened',
@@ -62,7 +72,7 @@ export const AdminOverview: React.FC<AdminOverviewProps> = ({
       label: 'Secrets Discovered',
       value: stats.secretsDiscovered,
       icon: KeyRound,
-      color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+      color: 'text-teal-400 bg-teal-500/10 border-teal-500/20',
       onClick: undefined,
     },
     {
@@ -83,7 +93,7 @@ export const AdminOverview: React.FC<AdminOverviewProps> = ({
       label: 'Badges Unlocked',
       value: stats.badgesUnlocked,
       icon: Award,
-      color: 'text-teal-400 bg-teal-500/10 border-teal-500/20',
+      color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
       onClick: undefined,
     },
   ];

@@ -1,9 +1,37 @@
-import React, { useState } from 'react';
-import { User, LogIn, LogOut, ShieldCheck, Palette, Heart, Check, Sparkles, Loader2, AlertCircle, Music, Volume2, VolumeX } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  User,
+  LogIn,
+  LogOut,
+  ShieldCheck,
+  Palette,
+  Heart,
+  Check,
+  Sparkles,
+  Loader2,
+  AlertCircle,
+  Music,
+  Volume2,
+  VolumeX,
+  Sliders,
+  Bell,
+  BellOff,
+  Send,
+  Info,
+  ExternalLink,
+} from 'lucide-react';
 import { Container, Surface, Button, Badge } from '../components';
 import { useAuth, useTheme } from '../hooks';
 import { useAudio, AMBIENT_TRACKS } from '../contexts';
-import { Theme } from '../types';
+import { Theme, NotificationPermissionState } from '../types';
+import {
+  isPushSupported,
+  getNotificationPermission,
+  getVapidKey,
+  requestAndRegisterNotification,
+  disableNotification,
+  sendLocalTestNotification,
+} from '../services';
 
 export default function Settings() {
   const { currentUser, loading, isAdmin, loginWithGoogle, logout } = useAuth();
@@ -12,27 +40,139 @@ export default function Settings() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  const themes: { id: Theme; label: string; desc: string }[] = [
+  // Notification state
+  const [pushSupported, setPushSupported] = useState<boolean>(true);
+  const [permissionState, setPermissionState] = useState<NotificationPermissionState>('default');
+  const [vapidConfigured, setVapidConfigured] = useState<boolean>(false);
+  const [isPushLoading, setIsPushLoading] = useState<boolean>(false);
+  const [pushFeedback, setPushFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [activeToken, setActiveToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function checkPush() {
+      const supported = await isPushSupported();
+      setPushSupported(supported);
+      setPermissionState(getNotificationPermission());
+      setVapidConfigured(Boolean(getVapidKey()));
+      const stored = typeof localStorage !== 'undefined' ? localStorage.getItem('starlit_fcm_token') : null;
+      setActiveToken(stored);
+    }
+    checkPush();
+  }, [currentUser]);
+
+  const handleToggleNotifications = async () => {
+    if (!currentUser) {
+      setPushFeedback({
+        type: 'error',
+        message: 'Please sign in with Google first to enable device push notifications.',
+      });
+      return;
+    }
+
+    setIsPushLoading(true);
+    setPushFeedback(null);
+
+    const isCurrentlyEnabled = permissionState === 'granted' && Boolean(activeToken);
+
+    if (isCurrentlyEnabled) {
+      // Disable
+      const res = await disableNotification(currentUser);
+      setIsPushLoading(false);
+      if (res.success) {
+        setActiveToken(null);
+        setPushFeedback({
+          type: 'success',
+          message: 'Notifications disabled for this session.',
+        });
+      } else {
+        setPushFeedback({
+          type: 'error',
+          message: res.error || 'Failed to disable notifications.',
+        });
+      }
+    } else {
+      // Enable
+      const res = await requestAndRegisterNotification(currentUser);
+      setIsPushLoading(false);
+      setPermissionState(getNotificationPermission());
+      if (res.success) {
+        setActiveToken(res.token || 'registered');
+        setPushFeedback({
+          type: 'success',
+          message: 'Notifications successfully enabled and registered to your UID! ✨',
+        });
+      } else {
+        setPushFeedback({
+          type: 'error',
+          message: res.error || 'Could not enable push notifications.',
+        });
+      }
+    }
+  };
+
+  const handleSendTestPush = async () => {
+    setPushFeedback(null);
+    const sent = await sendLocalTestNotification(
+      'Starlit Letters ✨',
+      'A little piece of your universe is waiting in the stars.',
+      '/'
+    );
+    if (sent) {
+      setPushFeedback({
+        type: 'success',
+        message: 'Test notification sent! Check your notification tray.',
+      });
+    } else {
+      setPushFeedback({
+        type: 'error',
+        message: 'Could not send test notification. Ensure permission is granted.',
+      });
+    }
+  };
+
+  const themes: {
+    id: Theme;
+    label: string;
+    desc: string;
+    palette: { bg: string; border: string; accent: string; text: string };
+  }[] = [
     {
       id: 'letter-archive',
       label: 'Letter Archive',
       desc: 'Warm parchment & elegant serif font',
+      palette: {
+        bg: '#FAF6F0',
+        border: 'rgba(138, 110, 89, 0.35)',
+        accent: '#7A2E3B',
+        text: '#2C221E',
+      },
     },
     {
       id: 'midnight-journal',
       label: 'Midnight Journal',
       desc: 'Charcoal canvas & luxury tones',
+      palette: {
+        bg: '#050A16',
+        border: 'rgba(201, 155, 88, 0.35)',
+        accent: '#C99B58',
+        text: '#F2E4CF',
+      },
     },
     {
       id: 'whimsical-scrapbook',
       label: 'Whimsical Scrapbook',
       desc: 'Enchanted night forest & magical artwork',
+      palette: {
+        bg: '#0B100D',
+        border: 'rgba(240, 230, 190, 0.25)',
+        accent: '#344A32',
+        text: '#F7F1DF',
+      },
     },
   ];
 
   const handleLogin = async () => {
     if (isLoggingIn) return;
-    console.log('[AUTH] Login button clicked');
     setIsLoggingIn(true);
     setAuthError(null);
     try {
@@ -46,307 +186,570 @@ export default function Settings() {
     }
   };
 
+  const volumePercentage = Math.round(volume * 100);
+
   return (
-    <Container maxWidth="lg" className="py-8 sm:py-12 space-y-8">
+    <Container maxWidth="lg" className="py-6 sm:py-10 lg:py-14 space-y-8 sm:space-y-10">
       {/* Page Header */}
-      <div className="space-y-2 text-center sm:text-left">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-serif font-medium bg-[var(--color-surface-secondary)] text-[var(--color-primary)] border border-[var(--color-border-light)]">
-          <Sparkles className="h-3.5 w-3.5 text-[var(--color-primary)]" />
+      <header className="space-y-3 text-center sm:text-left">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-serif font-medium bg-[var(--color-surface-secondary)] text-[var(--color-primary)] border border-[var(--color-border-light)] shadow-2xs">
+          <Sparkles className="h-3.5 w-3.5 text-[var(--color-primary)] shrink-0" aria-hidden="true" />
           <span>Preferences & Security</span>
         </div>
-        <h1 className="text-h1 font-serif font-bold text-[var(--color-text)] tracking-tight">
-          Settings & Account
-        </h1>
-        <p className="text-body text-[var(--color-text-secondary)] font-serif leading-relaxed">
-          Manage your account authentication, private sanctuary settings, and visual theme preferences.
-        </p>
-      </div>
+        <div className="space-y-1.5">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-[var(--color-text)] tracking-tight">
+            Settings & Account
+          </h1>
+          <p className="text-sm sm:text-base text-[var(--color-text-secondary)] font-serif max-w-2xl leading-relaxed">
+            Manage your account authentication, private sanctuary settings, and visual theme preferences.
+          </p>
+        </div>
+      </header>
 
-      {/* Account & Authentication Section */}
-      <Surface variant="elevated" padding="lg" className="border border-[var(--color-border-light)] space-y-6">
-        <div className="flex items-center justify-between border-b border-[var(--color-border-light)] pb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-full bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] flex items-center justify-center text-[var(--color-primary)]">
-              <User className="h-4 w-4" />
+      {/* Main Settings Sections */}
+      <div className="space-y-6 sm:space-y-8">
+        {/* =========================================================================
+            SECTION 1: VISUAL THEME PALETTE (Appearance)
+           ========================================================================= */}
+        <Surface
+          variant="elevated"
+          padding="lg"
+          className="border border-[var(--color-border-light)] shadow-[var(--shadow-soft)] space-y-6 transition-all"
+        >
+          {/* Section Header */}
+          <div className="flex items-start sm:items-center gap-3 border-b border-[var(--color-border-light)] pb-4">
+            <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] flex items-center justify-center text-[var(--color-primary)] shrink-0 shadow-2xs">
+              <Palette className="h-5 w-5" aria-hidden="true" />
             </div>
-            <div>
-              <h2 className="text-h2 font-serif font-bold text-[var(--color-text)]">
-                Account Authentication
+            <div className="space-y-0.5">
+              <h2 className="text-lg sm:text-xl font-serif font-bold text-[var(--color-text)]">
+                Visual Theme Palette
               </h2>
-              <p className="text-xs font-serif text-[var(--color-text-secondary)]">
-                Required for saving private feelings and written letters
-              </p>
-            </div>
-          </div>
-          {currentUser ? (
-            <Badge variant="success" size="md" className="font-serif">
-              Authenticated
-            </Badge>
-          ) : (
-            <Badge variant="neutral" size="md" className="font-serif">
-              Guest
-            </Badge>
-          )}
-        </div>
-
-        {authError && (
-          <div className="flex items-center gap-2 text-xs sm:text-sm font-serif text-rose-600 dark:text-rose-400 bg-rose-500/10 p-3 rounded-lg border border-rose-500/20">
-            <AlertCircle className="h-4 w-4 shrink-0" />
-            <span>{authError}</span>
-          </div>
-        )}
-
-        {currentUser ? (
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)]">
-              <div className="flex items-center gap-3">
-                {currentUser.photoURL ? (
-                  <img
-                    src={currentUser.photoURL}
-                    alt="Profile Avatar"
-                    referrerPolicy="no-referrer"
-                    className="h-12 w-12 rounded-full object-cover border border-[var(--color-border-light)]"
-                  />
-                ) : (
-                  <div className="h-12 w-12 rounded-full bg-[var(--color-primary)] text-[var(--color-primary-foreground)] flex items-center justify-center font-serif text-lg font-bold">
-                    {(currentUser.displayName || currentUser.email || 'U').charAt(0)}
-                  </div>
-                )}
-                <div>
-                  <h3 className="font-serif font-bold text-sm text-[var(--color-text)]">
-                    {currentUser.displayName || 'Starlit Letters User'}
-                  </h3>
-                  <p className="text-xs text-[var(--color-muted)] font-sans">
-                    {currentUser.email}
-                  </p>
-                  <p className="text-[11px] font-serif text-[var(--color-text-secondary)] mt-0.5">
-                    User ID: <code className="text-[10px] bg-[var(--color-surface)] px-1 rounded">{currentUser.uid.slice(0, 12)}...</code>
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                {isAdmin && (
-                  <Badge variant="accent" size="md" className="font-serif flex items-center gap-1">
-                    <ShieldCheck className="h-3.5 w-3.5" />
-                    Admin Role
-                  </Badge>
-                )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={logout}
-                  leftIcon={<LogOut className="h-3.5 w-3.5" />}
-                  className="font-serif text-xs text-rose-600 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/10"
-                >
-                  Sign Out
-                </Button>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border-light)] text-xs text-[var(--color-text-secondary)] font-serif space-y-1">
-              <div className="flex items-center gap-1.5 font-semibold text-[var(--color-text)]">
-                <Heart className="h-3.5 w-3.5 text-[var(--color-accent)]" />
-                <span>Private Sanctuary Protection</span>
-              </div>
-              <p>
-                Your submitted feelings and written letters in "What Am I To You?" are isolated and encrypted under your personal account ID (<code className="text-[10px]">{currentUser.uid}</code>).
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="p-6 rounded-xl bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] text-center space-y-3">
-              <div className="w-12 h-12 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center mx-auto">
-                <LogIn className="h-6 w-6" />
-              </div>
-              <div className="space-y-1 max-w-md mx-auto">
-                <h3 className="font-serif font-bold text-base text-[var(--color-text)]">
-                  Sign In to Access Private Writing
-                </h3>
-                <p className="text-xs font-serif text-[var(--color-text-secondary)] leading-relaxed">
-                  Sign in securely with Google to leave private feelings and letters in "What Am I To You?". You can freely browse the rest of Starlit Letters without signing in.
-                </p>
-              </div>
-              <Button
-                variant="primary"
-                size="md"
-                onClick={handleLogin}
-                disabled={loading || isLoggingIn}
-                leftIcon={
-                  isLoggingIn ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <LogIn className="h-4 w-4" />
-                  )
-                }
-                className="font-serif min-w-[180px]"
-              >
-                {isLoggingIn ? 'Signing In...' : 'Sign In with Google'}
-              </Button>
-            </div>
-          </div>
-        )}
-      </Surface>
-
-      {/* Visual Theme Settings */}
-      <Surface variant="elevated" padding="lg" className="border border-[var(--color-border-light)] space-y-6">
-        <div className="flex items-center gap-2.5 border-b border-[var(--color-border-light)] pb-4">
-          <div className="w-9 h-9 rounded-full bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] flex items-center justify-center text-[var(--color-primary)]">
-            <Palette className="h-4 w-4" />
-          </div>
-          <div>
-            <h2 className="text-h2 font-serif font-bold text-[var(--color-text)]">
-              Visual Theme Palette
-            </h2>
-            <p className="text-xs font-serif text-[var(--color-text-secondary)]">
-              Customize the visual atmosphere of Starlit Letters
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {themes.map((t) => {
-            const isActive = theme === t.id;
-            return (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setTheme(t.id)}
-                className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between h-32 relative ${
-                  isActive
-                    ? 'border-[var(--color-primary)] bg-[var(--color-surface-secondary)] ring-1 ring-[var(--color-primary)]'
-                    : 'border-[var(--color-border-light)] bg-[var(--color-surface)] hover:border-[var(--color-border)]'
-                }`}
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-serif font-bold text-sm text-[var(--color-text)]">
-                      {t.label}
-                    </span>
-                    {isActive && (
-                      <div className="w-5 h-5 rounded-full bg-[var(--color-primary)] text-[var(--color-primary-foreground)] flex items-center justify-center">
-                        <Check className="h-3 w-3" />
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-xs text-[var(--color-muted)] font-serif leading-relaxed">
-                    {t.desc}
-                  </p>
-                </div>
-                <div className="text-[10px] font-serif uppercase tracking-wider text-[var(--color-primary)] font-semibold">
-                  {isActive ? 'Active Theme' : 'Click to Apply'}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </Surface>
-
-      {/* Ambient Audio & Soundscape Controls */}
-      <Surface variant="elevated" padding="lg" className="border border-[var(--color-border-light)] space-y-6">
-        <div className="flex items-center justify-between border-b border-[var(--color-border-light)] pb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-full bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] flex items-center justify-center text-[var(--color-primary)]">
-              <Music className="h-4 w-4" />
-            </div>
-            <div>
-              <h2 className="text-h2 font-serif font-bold text-[var(--color-text)]">
-                Ambient Soundscapes & Mute Control
-              </h2>
-              <p className="text-xs font-serif text-[var(--color-text-secondary)]">
-                Manage background audio playback, volume level, and soundscape tracks
+              <p className="text-xs sm:text-sm font-serif text-[var(--color-text-secondary)]">
+                Customize the visual atmosphere of Starlit Letters
               </p>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={togglePlay}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif font-medium border transition-colors cursor-pointer ${
-              isPlaying
-                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20'
-                : 'bg-[var(--color-surface-secondary)] text-[var(--color-muted)] border-[var(--color-border)] hover:text-[var(--color-text)]'
-            }`}
+          {/* Theme Choices Cards */}
+          <div
+            role="radiogroup"
+            aria-label="Visual Theme Options"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4"
           >
-            {isPlaying ? (
-              <>
-                <Volume2 className="h-3.5 w-3.5 animate-pulse" />
-                <span>Playing (Click to Mute)</span>
-              </>
-            ) : (
-              <>
-                <VolumeX className="h-3.5 w-3.5" />
-                <span>Muted (Click to Unmute)</span>
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* Volume Slider */}
-        <div className="p-4 rounded-xl bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] space-y-2">
-          <div className="flex items-center justify-between text-xs font-serif text-[var(--color-text)]">
-            <span className="font-semibold flex items-center gap-1.5">
-              {volume === 0 || !isPlaying ? (
-                <VolumeX className="h-4 w-4 text-[var(--color-muted)]" />
-              ) : (
-                <Volume2 className="h-4 w-4 text-[var(--color-primary)]" />
-              )}
-              Soundscape Volume
-            </span>
-            <span className="font-mono text-xs">{Math.round(volume * 100)}%</span>
-          </div>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.05"
-            value={volume}
-            onChange={(e) => setVolume(parseFloat(e.target.value))}
-            className="w-full accent-[var(--color-primary)] cursor-pointer h-2 bg-[var(--color-surface)] rounded-lg"
-            aria-label="Ambient audio volume"
-          />
-        </div>
-
-        {/* Soundscape Track Choices */}
-        <div className="space-y-2">
-          <h3 className="text-xs font-serif font-semibold text-[var(--color-muted)] uppercase tracking-wider">
-            Choose Atmosphere Track
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {AMBIENT_TRACKS.map((t) => {
-              const isSelected = currentTrack === t.id;
+            {themes.map((t) => {
+              const isActive = theme === t.id;
               return (
                 <button
                   key={t.id}
                   type="button"
-                  onClick={() => setTrack(t.id)}
-                  className={`p-3.5 rounded-xl border text-left transition-colors cursor-pointer flex flex-col justify-between ${
-                    isSelected
-                      ? 'border-[var(--color-primary)] bg-[var(--color-surface-secondary)] ring-1 ring-[var(--color-primary)]'
-                      : 'border-[var(--color-border-light)] bg-[var(--color-surface)] hover:border-[var(--color-border)]'
+                  role="radio"
+                  aria-checked={isActive}
+                  onClick={() => setTheme(t.id)}
+                  className={`group relative p-4 sm:p-5 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[140px] sm:min-h-[160px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-background)] ${
+                    isActive
+                      ? 'border-[var(--color-primary)] bg-[var(--color-surface-secondary)] ring-1 ring-[var(--color-primary)] shadow-sm'
+                      : 'border-[var(--color-border-light)] bg-[var(--color-surface)] hover:border-[var(--color-border)] hover:bg-[var(--color-card-hover)] hover:shadow-2xs'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-serif font-bold text-sm text-[var(--color-text)]">
-                      {t.label}
-                    </span>
-                    {isSelected && (
-                      <Badge variant="primary" size="sm" className="font-serif text-[10px]">
-                        Active
-                      </Badge>
-                    )}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-serif font-bold text-sm sm:text-base text-[var(--color-text)]">
+                        {t.label}
+                      </span>
+                      <div
+                        className={`w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 ${
+                          isActive
+                            ? 'bg-[var(--color-primary)] text-[var(--color-primary-foreground)] shadow-xs'
+                            : 'border border-[var(--color-border-light)] group-hover:border-[var(--color-border)]'
+                        }`}
+                        aria-hidden="true"
+                      >
+                        {isActive && <Check className="h-3 w-3" />}
+                      </div>
+                    </div>
+                    <p className="text-xs text-[var(--color-text-secondary)] font-serif leading-relaxed line-clamp-2">
+                      {t.desc}
+                    </p>
                   </div>
-                  <p className="text-xs text-[var(--color-muted)] font-serif leading-relaxed">
-                    {t.desc}
-                  </p>
+
+                  {/* Palette Preview Dots & Status Label */}
+                  <div className="pt-3 border-t border-[var(--color-border-light)] flex items-center justify-between">
+                    <div
+                      className="flex items-center gap-1.5"
+                      aria-label={`${t.label} color preview`}
+                      title={`${t.label} palette`}
+                    >
+                      <span
+                        className="w-3 h-3 rounded-full border shadow-2xs"
+                        style={{ backgroundColor: t.palette.bg, borderColor: t.palette.border }}
+                      />
+                      <span
+                        className="w-3 h-3 rounded-full border shadow-2xs"
+                        style={{ backgroundColor: t.palette.accent, borderColor: t.palette.border }}
+                      />
+                      <span
+                        className="w-3 h-3 rounded-full border shadow-2xs"
+                        style={{ backgroundColor: t.palette.text, borderColor: t.palette.border }}
+                      />
+                    </div>
+                    <span
+                      className={`text-[10px] font-serif uppercase tracking-wider font-semibold ${
+                        isActive
+                          ? 'text-[var(--color-primary)]'
+                          : 'text-[var(--color-muted)] group-hover:text-[var(--color-text-secondary)]'
+                      }`}
+                    >
+                      {isActive ? 'Active Theme' : 'Click to Apply'}
+                    </span>
+                  </div>
                 </button>
               );
             })}
           </div>
-        </div>
-      </Surface>
+        </Surface>
+
+        {/* =========================================================================
+            SECTION 2: AMBIENT SOUNDSCAPES & AUDIO CONTROLS (Audio)
+           ========================================================================= */}
+        <Surface
+          variant="elevated"
+          padding="lg"
+          className="border border-[var(--color-border-light)] shadow-[var(--shadow-soft)] space-y-6 transition-all"
+        >
+          {/* Section Header with Master Toggle */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--color-border-light)] pb-4">
+            <div className="flex items-start sm:items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] flex items-center justify-center text-[var(--color-primary)] shrink-0 shadow-2xs">
+                <Music className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <div className="space-y-0.5">
+                <h2 className="text-lg sm:text-xl font-serif font-bold text-[var(--color-text)]">
+                  Ambient Soundscapes & Mute Control
+                </h2>
+                <p className="text-xs sm:text-sm font-serif text-[var(--color-text-secondary)]">
+                  Manage background audio playback, volume level, and soundscape tracks
+                </p>
+              </div>
+            </div>
+
+            {/* Mute / Play Audio Toggle Button */}
+            <button
+              type="button"
+              onClick={togglePlay}
+              aria-pressed={isPlaying}
+              className={`inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] rounded-full text-xs font-serif font-medium border transition-all duration-200 cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-background)] ${
+                isPlaying
+                  ? 'bg-[var(--color-primary)]/12 text-[var(--color-primary)] border-[var(--color-primary)]/35 hover:bg-[var(--color-primary)]/20 shadow-2xs'
+                  : 'bg-[var(--color-surface-secondary)] text-[var(--color-muted)] border-[var(--color-border-light)] hover:text-[var(--color-text)] hover:border-[var(--color-border)]'
+              }`}
+            >
+              {isPlaying ? (
+                <>
+                  <Volume2 className="h-4 w-4 animate-pulse text-[var(--color-primary)]" aria-hidden="true" />
+                  <span>Playing (Click to Mute)</span>
+                </>
+              ) : (
+                <>
+                  <VolumeX className="h-4 w-4 text-[var(--color-muted)]" aria-hidden="true" />
+                  <span>Muted (Click to Unmute)</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Volume Slider Card */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] space-y-3">
+            <div className="flex items-center justify-between text-xs sm:text-sm font-serif text-[var(--color-text)]">
+              <span className="font-semibold flex items-center gap-2">
+                {volume === 0 || !isPlaying ? (
+                  <VolumeX className="h-4 w-4 text-[var(--color-muted)] shrink-0" aria-hidden="true" />
+                ) : (
+                  <Volume2 className="h-4 w-4 text-[var(--color-primary)] shrink-0" aria-hidden="true" />
+                )}
+                Soundscape Volume
+              </span>
+              <span className="font-mono text-xs font-medium text-[var(--color-text-secondary)] px-2 py-0.5 rounded-md bg-[var(--color-surface)] border border-[var(--color-border-light)]">
+                {volumePercentage}%
+              </span>
+            </div>
+
+            <div className="py-1">
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={volume}
+                onChange={(e) => setVolume(parseFloat(e.target.value))}
+                className="w-full cursor-pointer h-2.5 rounded-lg appearance-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                style={{
+                  background: `linear-gradient(to right, var(--color-primary) 0%, var(--color-primary) ${volumePercentage}%, var(--color-surface) ${volumePercentage}%, var(--color-surface) 100%)`,
+                  accentColor: 'var(--color-primary)',
+                }}
+                aria-label="Ambient soundscape volume slider"
+              />
+            </div>
+          </div>
+
+          {/* Soundscape Track Choices */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-1.5">
+              <Sliders className="h-3.5 w-3.5 text-[var(--color-muted)]" aria-hidden="true" />
+              <h3 className="text-xs font-serif font-semibold text-[var(--color-muted)] uppercase tracking-wider">
+                Choose Atmosphere Track
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {AMBIENT_TRACKS.map((t) => {
+                const isSelected = currentTrack === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setTrack(t.id)}
+                    className={`group p-4 rounded-xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-background)] ${
+                      isSelected
+                        ? 'border-[var(--color-primary)] bg-[var(--color-surface-secondary)] ring-1 ring-[var(--color-primary)] shadow-2xs'
+                        : 'border-[var(--color-border-light)] bg-[var(--color-surface)] hover:border-[var(--color-border)] hover:bg-[var(--color-card-hover)]'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-serif font-bold text-sm text-[var(--color-text)]">
+                        {t.label}
+                      </span>
+                      {isSelected ? (
+                        <Badge variant="primary" size="sm" className="font-serif text-[10px] py-0 px-2">
+                          Active
+                        </Badge>
+                      ) : (
+                        <span className="text-[10px] font-serif text-[var(--color-muted)] group-hover:text-[var(--color-text-secondary)]">
+                          Select
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-[var(--color-muted)] font-serif leading-relaxed line-clamp-2">
+                      {t.desc}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </Surface>
+
+        {/* =========================================================================
+            SECTION 3: ACCOUNT & AUTHENTICATION (Account & Sanctuary)
+           ========================================================================= */}
+        <Surface
+          variant="elevated"
+          padding="lg"
+          className="border border-[var(--color-border-light)] shadow-[var(--shadow-soft)] space-y-6 transition-all"
+        >
+          {/* Section Header with Auth Badge */}
+          <div className="flex items-center justify-between border-b border-[var(--color-border-light)] pb-4">
+            <div className="flex items-start sm:items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] flex items-center justify-center text-[var(--color-primary)] shrink-0 shadow-2xs">
+                <User className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <div className="space-y-0.5">
+                <h2 className="text-lg sm:text-xl font-serif font-bold text-[var(--color-text)]">
+                  Account Authentication
+                </h2>
+                <p className="text-xs sm:text-sm font-serif text-[var(--color-text-secondary)]">
+                  Required for saving private feelings and written letters
+                </p>
+              </div>
+            </div>
+            {currentUser ? (
+              <Badge variant="success" size="md" className="font-serif shrink-0">
+                Authenticated
+              </Badge>
+            ) : (
+              <Badge variant="neutral" size="md" className="font-serif shrink-0">
+                Guest
+              </Badge>
+            )}
+          </div>
+
+          {/* Auth Error Banner */}
+          {authError && (
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-serif text-rose-600 dark:text-rose-400 bg-rose-500/10 p-3.5 rounded-xl border border-rose-500/20">
+              <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>{authError}</span>
+            </div>
+          )}
+
+          {currentUser ? (
+            /* Authenticated User View */
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)]">
+                <div className="flex items-center gap-3.5">
+                  {currentUser.photoURL ? (
+                    <img
+                      src={currentUser.photoURL}
+                      alt="Profile Avatar"
+                      referrerPolicy="no-referrer"
+                      className="h-12 w-12 rounded-full object-cover border border-[var(--color-border-light)] shadow-2xs shrink-0"
+                    />
+                  ) : (
+                    <div className="h-12 w-12 rounded-full bg-[var(--color-primary)] text-[var(--color-primary-foreground)] flex items-center justify-center font-serif text-lg font-bold shadow-2xs shrink-0">
+                      {(currentUser.displayName || currentUser.email || 'U').charAt(0)}
+                    </div>
+                  )}
+                  <div className="space-y-0.5">
+                    <h3 className="font-serif font-bold text-sm sm:text-base text-[var(--color-text)]">
+                      {currentUser.displayName || 'Starlit Letters User'}
+                    </h3>
+                    <p className="text-xs text-[var(--color-muted)] font-sans">
+                      {currentUser.email}
+                    </p>
+                    <p className="text-[11px] font-serif text-[var(--color-text-secondary)] pt-0.5">
+                      User ID:{' '}
+                      <code className="text-[10px] font-mono bg-[var(--color-surface)] px-1.5 py-0.5 rounded border border-[var(--color-border-light)] text-[var(--color-text)]">
+                        {currentUser.uid.slice(0, 12)}...
+                      </code>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-center">
+                  {isAdmin && (
+                    <Badge variant="accent" size="md" className="font-serif flex items-center gap-1">
+                      <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                      <span>Admin Role</span>
+                    </Badge>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={logout}
+                    leftIcon={<LogOut className="h-3.5 w-3.5" />}
+                    className="font-serif text-xs min-h-[38px] text-rose-600 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/10 hover:border-rose-500/50"
+                  >
+                    Sign Out
+                  </Button>
+                </div>
+              </div>
+
+              {/* Private Sanctuary Notice */}
+              <div className="p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-light)] text-xs text-[var(--color-text-secondary)] font-serif space-y-1.5">
+                <div className="flex items-center gap-1.5 font-semibold text-[var(--color-text)]">
+                  <Heart className="h-3.5 w-3.5 text-[var(--color-accent)] shrink-0" aria-hidden="true" />
+                  <span>Private Sanctuary Protection</span>
+                </div>
+                <p className="leading-relaxed">
+                  Your submitted feelings and written letters in &ldquo;What Am I To You?&rdquo; are isolated and encrypted under your personal account ID (<code className="text-[10px] font-mono">{currentUser.uid}</code>).
+                </p>
+              </div>
+            </div>
+          ) : (
+            /* Guest View */
+            <div className="p-6 sm:p-8 rounded-2xl bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] text-center space-y-4">
+              <div className="w-12 h-12 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center mx-auto shadow-2xs border border-[var(--color-border-light)]">
+                <LogIn className="h-6 w-6" aria-hidden="true" />
+              </div>
+              <div className="space-y-1.5 max-w-md mx-auto">
+                <h3 className="font-serif font-bold text-base sm:text-lg text-[var(--color-text)]">
+                  Sign In to Access Private Writing
+                </h3>
+                <p className="text-xs sm:text-sm font-serif text-[var(--color-text-secondary)] leading-relaxed">
+                  Sign in securely with Google to leave private feelings and letters in &ldquo;What Am I To You?&rdquo;. You can freely browse the rest of Starlit Letters without signing in.
+                </p>
+              </div>
+              <div className="pt-2">
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={handleLogin}
+                  disabled={loading || isLoggingIn}
+                  leftIcon={
+                    isLoggingIn ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <LogIn className="h-4 w-4" />
+                    )
+                  }
+                  className="font-serif min-w-[200px] min-h-[44px] shadow-sm"
+                >
+                  {isLoggingIn ? 'Signing In...' : 'Sign In with Google'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </Surface>
+
+        {/* =========================================================================
+            SECTION 4: REAL WEB PUSH NOTIFICATIONS (FCM Web Push)
+           ========================================================================= */}
+        <Surface
+          variant="elevated"
+          padding="lg"
+          className="border border-[var(--color-border-light)] shadow-[var(--shadow-soft)] space-y-6 transition-all"
+        >
+          {/* Section Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--color-border-light)] pb-4">
+            <div className="flex items-start sm:items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] flex items-center justify-center text-[var(--color-primary)] shrink-0 shadow-2xs">
+                <Bell className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <div className="space-y-0.5">
+                <h2 className="text-lg sm:text-xl font-serif font-bold text-[var(--color-text)]">
+                  Device Push Notifications
+                </h2>
+                <p className="text-xs sm:text-sm font-serif text-[var(--color-text-secondary)]">
+                  Receive real browser and Android notification panel updates from Starlit Letters
+                </p>
+              </div>
+            </div>
+
+            {/* Notification Status Badge */}
+            <div className="shrink-0">
+              {!pushSupported ? (
+                <Badge variant="neutral" size="md" className="font-serif">
+                  Unsupported Browser
+                </Badge>
+              ) : permissionState === 'denied' ? (
+                <Badge variant="destructive" size="md" className="font-serif">
+                  Permission Blocked
+                </Badge>
+              ) : permissionState === 'granted' && activeToken ? (
+                <Badge variant="success" size="md" className="font-serif">
+                  Notifications Enabled
+                </Badge>
+              ) : (
+                <Badge variant="neutral" size="md" className="font-serif">
+                  Notifications Disabled
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          {/* Feedback banner */}
+          {pushFeedback && (
+            <div
+              className={`flex items-start gap-2.5 p-3.5 rounded-xl border text-xs font-serif leading-relaxed ${
+                pushFeedback.type === 'success'
+                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-300'
+                  : 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400'
+              }`}
+            >
+              {pushFeedback.type === 'success' ? (
+                <Check className="h-4 w-4 shrink-0 mt-0.5" />
+              ) : (
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+              )}
+              <div className="space-y-1 flex-1">
+                <p>{pushFeedback.message}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Controls & Configuration Details */}
+          <div className="space-y-4">
+            <div className="p-4 sm:p-5 rounded-2xl bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <h3 className="font-serif font-bold text-sm text-[var(--color-text)]">
+                  Push Notification Status
+                </h3>
+                <p className="text-xs text-[var(--color-text-secondary)] font-serif max-w-lg leading-relaxed">
+                  {permissionState === 'granted' && activeToken
+                    ? 'Device push notifications are active. You will receive notifications even when the app is closed.'
+                    : permissionState === 'denied'
+                    ? 'Notifications are blocked in your browser settings. To enable them, allow notification permission for this site in your browser.'
+                    : 'Enable push notifications to receive real browser and Android notification tray alerts.'}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                {permissionState === 'granted' && activeToken && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSendTestPush}
+                    leftIcon={<Send className="h-3.5 w-3.5" />}
+                    className="font-serif text-xs min-h-[38px]"
+                  >
+                    Send Test Push
+                  </Button>
+                )}
+
+                <Button
+                  variant={permissionState === 'granted' && activeToken ? 'outline' : 'primary'}
+                  size="sm"
+                  onClick={handleToggleNotifications}
+                  disabled={isPushLoading || !pushSupported || !currentUser}
+                  leftIcon={
+                    isPushLoading ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : permissionState === 'granted' && activeToken ? (
+                      <BellOff className="h-3.5 w-3.5" />
+                    ) : (
+                      <Bell className="h-3.5 w-3.5" />
+                    )
+                  }
+                  className="font-serif text-xs min-h-[38px]"
+                >
+                  {isPushLoading
+                    ? 'Updating...'
+                    : permissionState === 'granted' && activeToken
+                    ? 'Disable Notifications'
+                    : 'Enable Notifications'}
+                </Button>
+              </div>
+            </div>
+
+            {/* VAPID Key Setup notice if missing */}
+            {!vapidConfigured && (
+              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-900 dark:text-amber-200 font-serif space-y-2">
+                <div className="flex items-center gap-2 font-semibold">
+                  <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <span>Firebase Web Push (VAPID) Key Configuration</span>
+                </div>
+                <p className="leading-relaxed">
+                  To establish real FCM Web Push subscription tokens, a Web Push certificate (VAPID Key) from your Firebase Console is required.
+                </p>
+                <div className="text-[11px] space-y-1 bg-amber-500/5 p-2.5 rounded-lg border border-amber-500/15">
+                  <p className="font-semibold">Where to obtain your VAPID Key:</p>
+                  <p>1. Open <strong className="font-sans">Firebase Console</strong> &rarr; <strong className="font-sans">Project Settings</strong> &rarr; <strong className="font-sans">Cloud Messaging</strong>.</p>
+                  <p>2. Scroll to <strong className="font-sans">Web configuration</strong> &rarr; <strong className="font-sans">Web Push certificates</strong>.</p>
+                  <p>3. Click <strong className="font-sans">Generate key pair</strong> (or copy your existing Key pair string).</p>
+                  <p>4. Set <code className="font-mono bg-amber-500/20 px-1 py-0.5 rounded">VITE_FIREBASE_VAPID_KEY=YOUR_KEY</code> in your environment.</p>
+                </div>
+              </div>
+            )}
+
+            {/* Browser Permission Blocked Guidance */}
+            {permissionState === 'denied' && (
+              <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/25 text-xs text-rose-800 dark:text-rose-300 font-serif space-y-1.5">
+                <div className="flex items-center gap-2 font-semibold">
+                  <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400 shrink-0" />
+                  <span>How to Unblock in Chrome / Android</span>
+                </div>
+                <p className="leading-relaxed">
+                  Tap the padlock or site settings icon in your browser address bar &rarr; choose <strong>Permissions</strong> &rarr; <strong>Notifications</strong> &rarr; set to <strong>Allow</strong>. Then return here and tap Enable Notifications.
+                </p>
+              </div>
+            )}
+
+            {/* Guest notice */}
+            {!currentUser && (
+              <div className="p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-light)] text-xs text-[var(--color-text-secondary)] font-serif space-y-1">
+                <div className="flex items-center gap-1.5 font-semibold text-[var(--color-text)]">
+                  <User className="h-3.5 w-3.5 text-[var(--color-primary)] shrink-0" />
+                  <span>Authentication Required</span>
+                </div>
+                <p className="leading-relaxed">
+                  Push notification tokens are securely associated with your authenticated Firebase account ID. Please sign in above to register this device.
+                </p>
+              </div>
+            )}
+          </div>
+        </Surface>
+      </div>
     </Container>
   );
 }
+
 

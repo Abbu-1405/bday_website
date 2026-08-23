@@ -1,4 +1,10 @@
 import { Note365 } from '../types';
+import { DAYS_001_060_DATA } from './notes365Days001_060Data';
+import { DAYS_061_120_DATA } from './notes365Days061_120Data';
+import { DAYS_121_180_DATA } from './notes365Days121_180Data';
+import { DAYS_181_240_DATA } from './notes365Days181_240Data';
+import { DAYS_241_300_DATA } from './notes365Days241_300Data';
+import { DAYS_301_365_DATA } from './notes365Days301_365Data';
 
 /**
  * Utility helper to format YYYY-MM-DD to "D MMMM YYYY" (e.g. "27 September 2026")
@@ -190,6 +196,14 @@ const CONTENT_TEMPLATES = [
 export function generate365Notes(): Note365[] {
   const notes: Note365[] = [];
 
+  // Map Days 001-060, 061-120, 121-180, 181-240, and 241-300 by exact index
+  const day001_060_map = new Map(DAYS_001_060_DATA.map((d) => [d.dayIndex, d]));
+  const day061_120_map = new Map(DAYS_061_120_DATA.map((d) => [d.dayIndex, d]));
+  const day121_180_map = new Map(DAYS_121_180_DATA.map((d) => [d.dayIndex, d]));
+  const day181_240_map = new Map(DAYS_181_240_DATA.map((d) => [d.dayIndex, d]));
+  const day241_300_map = new Map(DAYS_241_300_DATA.map((d) => [d.dayIndex, d]));
+  const day301_365_map = new Map(DAYS_301_365_DATA.map((d) => [d.dayIndex, d]));
+
   for (let i = 0; i < 365; i++) {
     const dayIndex = i + 1;
     // Base date: 2026-09-27
@@ -200,16 +214,102 @@ export function generate365Notes(): Note365[] {
     const dateStr = `${year}-${month}-${day}`;
     const displayDate = formatCalendarDate(dateStr);
 
+    const day001_060 = day001_060_map.get(dayIndex);
+    const day061_120 = day061_120_map.get(dayIndex);
+    const day121_180 = day121_180_map.get(dayIndex);
+    const day181_240 = day181_240_map.get(dayIndex);
+    const day241_300 = day241_300_map.get(dayIndex);
+    const day301_365 = day301_365_map.get(dayIndex);
+
+    let title: string;
+    let preview: string;
+    let content: string;
+    let category: string | undefined;
+
+    if (day001_060) {
+      // Days 001 - 060: Exact content and title from master document
+      title = day001_060.title;
+      content = day001_060.content;
+      category = day001_060.category;
+      
+      // Clean, faithful preview from first paragraph/line
+      const firstLine = day001_060.content
+        .split('\n')
+        .map((l) => l.trim())
+        .filter(Boolean)[0] || day001_060.title;
+      preview = firstLine.length > 110 ? firstLine.slice(0, 107) + '...' : firstLine;
+    } else if (day061_120) {
+      // Days 061 - 120: Exact content and title from master document
+      title = day061_120.title;
+      content = day061_120.content;
+      category = day061_120.category;
+
+      // Clean, faithful preview from first paragraph/line
+      const firstLine = day061_120.content
+        .split('\n')
+        .map((l) => l.trim())
+        .filter(Boolean)[0] || day061_120.title;
+      preview = firstLine.length > 110 ? firstLine.slice(0, 107) + '...' : firstLine;
+    } else if (day121_180) {
+      // Days 121 - 180: Exact content and title from master document
+      title = day121_180.title;
+      content = day121_180.content;
+      category = day121_180.category;
+
+      // Clean, faithful preview from first paragraph/line
+      const firstLine = day121_180.content
+        .split('\n')
+        .map((l) => l.trim())
+        .filter(Boolean)[0] || day121_180.title;
+      preview = firstLine.length > 110 ? firstLine.slice(0, 107) + '...' : firstLine;
+    } else if (day181_240) {
+      // Days 181 - 240: Exact content and title from master document
+      title = day181_240.title;
+      content = day181_240.content;
+      category = day181_240.category;
+
+      // Clean, faithful preview from first paragraph/line
+      const firstLine = day181_240.content
+        .split('\n')
+        .map((l) => l.trim())
+        .filter(Boolean)[0] || day181_240.title;
+      preview = firstLine.length > 110 ? firstLine.slice(0, 107) + '...' : firstLine;
+    } else if (day241_300) {
+      // Days 241 - 300: Exact content and title from master document
+      title = day241_300.title;
+      content = day241_300.content;
+      category = day241_300.category;
+
+      // Clean, faithful preview from first paragraph/line
+      const firstLine = day241_300.content
+        .split('\n')
+        .map((l) => l.trim())
+        .filter(Boolean)[0] || day241_300.title;
+      preview = firstLine.length > 110 ? firstLine.slice(0, 107) + '...' : firstLine;
+    } else if (day301_365) {
+      // Days 301 - 365: Exact content and title from master document
+      title = day301_365.title;
+      content = day301_365.content;
+      category = day301_365.category;
+
+      // Clean, faithful preview from first paragraph/line
+      const firstLine = day301_365.content
+        .split('\n')
+        .map((l) => l.trim())
+        .filter(Boolean)[0] || day301_365.title;
+      preview = firstLine.length > 110 ? firstLine.slice(0, 107) + '...' : firstLine;
+    } else {
+      const special = SPECIAL_NOTES_MAP[dayIndex];
+      const titleIndex = (dayIndex * 7 + 3) % TITLE_TEMPLATES.length;
+      const previewIndex = (dayIndex * 11 + 5) % PREVIEW_TEMPLATES.length;
+      const contentIndex = (dayIndex * 13 + 2) % CONTENT_TEMPLATES.length;
+
+      title = special?.title ?? `Day ${dayIndex}: ${TITLE_TEMPLATES[titleIndex]}`;
+      preview = special?.preview ?? PREVIEW_TEMPLATES[previewIndex];
+      content = special?.content ?? `${CONTENT_TEMPLATES[contentIndex]} (Note #${dayIndex} for ${displayDate})`;
+    }
+
     const special = SPECIAL_NOTES_MAP[dayIndex];
-
-    const titleIndex = (dayIndex * 7 + 3) % TITLE_TEMPLATES.length;
-    const previewIndex = (dayIndex * 11 + 5) % PREVIEW_TEMPLATES.length;
-    const contentIndex = (dayIndex * 13 + 2) % CONTENT_TEMPLATES.length;
-
-    const title = special?.title ?? `Day ${dayIndex}: ${TITLE_TEMPLATES[titleIndex]}`;
-    const preview = special?.preview ?? PREVIEW_TEMPLATES[previewIndex];
-    const content = special?.content ?? `${CONTENT_TEMPLATES[contentIndex]} (Note #${dayIndex} for ${displayDate})`;
-
     const mediaItems = special?.mediaItems ?? [];
     const media = special?.media ?? (mediaItems.length > 0 ? mediaItems[0] : { type: 'none' });
 
@@ -221,6 +321,7 @@ export function generate365Notes(): Note365[] {
       title,
       preview,
       content,
+      category,
       media,
       mediaItems,
       isRead: special?.isRead ?? false,

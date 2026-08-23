@@ -149,7 +149,7 @@ export const VintageOpenWhenDetailModal: React.FC<VintageOpenWhenDetailModalProp
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-serif text-[#5C4A42] hover:text-[#7A2E3B] transition-colors py-1 px-2 rounded hover:bg-[#F2E8DC]/60"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-serif text-[#5C4A42] hover:text-[#7A2E3B] transition-colors py-1.5 px-2.5 rounded hover:bg-[#F2E8DC]/60 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7A2E3B]"
           >
             <ArrowLeft className="h-4 w-4 text-[#7A2E3B]" />
             <span>Return to Archive</span>
@@ -163,7 +163,7 @@ export const VintageOpenWhenDetailModal: React.FC<VintageOpenWhenDetailModalProp
               aria-label="Previous letter"
               title="Previous letter"
               className={cn(
-                'p-1.5 rounded border text-xs font-serif transition-colors',
+                'p-2 rounded border text-xs font-serif transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7A2E3B]',
                 hasPrev
                   ? 'border-[rgba(138,110,89,0.35)] text-[#5C4A42] hover:bg-[#F2E8DC] hover:text-[#7A2E3B]'
                   : 'border-[rgba(138,110,89,0.15)] text-[#B09D90] cursor-not-allowed opacity-50'
@@ -179,7 +179,7 @@ export const VintageOpenWhenDetailModal: React.FC<VintageOpenWhenDetailModalProp
               aria-label="Next letter"
               title="Next letter"
               className={cn(
-                'p-1.5 rounded border text-xs font-serif transition-colors',
+                'p-2 rounded border text-xs font-serif transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7A2E3B]',
                 hasNext
                   ? 'border-[rgba(138,110,89,0.35)] text-[#5C4A42] hover:bg-[#F2E8DC] hover:text-[#7A2E3B]'
                   : 'border-[rgba(138,110,89,0.15)] text-[#B09D90] cursor-not-allowed opacity-50'
@@ -191,7 +191,7 @@ export const VintageOpenWhenDetailModal: React.FC<VintageOpenWhenDetailModalProp
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 ml-1 rounded-full text-[#7A6253] hover:text-[#3B2A20] hover:bg-[#F2E8DC] transition-colors"
+              className="p-2 ml-1 rounded-full text-[#7A6253] hover:text-[#3B2A20] hover:bg-[#F2E8DC] transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7A2E3B]"
               aria-label="Close letter"
               title="Close letter"
             >
@@ -262,7 +262,7 @@ export const VintageOpenWhenDetailModal: React.FC<VintageOpenWhenDetailModalProp
               onClick={onPrevLetter}
               disabled={!hasPrev}
               className={cn(
-                'inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded border flex-1 sm:flex-initial transition-colors',
+                'inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded border flex-1 sm:flex-initial transition-colors touch-manipulation min-h-[38px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7A2E3B]',
                 hasPrev
                   ? 'border-[rgba(138,110,89,0.35)] text-[#5C4A42] hover:bg-[#F2E8DC] hover:text-[#7A2E3B]'
                   : 'border-[rgba(138,110,89,0.15)] text-[#B09D90] cursor-not-allowed opacity-50'
@@ -277,7 +277,7 @@ export const VintageOpenWhenDetailModal: React.FC<VintageOpenWhenDetailModalProp
               onClick={onNextLetter}
               disabled={!hasNext}
               className={cn(
-                'inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded border flex-1 sm:flex-initial transition-colors',
+                'inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded border flex-1 sm:flex-initial transition-colors touch-manipulation min-h-[38px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7A2E3B]',
                 hasNext
                   ? 'border-[rgba(138,110,89,0.35)] text-[#5C4A42] hover:bg-[#F2E8DC] hover:text-[#7A2E3B]'
                   : 'border-[rgba(138,110,89,0.15)] text-[#B09D90] cursor-not-allowed opacity-50'
@@ -291,7 +291,7 @@ export const VintageOpenWhenDetailModal: React.FC<VintageOpenWhenDetailModalProp
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex items-center justify-center px-4 py-1.5 rounded text-xs font-serif text-[#6B5547] hover:text-[#7A2E3B] hover:bg-[#F2E8DC]/80 transition-colors w-full sm:w-auto"
+            className="inline-flex items-center justify-center px-4 py-2 rounded text-xs font-serif text-[#6B5547] hover:text-[#7A2E3B] hover:bg-[#F2E8DC]/80 transition-colors w-full sm:w-auto touch-manipulation min-h-[38px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7A2E3B]"
           >
             Close Letter
           </button>

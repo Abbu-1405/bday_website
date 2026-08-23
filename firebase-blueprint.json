@@ -218,6 +218,148 @@
         "aspectRatio",
         "cameraFacing"
       ]
+    },
+    "BtsActivity": {
+      "title": "Behind The Scenes Activity Event",
+      "description": "Activity event recorded when user interacts with Behind The Scenes content",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "ID of the authenticated user who performed the BTS interaction"
+        },
+        "eventType": {
+          "type": "string",
+          "enum": [
+            "bts_page_open",
+            "bts_item_open",
+            "bts_video_play",
+            "bts_audio_play",
+            "bts_random",
+            "bts_html_open_external"
+          ],
+          "description": "BTS interaction event type identifier"
+        },
+        "itemId": {
+          "type": "string",
+          "description": "Identifier of the BTS item or view interacted with"
+        },
+        "itemTitle": {
+          "type": "string",
+          "description": "Title of the BTS item"
+        },
+        "itemType": {
+          "type": "string",
+          "enum": ["image", "video", "audio", "pdf", "html"],
+          "description": "Media type of the BTS item"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the event occurred"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Non-sensitive event metadata"
+        }
+      },
+      "required": [
+        "userId",
+        "eventType",
+        "itemId"
+      ]
+    },
+    "Doodle": {
+      "title": "User Doodle Drawing",
+      "description": "Handmade drawing created by user in What Am I To You or Your Reflections",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique doodle identifier"
+        },
+        "userId": {
+          "type": "string",
+          "description": "User identifier who created the doodle"
+        },
+        "section": {
+          "type": "string",
+          "enum": ["what-am-i-to-you", "your-reflections"],
+          "description": "Section where the doodle was created"
+        },
+        "title": {
+          "type": "string",
+          "description": "Optional title for the drawing"
+        },
+        "strokes": {
+          "type": "array",
+          "description": "Array of stroke points and styling"
+        },
+        "thumbnailDataUrl": {
+          "type": "string",
+          "description": "Transparent preview image representation"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp when the doodle was created"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the doodle was last updated"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "section"
+      ]
+    },
+    "NotificationToken": {
+      "title": "FCM Notification Token",
+      "description": "Firebase Cloud Messaging Web Push registration token for device notifications",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique token document identifier"
+        },
+        "uid": {
+          "type": "string",
+          "description": "Authenticated Firebase user ID owning the token"
+        },
+        "token": {
+          "type": "string",
+          "description": "Full FCM Web Push registration token"
+        },
+        "platform": {
+          "type": "string",
+          "description": "Client operating system / device platform"
+        },
+        "browser": {
+          "type": "string",
+          "description": "Browser client name and version"
+        },
+        "userAgent": {
+          "type": "string",
+          "description": "Browser User-Agent string"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp when token was registered"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp when token was refreshed or verified"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether device notifications are currently enabled for this token"
+        }
+      },
+      "required": [
+        "uid",
+        "token",
+        "enabled"
+      ]
     }
   },
   "firestore": {
@@ -229,6 +371,14 @@
       "schema": "Activity",
       "description": "Collection of activity events recorded by a specific user"
     },
+    "/users/{userId}/btsActivity/{activityId}": {
+      "schema": "BtsActivity",
+      "description": "Collection of Behind The Scenes activity records for a specific user"
+    },
+    "/users/{userId}/doodles/{doodleId}": {
+      "schema": "Doodle",
+      "description": "Collection of hand-drawn doodles created by a specific user"
+    },
     "/users/{userId}/feelings/{feelingId}": {
       "schema": "Feeling",
       "description": "Collection of feelings written by a specific user"
@@ -236,6 +386,10 @@
     "/users/{userId}/letters/{letterId}": {
       "schema": "Letter",
       "description": "Collection of letters written by a specific user"
+    },
+    "/users/{userId}/notificationTokens/{tokenId}": {
+      "schema": "NotificationToken",
+      "description": "Private collection of FCM Web Push device notification tokens for a specific user"
     },
     "/users/{userId}/photoBooth/{photoId}": {
       "schema": "PhotoBoothMemory",

@@ -232,7 +232,7 @@ export default function Home() {
             {heroTitle}
           </h1>
 
-          <p className={cn(
+          <div className={cn(
             "text-xs sm:text-sm text-[var(--color-text-secondary)] italic font-serif leading-relaxed flex items-center justify-center gap-1.5 flex-wrap",
             isLetterArchive && "text-[#5C4A42]"
           )}>
@@ -242,7 +242,7 @@ export default function Home() {
               label="Examine subtle starlit sparkle"
               className="inline-flex text-[var(--color-accent)] shrink-0"
             />
-          </p>
+          </div>
 
           {/* Statistics Presentation */}
           {currentUser && streak.currentStreak > 0 && (
@@ -322,17 +322,30 @@ export default function Home() {
             {unlockedBadges.length > 0 && (
               <section className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-h3 font-serif text-[var(--color-text)] flex items-center gap-2">
-                    <Award className="h-4 w-4 text-[var(--color-primary)] shrink-0" />
-                    Your Discoveries
-                  </h2>
+                  <div>
+                    {isMidnight && (
+                      <span className="midnight-subtitle text-xs text-[#E2BD78] block -mb-0.5 select-none">
+                        honors & milestones
+                      </span>
+                    )}
+                    <h2 className={cn(
+                      "text-h3 font-serif font-semibold tracking-tight flex items-center gap-2",
+                      isMidnight ? "text-[#F2E4CF]" : "text-[var(--color-text)]"
+                    )}>
+                      <Award className={cn("h-4 w-4 shrink-0", isMidnight ? "text-[#E2BD78]" : "text-[var(--color-primary)]")} />
+                      Your Discoveries
+                    </h2>
+                  </div>
                   <button
                     type="button"
                     onClick={() => {
                       playShimmer();
                       navigate(ROUTES.JOURNEY);
                     }}
-                    className="text-xs text-[var(--color-primary)] hover:underline font-serif cursor-pointer"
+                    className={cn(
+                      "text-xs font-serif hover:underline cursor-pointer",
+                      isMidnight ? "text-[#E2BD78]" : "text-[var(--color-primary)]"
+                    )}
                   >
                     View All Badges →
                   </button>
@@ -344,16 +357,16 @@ export default function Home() {
                       key={b.id}
                       variant="elevated"
                       padding="md"
-                      className="border border-[var(--color-border-light)] flex items-center gap-3"
+                      className="bg-[rgba(13,23,40,0.85)] border border-[rgba(201,155,88,0.25)] shadow-md flex items-center gap-3"
                     >
-                      <div className="p-2 rounded-full bg-[var(--color-surface-secondary)] text-[var(--color-primary)] shrink-0">
+                      <div className="p-2 rounded-full bg-[rgba(16,27,45,0.9)] text-[#E2BD78] border border-[rgba(201,155,88,0.25)] shrink-0">
                         <Award className="h-4 w-4" />
                       </div>
                       <div className="min-w-0">
-                        <h3 className="text-xs font-serif font-bold text-[var(--color-text)] truncate">
+                        <h3 className="text-xs font-serif font-bold text-[#F2E4CF] truncate">
                           {b.title}
                         </h3>
-                        <p className="text-[11px] font-serif text-[var(--color-text-secondary)] truncate">
+                        <p className="text-[11px] font-serif text-[#C2AF99] truncate">
                           {b.description}
                         </p>
                       </div>
@@ -412,17 +425,38 @@ export default function Home() {
           {unlockedBadges.length > 0 && (
             <section className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-h3 font-serif text-[var(--color-text)] flex items-center gap-2">
-                  <Award className="h-4 w-4 text-[var(--color-primary)] shrink-0" />
-                  Your Discoveries
-                </h2>
+                <div>
+                  {isWhimsical && (
+                    <span className="whimsical-subtitle text-xs text-[var(--color-accent-rose)] block -mb-0.5 select-none">
+                      charms & keepsake tokens
+                    </span>
+                  )}
+                  {isLetterArchive && (
+                    <span className="letter-script text-sm text-[#7A2E3B] block -mb-0.5 select-none">
+                      seals & collected folios
+                    </span>
+                  )}
+                  <h2 className={cn(
+                    "text-h3 font-serif font-semibold tracking-tight flex items-center gap-2",
+                    isLetterArchive ? "text-[#3B2A20]" : "text-[var(--color-text)]"
+                  )}>
+                    <Award className={cn(
+                      "h-4 w-4 shrink-0",
+                      isLetterArchive ? "text-[#7A2E3B]" : isWhimsical ? "text-[#D8B86A]" : "text-[var(--color-primary)]"
+                    )} />
+                    Your Discoveries
+                  </h2>
+                </div>
                 <button
                   type="button"
                   onClick={() => {
                     playShimmer();
                     navigate(ROUTES.JOURNEY);
                   }}
-                  className="text-xs text-[var(--color-primary)] hover:underline font-serif cursor-pointer"
+                  className={cn(
+                    "text-xs font-serif hover:underline cursor-pointer",
+                    isLetterArchive ? "text-[#7A2E3B]" : isWhimsical ? "text-[#D8B86A]" : "text-[var(--color-primary)]"
+                  )}
                 >
                   View All Badges →
                 </button>
@@ -434,16 +468,34 @@ export default function Home() {
                     key={b.id}
                     variant="elevated"
                     padding="md"
-                    className="border border-[var(--color-border-light)] flex items-center gap-3"
+                    className={cn(
+                      "flex items-center gap-3 transition-all",
+                      isLetterArchive && "bg-[#FAF5EC] border border-[rgba(138,110,89,0.3)] shadow-[0_3px_12px_rgba(60,42,33,0.05)]",
+                      isWhimsical && "bg-[rgba(16,30,20,0.85)] border border-[rgba(216,184,106,0.2)] shadow-sm",
+                      !isLetterArchive && !isWhimsical && "border border-[var(--color-border-light)]"
+                    )}
                   >
-                    <div className="p-2 rounded-full bg-[var(--color-surface-secondary)] text-[var(--color-primary)] shrink-0">
+                    <div className={cn(
+                      "p-2 rounded-full shrink-0",
+                      isLetterArchive && "bg-[#F2E8DC] border border-[rgba(138,110,89,0.3)] text-[#7A2E3B]",
+                      isWhimsical && "bg-[rgba(20,38,25,0.9)] border border-[rgba(216,184,106,0.25)] text-[#D8B86A]",
+                      !isLetterArchive && !isWhimsical && "bg-[var(--color-surface-secondary)] text-[var(--color-primary)]"
+                    )}>
                       <Award className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
-                      <h3 className="text-xs font-serif font-bold text-[var(--color-text)] truncate">
+                      <h3 className={cn(
+                        "text-xs font-serif font-bold truncate",
+                        isLetterArchive && "text-[#3B2A20]",
+                        isWhimsical && "text-[var(--color-text)]",
+                        !isLetterArchive && !isWhimsical && "text-[var(--color-text)]"
+                      )}>
                         {b.title}
                       </h3>
-                      <p className="text-[11px] font-serif text-[var(--color-text-secondary)] truncate">
+                      <p className={cn(
+                        "text-[11px] font-serif truncate",
+                        isLetterArchive ? "text-[#6B5547]" : "text-[var(--color-text-secondary)]"
+                      )}>
                         {b.description}
                       </p>
                     </div>

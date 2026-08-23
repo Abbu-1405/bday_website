@@ -7,12 +7,12 @@ import {
   Mail,
   FolderKanban,
   Settings as SettingsIcon,
-  ShieldCheck,
   LogOut,
-  Menu,
-  X,
   Info,
   ExternalLink,
+  Film,
+  Pen,
+  Eye,
 } from 'lucide-react';
 import { useAuth } from '../hooks';
 import {
@@ -30,8 +30,12 @@ import { ActivityDetailModal } from '../components/admin/ActivityDetailModal';
 import { AdminFeelingsInbox } from '../components/admin/AdminFeelingsInbox';
 import { AdminLettersInbox } from '../components/admin/AdminLettersInbox';
 import { AdminContentHub } from '../components/admin/content/AdminContentHub';
+import { AdminBtsDashboard } from '../components/admin/bts';
+import { AdminDoodlesDashboard } from '../components/admin/doodles';
+import { AdminNotes365Preview } from '../components/admin/preview';
+import { AdminHeader } from '../components/admin/header';
 
-type AdminTab = 'overview' | 'activity' | 'users' | 'feelings' | 'letters' | 'content' | 'settings';
+type AdminTab = 'overview' | 'activity' | 'bts' | 'doodles' | 'preview' | 'users' | 'feelings' | 'letters' | 'content' | 'settings';
 
 export default function Admin() {
   const { currentUser, userProfile, isAdmin, logout } = useAuth();
@@ -94,67 +98,23 @@ export default function Admin() {
   const navItems: { id: AdminTab; label: string; icon: React.ElementType; badge?: string }[] = [
     { id: 'overview' as AdminTab, label: 'Overview', icon: LayoutDashboard },
     { id: 'activity' as AdminTab, label: 'Activity', icon: Activity },
+    { id: 'bts' as AdminTab, label: 'BTS Activity', icon: Film, badge: 'NEW' },
+    { id: 'doodles' as AdminTab, label: 'Doodles', icon: Pen },
     { id: 'users' as AdminTab, label: 'Users', icon: Users },
     { id: 'feelings' as AdminTab, label: 'Feelings', icon: Heart },
     { id: 'letters' as AdminTab, label: 'Letters', icon: Mail },
     { id: 'content' as AdminTab, label: 'Content', icon: FolderKanban },
+    { id: 'preview' as AdminTab, label: '365 Preview', icon: Eye, badge: 'TEST' },
     { id: 'settings' as AdminTab, label: 'Settings', icon: SettingsIcon },
   ];
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans select-none antialiased">
-      {/* Admin Top Header */}
-      <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-6 py-3.5 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <div>
-            <h1 className="text-sm font-semibold text-slate-100 tracking-tight flex items-center gap-2">
-              Starlit Letters <span className="text-xs text-indigo-400 font-mono">/ Admin</span>
-            </h1>
-            <p className="text-[11px] text-slate-400">Owner Dashboard & System Monitor</p>
-          </div>
-        </div>
-
-        {/* Right Admin Profile & Actions */}
-        <div className="hidden sm:flex items-center space-x-4">
-          <div className="flex items-center space-x-2.5 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/80 text-xs">
-            {currentUser?.photoURL ? (
-              <img
-                src={currentUser.photoURL}
-                alt="Admin"
-                className="w-5 h-5 rounded-full object-cover border border-slate-600"
-              />
-            ) : (
-              <div className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold">
-                A
-              </div>
-            )}
-            <span className="font-medium text-slate-200">{currentUser?.displayName || 'Admin'}</span>
-            <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              AUTHORIZED
-            </span>
-          </div>
-
-          <button
-            onClick={logout}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-950 hover:text-rose-300 text-slate-300 text-xs font-medium border border-slate-700 hover:border-rose-800 transition-colors"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            Sign Out
-          </button>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="sm:hidden p-2 rounded-xl bg-slate-800 text-slate-300 border border-slate-700"
-          aria-label="Toggle navigation menu"
-        >
-          {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
-      </header>
+      {/* Admin Top Header with Dedicated Responsive Layout */}
+      <AdminHeader
+        isMobileMenuOpen={isMobileMenuOpen}
+        onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+      />
 
       {/* Main Admin Workspace Container */}
       <div className="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-4 sm:p-6 gap-6">
@@ -206,6 +166,7 @@ export default function Admin() {
               loading={statsLoading}
               onRefresh={loadData}
               onNavigateToActivity={() => setActiveTab('activity')}
+              onNavigateToBts={() => setActiveTab('bts')}
               onNavigateToFeelings={() => setActiveTab('feelings')}
               onNavigateToLetters={() => setActiveTab('letters')}
             />
@@ -221,6 +182,10 @@ export default function Admin() {
             />
           )}
 
+          {activeTab === 'bts' && <AdminBtsDashboard />}
+
+          {activeTab === 'doodles' && <AdminDoodlesDashboard />}
+
           {activeTab === 'users' && (
             <AdminUsersList users={users} loading={usersLoading} />
           )}
@@ -229,7 +194,13 @@ export default function Admin() {
 
           {activeTab === 'letters' && <AdminLettersInbox />}
 
-          {activeTab === 'content' && <AdminContentHub />}
+          {activeTab === 'content' && (
+            <AdminContentHub onOpen365Preview={() => setActiveTab('preview')} />
+          )}
+
+          {activeTab === 'preview' && (
+            <AdminNotes365Preview onNavigateToContent={() => setActiveTab('content')} />
+          )}
 
           {activeTab === 'settings' && (
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6">

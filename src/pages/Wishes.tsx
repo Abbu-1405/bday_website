@@ -113,48 +113,48 @@ export default function Wishes() {
       <Surface
         variant="elevated"
         padding="md"
-        className="relative overflow-hidden border border-amber-400/20 bg-[#0E1224]/85 text-[#F5EEDC] space-y-3 shadow-xl backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-6"
+        className="relative overflow-hidden border border-[var(--color-border-light)] bg-[var(--color-surface)] text-[var(--color-text)] space-y-3 shadow-md rounded-2xl sm:rounded-3xl p-4 sm:p-6 transition-colors"
       >
         {isWhimsical && <CloverStrip className="absolute top-0 left-0 right-0 -mt-1" />}
 
         {/* Ambient Top Light Beam */}
         <div
           aria-hidden="true"
-          className="absolute -top-10 left-1/4 w-80 h-24 bg-amber-400/10 blur-3xl pointer-events-none"
+          className="absolute -top-10 left-1/4 w-80 h-24 bg-[var(--color-primary)]/10 blur-3xl pointer-events-none"
         />
 
         <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-3 sm:gap-4 pt-0.5 relative z-10">
           <div className="space-y-1.5 sm:space-y-2 text-center sm:text-left max-w-2xl">
             {/* Storybook Pill Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-serif font-medium bg-amber-400/10 text-amber-200 border border-amber-400/30 shadow-xs">
-              <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-300" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-serif font-medium bg-[var(--color-surface-secondary)] text-[var(--color-primary)] border border-[var(--color-border-light)] shadow-xs">
+              <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[var(--color-primary)] shrink-0" />
               <span>Lantern Sanctuary</span>
               <HiddenDiscoveryElement
                 secretId="secret-07"
                 label="Examine starlit wish lotus"
-                className="ml-1 text-amber-300 hover:text-amber-100"
+                className="ml-1 text-[var(--color-primary)] hover:text-[var(--color-accent)]"
               />
             </div>
 
             {/* Storybook Display Title */}
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-serif font-medium text-[#FFF9EB] tracking-tight drop-shadow-md">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-serif font-medium text-[var(--color-text)] tracking-tight drop-shadow-xs">
               Wishes
             </h1>
 
             {/* Storybook Subtitle */}
-            <p className="text-xs sm:text-base text-amber-200/80 font-serif leading-relaxed italic">
+            <p className="text-xs sm:text-base text-[var(--color-text-secondary)] font-serif leading-relaxed italic">
               Twenty glowing sky lanterns carrying quiet hopes into the night. Tap any lantern to reveal the wish within.
             </p>
           </div>
 
           {/* Constellation Progress Tracker & Reset */}
           <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between gap-2.5 sm:gap-3 shrink-0 w-full sm:w-auto pt-1 sm:pt-0">
-            <div className="flex items-center gap-2 sm:gap-2.5 bg-[#151B33]/80 px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-amber-400/25 shadow-xs">
-              <Flame className="h-3.5 w-3.5 text-amber-400" />
-              <span className="text-[11px] sm:text-xs font-serif text-amber-200/90">
-                Collected: <strong className="text-[#FFF9EB] font-bold">{collectedCount} / {totalCount}</strong>
+            <div className="flex items-center gap-2 sm:gap-2.5 bg-[var(--color-surface-secondary)] px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-[var(--color-border-light)] shadow-xs">
+              <Flame className="h-3.5 w-3.5 text-[var(--color-primary)]" />
+              <span className="text-[11px] sm:text-xs font-serif text-[var(--color-text-secondary)]">
+                Collected: <strong className="text-[var(--color-text)] font-bold">{collectedCount} / {totalCount}</strong>
               </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--color-surface)] text-[var(--color-primary)] font-bold border border-[var(--color-border-light)]">
                 {progressPercent}%
               </span>
             </div>
@@ -164,7 +164,7 @@ export default function Wishes() {
                 type="button"
                 id="wishes-reset-button"
                 onClick={handleReset}
-                className="inline-flex items-center gap-1.5 text-xs text-amber-300/70 hover:text-amber-200 font-serif transition-colors cursor-pointer px-2 py-1 rounded-md hover:bg-amber-400/10 touch-manipulation"
+                className="inline-flex items-center gap-1.5 text-xs text-[var(--color-muted)] hover:text-[var(--color-primary)] font-serif transition-colors cursor-pointer px-2.5 py-1 rounded-md hover:bg-[var(--color-surface-secondary)] touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                 title="Reset collected wishes"
               >
                 <RefreshCw className="h-3 w-3" />
@@ -178,7 +178,7 @@ export default function Wishes() {
       {/* 2. Interactive Night Sky Lantern Garden Canvas */}
       <div
         id="wishes-sky-canvas"
-        className="relative w-full min-h-[580px] sm:min-h-[720px] md:min-h-[780px] rounded-2xl sm:rounded-3xl overflow-hidden border border-amber-400/20 shadow-2xl select-none"
+        className="relative w-full min-h-[580px] sm:min-h-[720px] md:min-h-[780px] rounded-2xl sm:rounded-3xl overflow-hidden border border-[var(--color-border-light)] shadow-xl select-none"
       >
         {/* Deep Atmospheric Night Sky Background & Twinkling Stars */}
         <WishesAtmosphere prefersReducedMotion={prefersReducedMotion} />
@@ -193,8 +193,8 @@ export default function Wishes() {
         {/* Empty / Loading Atmosphere State */}
         {wishes.length === 0 && (
           <div className="relative z-10 flex flex-col items-center justify-center min-h-[400px] text-center p-6 space-y-3">
-            <Moon className="w-8 h-8 text-amber-300/70 animate-pulse" />
-            <p className="font-serif text-amber-200/80 italic text-sm sm:text-base">
+            <Moon className="w-8 h-8 text-[var(--color-primary)] animate-pulse" />
+            <p className="font-serif text-[var(--color-text-secondary)] italic text-sm sm:text-base">
               The night breeze is still... the sky lanterns will rise shortly.
             </p>
           </div>

@@ -213,7 +213,7 @@ export const NoteFilterBar: React.FC<NoteFilterBarProps> = ({
                   : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
               )}
             >
-              <CheckCircle className={cn("h-3 w-3", isLetterArchive ? "text-[#4A6342]" : "text-green-600")} />
+              <CheckCircle className={cn("h-3 w-3", isLetterArchive ? "text-[#4A6342]" : "text-[var(--color-success)]")} />
               {isLetterArchive ? 'Opened' : 'Read'}
             </button>
           </div>

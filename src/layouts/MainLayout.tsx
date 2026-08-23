@@ -7,20 +7,30 @@ import {
   AudioButton,
   AchievementCelebrationModal,
   LetterArchiveBackground,
+  VintageInkPot,
+  NotificationPermissionModal,
 } from '../components';
 import { MagicalWandCursor } from '../components/whimsical/MagicalWandCursor';
 import { evaluateBadges } from '../services/badgeService';
+import {
+  syncNotificationTokenOnAuth,
+  setupForegroundMessageListener,
+  shouldPromptNotificationPermission,
+} from '../services/notificationService';
 import { BadgeItem } from '../types/achievements';
-import { useTheme } from '../hooks';
+import { useTheme, useAuth } from '../hooks';
 import letterArchiveCursor from '../assets/icons/Letter-archive.cur';
 
 export const MainLayout: React.FC = () => {
   const location = useLocation();
+  const { currentUser } = useAuth();
   const { theme } = useTheme();
   const isWhimsical = theme === 'whimsical-scrapbook';
   const isMidnight = theme === 'midnight-journal';
   const isLetterArchive = theme === 'letter-archive';
+  const isAdminRoute = location.pathname.startsWith('/admin');
   const [celebrationBadge, setCelebrationBadge] = useState<BadgeItem | null>(null);
+  const [showNotificationPrompt, setShowNotificationPrompt] = useState<boolean>(false);
 
   useEffect(() => {
     // Evaluate badges on mount and route change
@@ -30,8 +40,38 @@ export const MainLayout: React.FC = () => {
     }
   }, [location.pathname]);
 
+  // Sync notification token on auth and setup foreground message listener
+  useEffect(() => {
+    if (currentUser) {
+      syncNotificationTokenOnAuth(currentUser);
+
+      // Check if we should respectfully prompt the user for notifications
+      if (shouldPromptNotificationPermission(currentUser)) {
+        // Wait 3.5 seconds after page load so it's unobtrusive
+        const timer = setTimeout(() => {
+          setShowNotificationPrompt(true);
+        }, 3500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    // Setup foreground message listener for active tab
+    const unsubscribe = setupForegroundMessageListener((payload) => {
+      console.log('[PUSH] Received in-app foreground notification:', payload);
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text)] relative pb-32 sm:pb-36 selection:bg-[var(--color-primary)] selection:text-[var(--color-primary-foreground)]">
+    <div
+      className={`min-h-screen bg-[var(--color-background)] text-[var(--color-text)] relative selection:bg-[var(--color-primary)] selection:text-[var(--color-primary-foreground)] ${
+        !isAdminRoute ? 'pb-32 sm:pb-36' : 'pb-6'
+      }`}
+    >
       {/* Letter Archive Dedicated Scoped Cursor Style */}
       {isLetterArchive && (
         <style>{`
@@ -114,20 +154,27 @@ export const MainLayout: React.FC = () => {
         </div>
       )}
 
-      {/* Top-Right Floating Controls Bar */}
-      <div className="fixed top-4 right-4 z-40 flex items-center gap-2">
-        <FloatingAuthButton className="static" />
-        <AudioButton className="static" />
-        <FloatingThemeButton className="static" />
-      </div>
+      {/* Top-Right Floating Controls Bar (Public pages only - Admin has dedicated header layout) */}
+      {!isAdminRoute && (
+        <div className="fixed top-4 right-4 z-40 flex items-center gap-2">
+          <FloatingAuthButton className="static" />
+          <AudioButton className="static" />
+          <FloatingThemeButton className="static" />
+        </div>
+      )}
 
       <main className="relative z-10">
         <Outlet />
       </main>
-      <FloatingNavigation />
+      {!isAdminRoute && <FloatingNavigation />}
+      {!isAdminRoute && <VintageInkPot />}
       <AchievementCelebrationModal
         badge={celebrationBadge}
         onClose={() => setCelebrationBadge(null)}
+      />
+      <NotificationPermissionModal
+        isOpen={showNotificationPrompt}
+        onClose={() => setShowNotificationPrompt(false)}
       />
       <MagicalWandCursor />
     </div>

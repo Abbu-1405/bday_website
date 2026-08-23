@@ -1257,5 +1257,614 @@
   }
 }
 
+/* =========================================================================
+   LETTER ARCHIVE — SECTION SPECIFIC PALETTE OVERRIDES
+   (Secret Vault, Your Reflections, What Am I To You)
+   ========================================================================= */
+
+/* --- 1. SECRET VAULT (Letter Archive) --- */
+[data-theme="letter-archive"] .vault-canvas,
+.letter-archive-theme .vault-canvas {
+  background: radial-gradient(circle at 50% 10%, #FAF6F0 0%, #F7F2EB 50%, #EDE4DC 100%) !important;
+  color: var(--letter-text, #2C221E) !important;
+}
+
+[data-theme="letter-archive"] .vault-surface,
+.letter-archive-theme .vault-surface {
+  background-color: var(--letter-paper, #FAF6F0) !important;
+  border: 1px solid var(--letter-border, rgba(138, 110, 89, 0.22)) !important;
+  box-shadow: 0 8px 30px rgba(60, 42, 33, 0.08) !important;
+}
+
+[data-theme="letter-archive"] .vault-card-locked,
+.letter-archive-theme .vault-card-locked {
+  background: linear-gradient(180deg, #FAF6F0 0%, #F3ECE2 100%) !important;
+  border: 1px solid var(--letter-border, rgba(138, 110, 89, 0.22)) !important;
+  box-shadow: 0 4px 16px rgba(60, 42, 33, 0.06) !important;
+  color: var(--letter-text, #2C221E) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-theme="letter-archive"] .vault-card-locked:hover,
+  .letter-archive-theme .vault-card-locked:hover {
+    border-color: var(--letter-border-gold, rgba(194, 147, 77, 0.50)) !important;
+    box-shadow: 0 10px 24px rgba(60, 42, 33, 0.12), 0 0 0 1px rgba(194, 147, 77, 0.25) !important;
+  }
+}
+
+[data-theme="letter-archive"] .vault-card-unlocked,
+.letter-archive-theme .vault-card-unlocked {
+  background: linear-gradient(180deg, #FFFDF9 0%, #FAF6F0 100%) !important;
+  border: 1px solid var(--letter-border-gold, rgba(194, 147, 77, 0.40)) !important;
+  box-shadow: 0 6px 22px rgba(122, 46, 59, 0.08) !important;
+  color: var(--letter-text, #2C221E) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-theme="letter-archive"] .vault-card-unlocked:hover,
+  .letter-archive-theme .vault-card-unlocked:hover {
+    border-color: var(--letter-accent-gold, #C2934D) !important;
+    box-shadow: 0 12px 30px rgba(122, 46, 59, 0.14), 0 0 0 1px rgba(194, 147, 77, 0.35) !important;
+  }
+}
+
+[data-theme="letter-archive"] .vault-wax-seal,
+.letter-archive-theme .vault-wax-seal {
+  background: linear-gradient(135deg, var(--letter-burgundy, #7A2E3B) 0%, #63242F 100%) !important;
+  border: 1px solid var(--letter-accent-gold, #C2934D) !important;
+  box-shadow: 0 2px 8px rgba(122, 46, 59, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
+}
+
+[data-theme="letter-archive"] .vault-parchment-document,
+.letter-archive-theme .vault-parchment-document {
+  background-color: var(--letter-paper-elevated, #FFFDF9) !important;
+  color: var(--letter-text, #2C221E) !important;
+  border: 1px solid var(--letter-border-gold, rgba(194, 147, 77, 0.45)) !important;
+  box-shadow: inset 0 2px 8px rgba(60, 42, 33, 0.04), 0 16px 40px rgba(60, 42, 33, 0.2) !important;
+}
+
+[data-theme="letter-archive"] .vault-canvas h1,
+[data-theme="letter-archive"] .vault-canvas h2,
+[data-theme="letter-archive"] .vault-canvas h3,
+.letter-archive-theme .vault-canvas h1,
+.letter-archive-theme .vault-canvas h2,
+.letter-archive-theme .vault-canvas h3 {
+  color: var(--letter-text, #2C221E) !important;
+}
+
+[data-theme="letter-archive"] .vault-canvas p,
+.letter-archive-theme .vault-canvas p {
+  color: var(--letter-text-secondary, #5C4A42) !important;
+}
+
+[data-theme="letter-archive"] .vault-canvas .text-\[\#F0E5CF\],
+.letter-archive-theme .vault-canvas .text-\[\#F0E5CF\] {
+  color: var(--letter-text, #2C221E) !important;
+}
+
+[data-theme="letter-archive"] .vault-canvas .text-\[\#E7D7B8\],
+.letter-archive-theme .vault-canvas .text-\[\#E7D7B8\] {
+  color: var(--letter-text, #2C221E) !important;
+}
+
+[data-theme="letter-archive"] .vault-canvas .text-\[\#A99E8B\],
+.letter-archive-theme .vault-canvas .text-\[\#A99E8B\] {
+  color: var(--letter-muted, #8C776C) !important;
+}
+
+[data-theme="letter-archive"] .vault-canvas .text-\[\#B18A4A\],
+.letter-archive-theme .vault-canvas .text-\[\#B18A4A\] {
+  color: var(--letter-accent-gold, #C2934D) !important;
+}
+
+[data-theme="letter-archive"] .vault-canvas .bg-\[\#172235\],
+.letter-archive-theme .vault-canvas .bg-\[\#172235\] {
+  background-color: var(--letter-bg-secondary, #EDE4D8) !important;
+  color: var(--letter-text, #2C221E) !important;
+  border-color: var(--letter-border, rgba(138, 110, 89, 0.25)) !important;
+}
+
+[data-theme="letter-archive"] .vault-canvas .bg-\[\#0B1018\]\/70,
+[data-theme="letter-archive"] .vault-canvas .bg-\[\#0B1018\]\/60,
+[data-theme="letter-archive"] .vault-canvas .bg-\[\#111927\],
+.letter-archive-theme .vault-canvas .bg-\[\#0B1018\]\/70,
+.letter-archive-theme .vault-canvas .bg-\[\#0B1018\]\/60,
+.letter-archive-theme .vault-canvas .bg-\[\#111927\] {
+  background-color: var(--letter-paper-subtle, #F3ECE2) !important;
+  border-color: var(--letter-border, rgba(138, 110, 89, 0.22)) !important;
+}
+
+[data-theme="letter-archive"] .vault-canvas .bg-\[\#55343B\],
+.letter-archive-theme .vault-canvas .bg-\[\#55343B\] {
+  background-color: var(--letter-burgundy, #7A2E3B) !important;
+  color: var(--letter-paper, #FAF6F0) !important;
+  border-color: var(--letter-border-gold, rgba(194, 147, 77, 0.40)) !important;
+}
+
+[data-theme="letter-archive"] .vault-canvas .bg-\[\#55343B\]:hover,
+.letter-archive-theme .vault-canvas .bg-\[\#55343B\]:hover {
+  background-color: var(--letter-burgundy-hover, #63242F) !important;
+}
+
+[data-theme="letter-archive"] .vault-canvas .border-\[\#B18A4A\]\/40,
+[data-theme="letter-archive"] .vault-canvas .border-\[\#B18A4A\]\/50,
+[data-theme="letter-archive"] .vault-canvas .border-\[\#B18A4A\]\/30,
+[data-theme="letter-archive"] .vault-canvas .border-\[\#B18A4A\]\/25,
+[data-theme="letter-archive"] .vault-canvas .border-\[\#B18A4A\]\/20,
+.letter-archive-theme .vault-canvas .border-\[\#B18A4A\]\/40,
+.letter-archive-theme .vault-canvas .border-\[\#B18A4A\]\/50,
+.letter-archive-theme .vault-canvas .border-\[\#B18A4A\]\/30,
+.letter-archive-theme .vault-canvas .border-\[\#B18A4A\]\/25,
+.letter-archive-theme .vault-canvas .border-\[\#B18A4A\]\/20 {
+  border-color: var(--letter-border, rgba(138, 110, 89, 0.22)) !important;
+}
+
+
+/* --- 2. YOUR REFLECTIONS (Letter Archive) --- */
+[data-theme="letter-archive"] .reflections-canvas,
+.letter-archive-theme .reflections-canvas {
+  background: radial-gradient(circle at 50% 0%, #FAF6F0 0%, #F7F2EB 50%, #EDE4DC 100%) !important;
+  color: var(--letter-text, #2C221E) !important;
+}
+
+[data-theme="letter-archive"] .reflections-canvas h1,
+[data-theme="letter-archive"] .reflections-canvas h2,
+[data-theme="letter-archive"] .reflections-canvas h3,
+.letter-archive-theme .reflections-canvas h1,
+.letter-archive-theme .reflections-canvas h2,
+.letter-archive-theme .reflections-canvas h3 {
+  color: var(--letter-text, #2C221E) !important;
+}
+
+[data-theme="letter-archive"] .reflections-canvas p,
+.letter-archive-theme .reflections-canvas p {
+  color: var(--letter-text-secondary, #5C4A42) !important;
+}
+
+[data-theme="letter-archive"] .reflections-canvas header[style],
+[data-theme="letter-archive"] .reflections-canvas div[style*="background-color: rgb(21, 28, 46)"],
+[data-theme="letter-archive"] .reflections-canvas div[style*="background-color: #151c2e"],
+[data-theme="letter-archive"] .reflections-canvas div[style*="backgroundColor: '#151c2e'"],
+[data-theme="letter-archive"] .reflections-canvas section[style*="background-color: rgb(21, 28, 46)"],
+[data-theme="letter-archive"] .reflections-canvas section[style*="background-color: #151c2e"],
+.letter-archive-theme .reflections-canvas section[style*="background-color: #151c2e"] {
+  background-color: var(--letter-paper, #FAF6F0) !important;
+  border-color: var(--letter-border, rgba(138, 110, 89, 0.22)) !important;
+  box-shadow: 0 8px 24px rgba(60, 42, 33, 0.07) !important;
+}
+
+[data-theme="letter-archive"] .reflections-canvas div[role="tablist"],
+.letter-archive-theme .reflections-canvas div[role="tablist"],
+[data-theme="letter-archive"] .reflections-canvas .bg-\[\#0f1424\],
+.letter-archive-theme .reflections-canvas .bg-\[\#0f1424\] {
+  background-color: var(--letter-bg-secondary, #EDE4D8) !important;
+  border-color: var(--letter-border, rgba(138, 110, 89, 0.25)) !important;
+}
+
+[data-theme="letter-archive"] .reflections-canvas button[style*="background-color: rgb(110, 62, 66)"],
+[data-theme="letter-archive"] .reflections-canvas button[style*="background-color: #6E3E42"],
+[data-theme="letter-archive"] .reflections-canvas button[style*="backgroundColor: '#6E3E42'"],
+.letter-archive-theme .reflections-canvas button[style*="background-color: #6E3E42"] {
+  background-color: var(--letter-burgundy, #7A2E3B) !important;
+  color: var(--letter-paper, #FAF6F0) !important;
+  border-color: var(--letter-border-gold, rgba(194, 147, 77, 0.40)) !important;
+}
+
+[data-theme="letter-archive"] .reflections-canvas button[style*="background-color: rgb(110, 62, 66)"]:hover,
+[data-theme="letter-archive"] .reflections-canvas button[style*="background-color: #6E3E42"]:hover,
+.letter-archive-theme .reflections-canvas button[style*="background-color: #6E3E42"]:hover {
+  background-color: var(--letter-burgundy-hover, #63242F) !important;
+}
+
+[data-theme="letter-archive"] .reflections-canvas button[style*="background-color: rgb(21, 28, 46)"],
+[data-theme="letter-archive"] .reflections-canvas button[style*="background-color: #151c2e"],
+[data-theme="letter-archive"] .reflections-canvas button[style*="background-color: rgb(23, 32, 51)"],
+[data-theme="letter-archive"] .reflections-canvas button[style*="background-color: #172033"],
+.letter-archive-theme .reflections-canvas button[style*="background-color: #151c2e"],
+.letter-archive-theme .reflections-canvas button[style*="background-color: #172033"] {
+  background-color: var(--letter-bg-secondary, #EDE4D8) !important;
+  color: var(--letter-text, #2C221E) !important;
+  border-color: var(--letter-border, rgba(138, 110, 89, 0.25)) !important;
+}
+
+[data-theme="letter-archive"] .reflections-canvas button[style*="background-color: rgb(21, 28, 46)"]:hover,
+[data-theme="letter-archive"] .reflections-canvas button[style*="background-color: #151c2e"]:hover,
+[data-theme="letter-archive"] .reflections-canvas button[style*="background-color: rgb(23, 32, 51)"]:hover,
+[data-theme="letter-archive"] .reflections-canvas button[style*="background-color: #172033"]:hover,
+.letter-archive-theme .reflections-canvas button[style*="background-color: #151c2e"]:hover,
+.letter-archive-theme .reflections-canvas button[style*="background-color: #172033"]:hover {
+  background-color: #E2D7C9 !important;
+}
+
+[data-theme="letter-archive"] .reflections-canvas input,
+.letter-archive-theme .reflections-canvas input {
+  background-color: var(--letter-paper, #FAF6F0) !important;
+  color: var(--letter-text, #2C221E) !important;
+  border-color: var(--letter-border, rgba(138, 110, 89, 0.28)) !important;
+}
+
+[data-theme="letter-archive"] .journal-entry-fragment,
+.letter-archive-theme .journal-entry-fragment {
+  background-color: var(--letter-paper, #FAF6F0) !important;
+  border-color: var(--letter-border, rgba(138, 110, 89, 0.25)) !important;
+  color: var(--letter-text, #2C221E) !important;
+  box-shadow: 0 4px 14px rgba(60, 42, 33, 0.07) !important;
+}
+
+[data-theme="letter-archive"] .reading-parchment-page,
+.letter-archive-theme .reading-parchment-page {
+  background-color: var(--letter-paper-elevated, #FFFDF9) !important;
+  color: var(--letter-text, #2C221E) !important;
+  border-color: var(--letter-border-gold, rgba(194, 147, 77, 0.40)) !important;
+  box-shadow: 0 16px 40px rgba(60, 42, 33, 0.18) !important;
+}
+
+[data-theme="letter-archive"] .reflections-canvas *[style*="color: rgb(242, 232, 210)"],
+[data-theme="letter-archive"] .reflections-canvas *[style*="color: #F2E8D2"],
+[data-theme="letter-archive"] .reflections-canvas *[style*="color: rgb(232, 216, 184)"],
+[data-theme="letter-archive"] .reflections-canvas *[style*="color: #E8D8B8"],
+.letter-archive-theme .reflections-canvas *[style*="color: #F2E8D2"],
+.letter-archive-theme .reflections-canvas *[style*="color: #E8D8B8"] {
+  color: var(--letter-text, #2C221E) !important;
+}
+
+[data-theme="letter-archive"] .reflections-canvas *[style*="color: rgb(205, 191, 168)"],
+[data-theme="letter-archive"] .reflections-canvas *[style*="color: #CDBFA8"],
+.letter-archive-theme .reflections-canvas *[style*="color: #CDBFA8"] {
+  color: var(--letter-text-secondary, #5C4A42) !important;
+}
+
+[data-theme="letter-archive"] .reflections-canvas *[style*="color: rgb(159, 146, 127)"],
+[data-theme="letter-archive"] .reflections-canvas *[style*="color: #9F927F"],
+.letter-archive-theme .reflections-canvas *[style*="color: #9F927F"] {
+  color: var(--letter-muted, #8C776C) !important;
+}
+
+[data-theme="letter-archive"] .reflections-canvas *[style*="color: rgb(197, 154, 82)"],
+[data-theme="letter-archive"] .reflections-canvas *[style*="color: #C59A52"],
+.letter-archive-theme .reflections-canvas *[style*="color: #C59A52"] {
+  color: var(--letter-accent-gold, #C2934D) !important;
+}
+
+
+/* --- 3. WHAT AM I TO YOU (Letter Archive) --- */
+[data-theme="letter-archive"] .what-am-i-bg,
+.letter-archive-theme .what-am-i-bg {
+  background: radial-gradient(circle at 50% 12%, rgba(247, 242, 235, 0.9) 0%, rgba(237, 228, 216, 0.95) 45%, #F7F2EB 100%) !important;
+  color: var(--letter-text, #2C221E) !important;
+}
+
+[data-theme="letter-archive"] .what-am-i-bg header[style],
+[data-theme="letter-archive"] .what-am-i-bg section[style],
+[data-theme="letter-archive"] .what-am-i-bg div[role="region"][style],
+.letter-archive-theme .what-am-i-bg header[style],
+.letter-archive-theme .what-am-i-bg section[style],
+.letter-archive-theme .what-am-i-bg div[role="region"][style] {
+  background-color: var(--letter-paper, #FAF6F0) !important;
+  border-color: var(--letter-border, rgba(138, 110, 89, 0.22)) !important;
+  box-shadow: 0 10px 30px rgba(60, 42, 33, 0.08) !important;
+}
+
+[data-theme="letter-archive"] .what-am-i-bg h1,
+[data-theme="letter-archive"] .what-am-i-bg h2,
+[data-theme="letter-archive"] .what-am-i-bg h3,
+.letter-archive-theme .what-am-i-bg h1,
+.letter-archive-theme .what-am-i-bg h2,
+.letter-archive-theme .what-am-i-bg h3 {
+  color: var(--letter-text, #2C221E) !important;
+}
+
+[data-theme="letter-archive"] .what-am-i-bg p,
+.letter-archive-theme .what-am-i-bg p {
+  color: var(--letter-text-secondary, #5C4A42) !important;
+}
+
+[data-theme="letter-archive"] .what-am-i-bg button[style*="background-color: rgb(110, 62, 66)"],
+[data-theme="letter-archive"] .what-am-i-bg button[style*="background-color: #6E3E42"],
+.letter-archive-theme .what-am-i-bg button[style*="background-color: #6E3E42"] {
+  background-color: var(--letter-burgundy, #7A2E3B) !important;
+  color: var(--letter-paper, #FAF6F0) !important;
+  border-color: var(--letter-border-gold, rgba(194, 147, 77, 0.40)) !important;
+}
+
+[data-theme="letter-archive"] .what-am-i-bg button[style*="background-color: rgb(110, 62, 66)"]:hover,
+[data-theme="letter-archive"] .what-am-i-bg button[style*="background-color: #6E3E42"]:hover,
+.letter-archive-theme .what-am-i-bg button[style*="background-color: #6E3E42"]:hover {
+  background-color: var(--letter-burgundy-hover, #63242F) !important;
+}
+
+[data-theme="letter-archive"] .what-am-i-bg button[style*="background-color: rgb(23, 32, 51)"],
+[data-theme="letter-archive"] .what-am-i-bg button[style*="background-color: #172033"],
+.letter-archive-theme .what-am-i-bg button[style*="background-color: #172033"] {
+  background-color: var(--letter-bg-secondary, #EDE4D8) !important;
+  color: var(--letter-text-secondary, #5C4A42) !important;
+  border-color: var(--letter-border, rgba(138, 110, 89, 0.25)) !important;
+}
+
+[data-theme="letter-archive"] .what-am-i-bg button[style*="background-color: rgb(23, 32, 51)"]:hover,
+[data-theme="letter-archive"] .what-am-i-bg button[style*="background-color: #172033"]:hover,
+.letter-archive-theme .what-am-i-bg button[style*="background-color: #172033"]:hover {
+  background-color: #E2D7C9 !important;
+  color: var(--letter-text, #2C221E) !important;
+}
+
+[data-theme="letter-archive"] .what-am-i-bg *[style*="color: rgb(242, 232, 210)"],
+[data-theme="letter-archive"] .what-am-i-bg *[style*="color: #F2E8D2"],
+[data-theme="letter-archive"] .what-am-i-bg *[style*="color: rgb(232, 216, 184)"],
+[data-theme="letter-archive"] .what-am-i-bg *[style*="color: #E8D8B8"],
+.letter-archive-theme .what-am-i-bg *[style*="color: #F2E8D2"],
+.letter-archive-theme .what-am-i-bg *[style*="color: #E8D8B8"] {
+  color: var(--letter-text, #2C221E) !important;
+}
+
+[data-theme="letter-archive"] .what-am-i-bg *[style*="color: rgb(205, 191, 168)"],
+[data-theme="letter-archive"] .what-am-i-bg *[style*="color: #CDBFA8"],
+.letter-archive-theme .what-am-i-bg *[style*="color: #CDBFA8"] {
+  color: var(--letter-text-secondary, #5C4A42) !important;
+}
+
+[data-theme="letter-archive"] .what-am-i-bg *[style*="color: rgb(159, 146, 127)"],
+[data-theme="letter-archive"] .what-am-i-bg *[style*="color: #9F927F"],
+.letter-archive-theme .what-am-i-bg *[style*="color: #9F927F"] {
+  color: var(--letter-muted, #8C776C) !important;
+}
+
+[data-theme="letter-archive"] .what-am-i-bg *[style*="color: rgb(197, 154, 82)"],
+[data-theme="letter-archive"] .what-am-i-bg *[style*="color: #C59A52"],
+.letter-archive-theme .what-am-i-bg *[style*="color: #C59A52"] {
+  color: var(--letter-accent-gold, #C2934D) !important;
+}
+
+[data-theme="letter-archive"] .stationery-parchment-sheet,
+[data-theme="letter-archive"] .stationery-parchment-lines,
+.letter-archive-theme .stationery-parchment-sheet,
+.letter-archive-theme .stationery-parchment-lines {
+  background-color: var(--letter-paper-elevated, #FFFDF9) !important;
+  color: var(--letter-text, #2C221E) !important;
+  border-color: var(--letter-border, rgba(138, 110, 89, 0.28)) !important;
+}
+
+[data-theme="letter-archive"] .animate-ambient-aura,
+.letter-archive-theme .animate-ambient-aura {
+  background-color: rgba(194, 147, 77, 0.08) !important;
+}
+
+
+/* =========================================================================
+   WHIMSICAL SCRAPBOOK — SECTION SPECIFIC PALETTE OVERRIDES
+   (Secret Vault, Your Reflections, What Am I To You)
+   ========================================================================= */
+
+/* --- 1. SECRET VAULT (Whimsical Scrapbook) --- */
+[data-theme="whimsical-scrapbook"] .vault-canvas,
+.whimsical-scrapbook-theme .vault-canvas {
+  background: transparent !important;
+  color: #F7F1DF !important;
+}
+
+[data-theme="whimsical-scrapbook"] .vault-surface,
+.whimsical-scrapbook-theme .vault-surface {
+  background-color: rgba(8, 20, 11, 0.70) !important;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(240, 230, 190, 0.14) !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="whimsical-scrapbook"] .vault-card-locked,
+.whimsical-scrapbook-theme .vault-card-locked {
+  background: rgba(12, 26, 15, 0.65) !important;
+  border: 1px solid rgba(240, 230, 190, 0.12) !important;
+  color: #F7F1DF !important;
+}
+
+[data-theme="whimsical-scrapbook"] .vault-card-unlocked,
+.whimsical-scrapbook-theme .vault-card-unlocked {
+  background: rgba(8, 20, 11, 0.78) !important;
+  border: 1px solid rgba(216, 184, 106, 0.35) !important;
+  color: #F7F1DF !important;
+}
+
+[data-theme="whimsical-scrapbook"] .vault-wax-seal,
+.whimsical-scrapbook-theme .vault-wax-seal {
+  background: linear-gradient(135deg, #2E452C 0%, #1D301C 100%) !important;
+  border: 1px solid #D8B86A !important;
+}
+
+[data-theme="whimsical-scrapbook"] .vault-canvas .bg-\[\#55343B\],
+.whimsical-scrapbook-theme .vault-canvas .bg-\[\#55343B\] {
+  background-color: #2E452C !important;
+  color: #F7F1DF !important;
+  border-color: rgba(216, 184, 106, 0.35) !important;
+}
+
+[data-theme="whimsical-scrapbook"] .vault-canvas .bg-\[\#172235\],
+.whimsical-scrapbook-theme .vault-canvas .bg-\[\#172235\] {
+  background-color: rgba(12, 26, 15, 0.65) !important;
+  color: #F7F1DF !important;
+  border-color: rgba(240, 230, 190, 0.12) !important;
+}
+
+[data-theme="whimsical-scrapbook"] .vault-canvas .bg-\[\#0B1018\]\/70,
+[data-theme="whimsical-scrapbook"] .vault-canvas .bg-\[\#0B1018\]\/60,
+[data-theme="whimsical-scrapbook"] .vault-canvas .bg-\[\#111927\],
+.whimsical-scrapbook-theme .vault-canvas .bg-\[\#0B1018\]\/70,
+.whimsical-scrapbook-theme .vault-canvas .bg-\[\#0B1018\]\/60,
+.whimsical-scrapbook-theme .vault-canvas .bg-\[\#111927\] {
+  background-color: rgba(6, 16, 9, 0.65) !important;
+  border-color: rgba(240, 230, 190, 0.10) !important;
+}
+
+[data-theme="whimsical-scrapbook"] .vault-canvas .text-\[\#B18A4A\],
+.whimsical-scrapbook-theme .vault-canvas .text-\[\#B18A4A\] {
+  color: #D8B86A !important;
+}
+
+[data-theme="whimsical-scrapbook"] .vault-canvas .text-\[\#A99E8B\],
+.whimsical-scrapbook-theme .vault-canvas .text-\[\#A99E8B\] {
+  color: #B8C0AE !important;
+}
+
+[data-theme="whimsical-scrapbook"] .vault-canvas .text-\[\#F0E5CF\],
+[data-theme="whimsical-scrapbook"] .vault-canvas .text-\[\#E7D7B8\],
+.whimsical-scrapbook-theme .vault-canvas .text-\[\#F0E5CF\],
+.whimsical-scrapbook-theme .vault-canvas .text-\[\#E7D7B8\] {
+  color: #F7F1DF !important;
+}
+
+
+/* --- 2. YOUR REFLECTIONS (Whimsical Scrapbook) --- */
+[data-theme="whimsical-scrapbook"] .reflections-canvas,
+.whimsical-scrapbook-theme .reflections-canvas {
+  background: transparent !important;
+  color: #F7F1DF !important;
+}
+
+[data-theme="whimsical-scrapbook"] .reflections-canvas h1,
+[data-theme="whimsical-scrapbook"] .reflections-canvas h2,
+[data-theme="whimsical-scrapbook"] .reflections-canvas h3,
+.whimsical-scrapbook-theme .reflections-canvas h1,
+.whimsical-scrapbook-theme .reflections-canvas h2,
+.whimsical-scrapbook-theme .reflections-canvas h3 {
+  color: #F7F1DF !important;
+}
+
+[data-theme="whimsical-scrapbook"] .reflections-canvas header[style],
+[data-theme="whimsical-scrapbook"] .reflections-canvas section[style*="background-color"],
+[data-theme="whimsical-scrapbook"] .reflections-canvas div[style*="background-color: rgb(21, 28, 46)"],
+[data-theme="whimsical-scrapbook"] .reflections-canvas div[style*="background-color: #151c2e"],
+.whimsical-scrapbook-theme .reflections-canvas section[style*="background-color"],
+.whimsical-scrapbook-theme .reflections-canvas div[style*="background-color: rgb(21, 28, 46)"],
+.whimsical-scrapbook-theme .reflections-canvas div[style*="background-color: #151c2e"] {
+  background-color: rgba(8, 20, 11, 0.70) !important;
+  backdrop-filter: blur(6px);
+  border-color: rgba(240, 230, 190, 0.14) !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="whimsical-scrapbook"] .reflections-canvas button[style*="background-color: rgb(110, 62, 66)"],
+[data-theme="whimsical-scrapbook"] .reflections-canvas button[style*="background-color: #6E3E42"],
+.whimsical-scrapbook-theme .reflections-canvas button[style*="background-color: #6E3E42"] {
+  background-color: #2E452C !important;
+  color: #F7F1DF !important;
+  border-color: rgba(216, 184, 106, 0.35) !important;
+}
+
+[data-theme="whimsical-scrapbook"] .reflections-canvas button[style*="background-color: rgb(21, 28, 46)"],
+[data-theme="whimsical-scrapbook"] .reflections-canvas button[style*="background-color: #151c2e"],
+[data-theme="whimsical-scrapbook"] .reflections-canvas button[style*="background-color: rgb(23, 32, 51)"],
+[data-theme="whimsical-scrapbook"] .reflections-canvas button[style*="background-color: #172033"],
+.whimsical-scrapbook-theme .reflections-canvas button[style*="background-color: #151c2e"],
+.whimsical-scrapbook-theme .reflections-canvas button[style*="background-color: #172033"] {
+  background-color: rgba(12, 26, 15, 0.65) !important;
+  color: #F7F1DF !important;
+  border-color: rgba(240, 230, 190, 0.12) !important;
+}
+
+[data-theme="whimsical-scrapbook"] .reflections-canvas div[role="tablist"],
+[data-theme="whimsical-scrapbook"] .reflections-canvas .bg-\[\#0f1424\],
+.whimsical-scrapbook-theme .reflections-canvas div[role="tablist"],
+.whimsical-scrapbook-theme .reflections-canvas .bg-\[\#0f1424\] {
+  background-color: rgba(6, 16, 9, 0.80) !important;
+  border-color: rgba(240, 230, 190, 0.14) !important;
+}
+
+[data-theme="whimsical-scrapbook"] .reflections-canvas input,
+.whimsical-scrapbook-theme .reflections-canvas input {
+  background-color: rgba(30, 43, 31, 0.65) !important;
+  border-color: rgba(255, 248, 232, 0.12) !important;
+  color: #F7F1DF !important;
+}
+
+[data-theme="whimsical-scrapbook"] .reflections-canvas *[style*="color: rgb(242, 232, 210)"],
+[data-theme="whimsical-scrapbook"] .reflections-canvas *[style*="color: #F2E8D2"],
+[data-theme="whimsical-scrapbook"] .reflections-canvas *[style*="color: rgb(232, 216, 184)"],
+[data-theme="whimsical-scrapbook"] .reflections-canvas *[style*="color: #E8D8B8"],
+.whimsical-scrapbook-theme .reflections-canvas *[style*="color: #F2E8D2"],
+.whimsical-scrapbook-theme .reflections-canvas *[style*="color: #E8D8B8"] {
+  color: #F7F1DF !important;
+}
+
+[data-theme="whimsical-scrapbook"] .reflections-canvas *[style*="color: rgb(205, 191, 168)"],
+[data-theme="whimsical-scrapbook"] .reflections-canvas *[style*="color: #CDBFA8"],
+.whimsical-scrapbook-theme .reflections-canvas *[style*="color: #CDBFA8"] {
+  color: #B8C0AE !important;
+}
+
+[data-theme="whimsical-scrapbook"] .reflections-canvas *[style*="color: rgb(159, 146, 127)"],
+[data-theme="whimsical-scrapbook"] .reflections-canvas *[style*="color: #9F927F"],
+.whimsical-scrapbook-theme .reflections-canvas *[style*="color: #9F927F"] {
+  color: #7F8B78 !important;
+}
+
+[data-theme="whimsical-scrapbook"] .reflections-canvas *[style*="color: rgb(197, 154, 82)"],
+[data-theme="whimsical-scrapbook"] .reflections-canvas *[style*="color: #C59A52"],
+.whimsical-scrapbook-theme .reflections-canvas *[style*="color: #C59A52"] {
+  color: #D8B86A !important;
+}
+
+
+/* --- 3. WHAT AM I TO YOU (Whimsical Scrapbook) --- */
+[data-theme="whimsical-scrapbook"] .what-am-i-bg,
+.whimsical-scrapbook-theme .what-am-i-bg {
+  background: transparent !important;
+  color: #F7F1DF !important;
+}
+
+[data-theme="whimsical-scrapbook"] .what-am-i-bg header[style],
+[data-theme="whimsical-scrapbook"] .what-am-i-bg section[style],
+[data-theme="whimsical-scrapbook"] .what-am-i-bg div[role="region"][style],
+.whimsical-scrapbook-theme .what-am-i-bg header[style],
+.whimsical-scrapbook-theme .what-am-i-bg section[style],
+.whimsical-scrapbook-theme .what-am-i-bg div[role="region"][style] {
+  background-color: rgba(8, 20, 11, 0.70) !important;
+  backdrop-filter: blur(6px);
+  border-color: rgba(240, 230, 190, 0.14) !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="whimsical-scrapbook"] .what-am-i-bg button[style*="background-color: rgb(110, 62, 66)"],
+[data-theme="whimsical-scrapbook"] .what-am-i-bg button[style*="background-color: #6E3E42"],
+.whimsical-scrapbook-theme .what-am-i-bg button[style*="background-color: #6E3E42"] {
+  background-color: #2E452C !important;
+  color: #F7F1DF !important;
+  border-color: rgba(216, 184, 106, 0.35) !important;
+}
+
+[data-theme="whimsical-scrapbook"] .what-am-i-bg button[style*="background-color: rgb(23, 32, 51)"],
+[data-theme="whimsical-scrapbook"] .what-am-i-bg button[style*="background-color: #172033"],
+.whimsical-scrapbook-theme .what-am-i-bg button[style*="background-color: #172033"] {
+  background-color: rgba(12, 26, 15, 0.65) !important;
+  color: #B8C0AE !important;
+  border-color: rgba(240, 230, 190, 0.12) !important;
+}
+
+[data-theme="whimsical-scrapbook"] .what-am-i-bg *[style*="color: rgb(242, 232, 210)"],
+[data-theme="whimsical-scrapbook"] .what-am-i-bg *[style*="color: #F2E8D2"],
+[data-theme="whimsical-scrapbook"] .what-am-i-bg *[style*="color: rgb(232, 216, 184)"],
+[data-theme="whimsical-scrapbook"] .what-am-i-bg *[style*="color: #E8D8B8"],
+.whimsical-scrapbook-theme .what-am-i-bg *[style*="color: #F2E8D2"],
+.whimsical-scrapbook-theme .what-am-i-bg *[style*="color: #E8D8B8"] {
+  color: #F7F1DF !important;
+}
+
+[data-theme="whimsical-scrapbook"] .what-am-i-bg *[style*="color: rgb(205, 191, 168)"],
+[data-theme="whimsical-scrapbook"] .what-am-i-bg *[style*="color: #CDBFA8"],
+.whimsical-scrapbook-theme .what-am-i-bg *[style*="color: #CDBFA8"] {
+  color: #B8C0AE !important;
+}
+
+[data-theme="whimsical-scrapbook"] .what-am-i-bg *[style*="color: rgb(159, 146, 127)"],
+[data-theme="whimsical-scrapbook"] .what-am-i-bg *[style*="color: #9F927F"],
+.whimsical-scrapbook-theme .what-am-i-bg *[style*="color: #9F927F"] {
+  color: #7F8B78 !important;
+}
+
+[data-theme="whimsical-scrapbook"] .what-am-i-bg *[style*="color: rgb(197, 154, 82)"],
+[data-theme="whimsical-scrapbook"] .what-am-i-bg *[style*="color: #C59A52"],
+.whimsical-scrapbook-theme .what-am-i-bg *[style*="color: #C59A52"] {
+  color: #D8B86A !important;
+}
+
+
 
 

@@ -13,6 +13,7 @@ import {
   PlusCircle,
   Loader2,
   PenTool,
+  Pen,
 } from 'lucide-react';
 import { QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
 import { useAuth } from '../hooks';
@@ -25,6 +26,8 @@ import {
 } from '../services/reflectionsService';
 import { ReflectionEntryCard } from '../components/reflections/ReflectionEntryCard';
 import { ReflectionWriter } from '../components/reflections/ReflectionWriter';
+import { DoodleCanvasModal, DoodlesDrawer } from '../components/doodle';
+import { DoodleItem } from '../types/doodle';
 import '../components/reflections/reflections.css';
 
 export default function Reflections() {
@@ -33,6 +36,11 @@ export default function Reflections() {
 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+
+  // Doodle State
+  const [isDoodleModalOpen, setIsDoodleModalOpen] = useState(false);
+  const [isDoodlesDrawerOpen, setIsDoodlesDrawerOpen] = useState(false);
+  const [editingDoodle, setEditingDoodle] = useState<DoodleItem | null>(null);
 
   const handleGoogleLogin = async () => {
     if (isLoggingIn) return;
@@ -251,7 +259,7 @@ export default function Reflections() {
               <button
                 type="button"
                 onClick={() => setShowWriter((prev) => !prev)}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 min-h-[44px] rounded-full text-xs sm:text-sm font-serif font-medium transition-all duration-200 cursor-pointer shadow-md hover:brightness-110"
+                className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 min-h-[44px] rounded-full text-xs sm:text-sm font-serif font-medium transition-all duration-200 cursor-pointer shadow-md hover:brightness-110"
                 style={{
                   backgroundColor: showWriter ? '#6E3E42' : '#172033',
                   color: '#F2E8D2',
@@ -260,6 +268,39 @@ export default function Reflections() {
               >
                 <PenTool className="w-4 h-4 text-[#C59A52]" />
                 <span>{showWriter ? 'Hide Writing Desk' : 'Write in Journal'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingDoodle(null);
+                  setIsDoodleModalOpen(true);
+                }}
+                className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 min-h-[44px] rounded-full text-xs sm:text-sm font-serif font-medium transition-all duration-200 cursor-pointer shadow-md hover:brightness-110"
+                style={{
+                  backgroundColor: '#6E3E42',
+                  color: '#F2E8D2',
+                  border: '1px solid #9F7A3D',
+                }}
+                title="Open doodle canvas"
+              >
+                <Pen className="w-4 h-4 text-[#F2E8D2]" />
+                <span>Doodle</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsDoodlesDrawerOpen(true)}
+                className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 min-h-[44px] rounded-full text-xs sm:text-sm font-serif transition-all duration-200 cursor-pointer hover:brightness-115"
+                style={{
+                  backgroundColor: '#151c2e',
+                  color: '#E8D8B8',
+                  border: '1px solid rgba(197, 154, 82, 0.4)',
+                }}
+                title="View your saved reflection doodles"
+              >
+                <Sparkles className="w-4 h-4 text-[#C59A52]" />
+                <span>My Doodles</span>
               </button>
 
               <button
@@ -701,6 +742,36 @@ export default function Reflections() {
             </div>
           </div>
         )}
+
+        {/* Doodling System Modals */}
+        <DoodleCanvasModal
+          isOpen={isDoodleModalOpen}
+          onClose={() => {
+            setIsDoodleModalOpen(false);
+            setEditingDoodle(null);
+          }}
+          section="your-reflections"
+          initialDoodle={editingDoodle}
+          onDoodleSaved={() => {
+            // Keep modal open or let user continue editing
+          }}
+        />
+
+        <DoodlesDrawer
+          isOpen={isDoodlesDrawerOpen}
+          onClose={() => setIsDoodlesDrawerOpen(false)}
+          section="your-reflections"
+          onSelectDoodle={(doodle) => {
+            setEditingDoodle(doodle);
+            setIsDoodlesDrawerOpen(false);
+            setIsDoodleModalOpen(true);
+          }}
+          onNewDoodle={() => {
+            setEditingDoodle(null);
+            setIsDoodlesDrawerOpen(false);
+            setIsDoodleModalOpen(true);
+          }}
+        />
 
       </div>
     </main>

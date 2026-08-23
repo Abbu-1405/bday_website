@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Sparkles, HeartHandshake } from 'lucide-react';
-import { Container, Surface, Badge } from '../components';
+import { Container } from '../components';
 import { OpenWhenCard, OpenWhenDetailModal } from '../components/openWhen';
 import { sampleOpenWhenLetters } from '../data';
 import { OpenWhenLetter } from '../types';
@@ -95,36 +95,78 @@ export default function OpenWhen() {
             <VintageOrnamentalDivider className="my-2 opacity-70" />
           </div>
         </div>
-      ) : (
-        <Surface
-          variant="elevated"
-          padding="lg"
-          className="relative overflow-hidden border border-[var(--color-border-light)] bg-[var(--color-surface)] space-y-4 text-center sm:text-left"
-        >
+      ) : theme === 'midnight-journal' ? (
+        <div className="relative rounded-[18px] p-6 sm:p-9 bg-[rgba(13,23,40,0.85)] border border-[rgba(201,155,88,0.28)] shadow-[0_12px_32px_-8px_rgba(0,0,0,0.55)] space-y-4 text-center sm:text-left overflow-hidden backdrop-blur-xs">
           <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4">
             <div className="space-y-2 max-w-2xl">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-serif font-medium bg-[var(--color-surface-secondary)] text-[var(--color-primary)] border border-[var(--color-border-light)]">
-                <Mail className="h-3.5 w-3.5 text-[var(--color-accent)]" />
-                <span>Personal Envelopes</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-serif font-medium bg-[rgba(201,155,88,0.12)] text-[#E2BD78] border border-[rgba(201,155,88,0.25)]">
+                <Mail className="h-3.5 w-3.5 text-[#E2BD78]" />
+                <span>Midnight Envelopes</span>
               </div>
 
-              <h1 className="text-h1 font-serif font-bold text-[var(--color-text)] tracking-tight">
-                Open When...
+              <h1 className="text-3xl sm:text-4xl font-serif font-normal text-[#F2E4CF] tracking-tight">
+                OPEN WHEN...
               </h1>
 
-              <p className="text-body text-[var(--color-text-secondary)] font-serif leading-relaxed">
+              <p className="font-serif italic text-base sm:text-lg text-[#E2BD78] tracking-wide">
+                for the moments when you need a little something from me
+              </p>
+
+              <p className="text-sm text-[#C2AF99] font-serif leading-relaxed pt-1">
                 Choose the letter you need right now. A sanctuary of words written for quiet moments, unexpected days, and gentle reassurance.
               </p>
             </div>
 
             <div className="flex items-center gap-2 self-center sm:self-start shrink-0">
-              <Badge variant="primary" size="md" className="font-serif">
-                <HeartHandshake className="h-3.5 w-3.5 mr-1" />
-                {letters.length} Letters
-              </Badge>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif font-medium bg-[rgba(201,155,88,0.14)] text-[#E2BD78] border border-[rgba(201,155,88,0.3)] shadow-2xs">
+                <HeartHandshake className="h-3.5 w-3.5 text-[#E2BD78]" />
+                ✦ {letters.length} Sealed Letters
+              </span>
             </div>
           </div>
-        </Surface>
+
+          <div className="pt-2 flex items-center justify-center gap-2 opacity-50">
+            <span className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[rgba(201,155,88,0.35)] to-transparent" />
+            <span className="text-[10px] text-[#E2BD78]">✦</span>
+            <span className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[rgba(201,155,88,0.35)] to-transparent" />
+          </div>
+        </div>
+      ) : (
+        <div className="relative rounded-[18px] p-6 sm:p-9 bg-[rgba(16,30,20,0.85)] border border-[rgba(216,184,106,0.25)] shadow-[0_12px_32px_-8px_rgba(0,0,0,0.45)] space-y-4 text-center sm:text-left overflow-hidden backdrop-blur-xs">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4">
+            <div className="space-y-2 max-w-2xl">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-serif font-medium bg-[rgba(79,107,72,0.25)] text-[#D8B86A] border border-[rgba(216,184,106,0.3)]">
+                <Mail className="h-3.5 w-3.5 text-[#D8B86A]" />
+                <span>Storybook Envelopes</span>
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl font-serif font-normal text-[#F7F1DF] tracking-tight">
+                OPEN WHEN...
+              </h1>
+
+              <p className="font-serif italic text-base sm:text-lg text-[#D8B86A] tracking-wide">
+                for the moments when you need a little something from me
+              </p>
+
+              <p className="text-sm text-[#B8C0AE] font-serif leading-relaxed pt-1">
+                Choose the letter you need right now. A sanctuary of words written for quiet moments, unexpected days, and gentle reassurance.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 self-center sm:self-start shrink-0">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif font-medium bg-[rgba(79,107,72,0.28)] text-[#D8B86A] border border-[rgba(216,184,106,0.35)] shadow-2xs">
+                <HeartHandshake className="h-3.5 w-3.5 text-[#D8B86A]" />
+                ✿ {letters.length} Sealed Letters
+              </span>
+            </div>
+          </div>
+
+          <div className="pt-2 flex items-center justify-center gap-2 opacity-50">
+            <span className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[rgba(216,184,106,0.35)] to-transparent" />
+            <span className="text-[10px] text-[#D8B86A]">✿</span>
+            <span className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[rgba(216,184,106,0.35)] to-transparent" />
+          </div>
+        </div>
       )}
 
       {/* Grid Collection of Open When Letters */}

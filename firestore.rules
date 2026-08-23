@@ -28,12 +28,21 @@ service cloud.firestore {
       allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
     }
 
+    match /{path=**}/btsActivity/{activityId} {
+      allow read: if isAdmin();
+    }
+
     match /{path=**}/feelings/{feelingId} {
       allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
     }
 
     match /{path=**}/letters/{letterId} {
       allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+    }
+
+    match /{path=**}/doodles/{doodleId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
     }
 
     match /{path=**}/photoBooth/{photoId} {
@@ -85,12 +94,32 @@ service cloud.firestore {
         allow create, update, delete: if isOwner(userId);
       }
 
+      // User BTS Activity sub-collection
+      match /btsActivity/{activityId} {
+        allow read: if isAdmin();
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update, delete: if isAdmin();
+      }
+
+      // User Doodles sub-collection
+      match /doodles/{doodleId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create, update, delete: if isOwner(userId) || isAdmin();
+      }
+
       // User Photo Booth sub-collection
       match /photoBooth/{photoId} {
         allow read: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && request.resource.data.uid == userId;
         allow update: if false;
         allow delete: if isAdmin();
+      }
+
+      // User Notification Tokens sub-collection (FCM Web Push)
+      match /notificationTokens/{tokenId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create, update: if isOwner(userId) && request.resource.data.uid == userId;
+        allow delete: if isOwner(userId) || isAdmin();
       }
     }
   }

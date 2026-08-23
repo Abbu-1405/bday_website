@@ -50,6 +50,8 @@ const MUTED_KEY = 'starlit_audio_muted';
 const VOLUME_KEY = 'starlit_audio_volume';
 const TRACK_KEY = 'starlit_audio_track';
 
+let sharedAudioCtx: AudioContext | null = null;
+
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isPlaying, setIsPlaying] = useState<boolean>(() => {
     try {
@@ -192,12 +194,20 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  // Helper for synthesized sound effects
+  // Reusable singleton AudioContext for synthesized sound effects
   const getAudioCtx = (): AudioContext | null => {
     try {
-      const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const AudioCtxClass =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!AudioCtxClass) return null;
-      return new AudioCtxClass();
+      if (!sharedAudioCtx || sharedAudioCtx.state === 'closed') {
+        sharedAudioCtx = new AudioCtxClass();
+      }
+      if (sharedAudioCtx.state === 'suspended') {
+        sharedAudioCtx.resume().catch(() => {});
+      }
+      return sharedAudioCtx;
     } catch {
       return null;
     }

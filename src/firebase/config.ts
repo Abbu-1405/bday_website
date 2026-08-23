@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
-import { getFirestore, initializeFirestore, Firestore, setLogLevel, memoryLocalCache } from 'firebase/firestore';
+import { getFirestore, Firestore, setLogLevel } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
 import firebaseAppletConfig from '../../firebase-applet-config.json';
 
@@ -33,25 +33,55 @@ try {
 
 function createFirestoreInstance(): Firestore {
   try {
-    if (firestoreDatabaseId) {
-      return initializeFirestore(app, {
-        localCache: memoryLocalCache(),
-        experimentalForceLongPolling: true,
-      }, firestoreDatabaseId);
-    } else {
-      return initializeFirestore(app, {
-        localCache: memoryLocalCache(),
-        experimentalForceLongPolling: true,
-      });
-    }
-  } catch {
-    // In case Firestore was already initialized for this app instance
     return firestoreDatabaseId ? getFirestore(app, firestoreDatabaseId) : getFirestore(app);
+  } catch (err) {
+    console.warn('[FIREBASE] Firestore retrieval fallback:', err);
+    return getFirestore(app);
   }
 }
 
 export const db: Firestore = createFirestoreInstance();
 export const storage: FirebaseStorage = getStorage(app);
+
+// Safe validation connection test
+if (isFirebaseConfigured && typeof window !== 'undefined') {
+  const runTestConnection = async () => {
+    try {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+      if (typeof navigator !== 'undefined' && !navigator.onLine) return;
+      const { doc, getDocFromServer } = await import('firebase/firestore');
+      if (db) {
+        await getDocFromServer(doc(db, 'test', 'connection')).catch(() => {
+          // Connection test notice - safely handled
+        });
+      }
+    } catch {
+      // Ignored for offline, hidden, or transitioning states
+    }
+  };
+
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'complete') {
+      setTimeout(() => {
+        if (document.visibilityState !== 'hidden') {
+          runTestConnection();
+        }
+      }, 1000);
+    } else {
+      window.addEventListener(
+        'load',
+        () => {
+          setTimeout(() => {
+            if (document.visibilityState !== 'hidden') {
+              runTestConnection();
+            }
+          }, 1000);
+        },
+        { once: true }
+      );
+    }
+  }
+}
 
 export default app;
 

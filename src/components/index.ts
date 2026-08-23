@@ -38,4 +38,6 @@ export * from './ForYou';
 export * from './UniverseExploration';
 export * from './midnight';
 export * from './letterArchive';
+export * from './doodle';
+export * from './notifications';
 

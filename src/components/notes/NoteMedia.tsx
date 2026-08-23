@@ -159,7 +159,7 @@ const DownloadButton: React.FC<{
         status === 'downloading' ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin text-[var(--color-primary)]" />
         ) : status === 'completed' ? (
-          <Check className="h-3.5 w-3.5 text-green-600" />
+          <Check className="h-3.5 w-3.5 text-[var(--color-success)]" />
         ) : (
           <Download className="h-3.5 w-3.5" />
         )
@@ -434,7 +434,7 @@ export const NoteMedia: React.FC<NoteMediaProps> = ({
             onClick={handleOpenDoc}
             leftIcon={
               docOpened ? (
-                <FileCheck className="h-3.5 w-3.5 text-green-600" />
+                <FileCheck className="h-3.5 w-3.5 text-[var(--color-success)]" />
               ) : (
                 <ExternalLink className="h-3.5 w-3.5" />
               )

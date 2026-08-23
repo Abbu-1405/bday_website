@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Key, Sparkles, X, Unlock, CheckCircle2 } from 'lucide-react';
 import { SecretItem } from '../types';
 import { Surface } from './Surface';
@@ -40,7 +41,7 @@ export const HiddenDiscoveryModal: React.FC<HiddenDiscoveryModalProps> = ({
 
   if (!isOpen || !secret) return null;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200 overflow-y-auto"
       onClick={onClose}
@@ -147,6 +148,7 @@ export const HiddenDiscoveryModal: React.FC<HiddenDiscoveryModalProps> = ({
           </div>
         </Surface>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

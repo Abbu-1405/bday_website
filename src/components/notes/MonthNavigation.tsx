@@ -65,13 +65,13 @@ export const MonthNavigation: React.FC<MonthNavigationProps> = ({
         onClick={onPreviousMonth}
         disabled={isAtMin}
         aria-label="Previous Month"
-        className="text-[var(--color-text)] hover:bg-[var(--color-surface-secondary)] disabled:opacity-30 disabled:cursor-not-allowed"
+        className="text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-secondary)] disabled:opacity-30 disabled:cursor-not-allowed touch-manipulation font-serif"
       >
-        <ChevronLeft className="h-4 w-4 mr-1" />
+        <ChevronLeft className="h-4 w-4 mr-0.5 sm:mr-1" />
         <span className="hidden sm:inline text-xs font-medium">Previous</span>
       </Button>
 
-      <div className="flex items-center gap-2 text-center select-none">
+      <div className="flex items-center gap-2 text-center select-none px-2">
         <Calendar className="h-4 w-4 text-[var(--color-primary)] shrink-0" />
         <span className="font-serif font-semibold text-sm sm:text-base text-[var(--color-text)] tracking-wide">
           {monthName} {currentYear}
@@ -84,10 +84,10 @@ export const MonthNavigation: React.FC<MonthNavigationProps> = ({
         onClick={onNextMonth}
         disabled={isAtMax}
         aria-label="Next Month"
-        className="text-[var(--color-text)] hover:bg-[var(--color-surface-secondary)] disabled:opacity-30 disabled:cursor-not-allowed"
+        className="text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-secondary)] disabled:opacity-30 disabled:cursor-not-allowed touch-manipulation font-serif"
       >
         <span className="hidden sm:inline text-xs font-medium">Next</span>
-        <ChevronRight className="h-4 w-4 ml-1" />
+        <ChevronRight className="h-4 w-4 ml-0.5 sm:ml-1" />
       </Button>
     </Surface>
   );

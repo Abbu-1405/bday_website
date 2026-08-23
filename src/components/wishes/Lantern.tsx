@@ -101,7 +101,7 @@ export const Lantern: React.FC<LanternProps> = ({
         id={`lantern-button-${wish.id}`}
         onClick={() => onClick(wish)}
         aria-label={`Wish #${formattedNumber}: ${wish.title}. ${isCollected ? 'Collected' : 'Tap to reveal and collect.'}`}
-        className="relative z-10 block p-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/80 rounded-full cursor-pointer touch-manipulation transition-all duration-300 group-hover:-translate-y-1 group-hover:brightness-105 active:scale-[0.97]"
+        className="relative z-10 block p-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded-full cursor-pointer touch-manipulation transition-all duration-300 group-hover:-translate-y-1 group-hover:brightness-105 active:scale-[0.97]"
       >
         {/* Soft Ambient Outer Diffusion (Illumination cast into the surrounding night sky) */}
         <div
@@ -374,9 +374,9 @@ export const Lantern: React.FC<LanternProps> = ({
             : 'opacity-0 transform translate-y-1'
         )}
       >
-        <div className="px-3 py-1 rounded-full bg-[#121026]/90 border border-amber-400/40 text-amber-100 text-xs font-serif whitespace-nowrap shadow-lg backdrop-blur-xs flex items-center gap-1.5">
-          <span className="font-bold text-amber-300">#{formattedNumber}</span>
-          <span className="text-amber-200/80 truncate max-w-[140px]">
+        <div className="px-3 py-1 rounded-full bg-[var(--color-surface-secondary)]/95 border border-[var(--color-border)] text-[var(--color-text)] text-xs font-serif whitespace-nowrap shadow-lg backdrop-blur-xs flex items-center gap-1.5">
+          <span className="font-bold text-[var(--color-primary)]">#{formattedNumber}</span>
+          <span className="text-[var(--color-text-secondary)] truncate max-w-[140px]">
             {wish.title.replace(/^Wish\s*#?\d+\s*[-—:]\s*/i, '')}
           </span>
         </div>

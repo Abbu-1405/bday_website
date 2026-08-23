@@ -10,6 +10,7 @@ export const ROUTES = {
   SECRET_VAULT: '/secret-vault',
   WHAT_AM_I_TO_YOU: '/what-am-i-to-you',
   REFLECTIONS: '/reflections',
+  BTS: '/bts',
   SETTINGS: '/settings',
   ADMIN: '/admin',
 } as const;
