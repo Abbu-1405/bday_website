@@ -90,6 +90,11 @@ service cloud.firestore {
         && request.resource.data.type == resource.data.type
         && request.resource.data.title == resource.data.title
         && request.resource.data.body == resource.data.body
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['openedCount']) || (request.resource.data.openedCount is int && request.resource.data.openedCount >= 1 && request.resource.data.openedCount <= 1000))
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['interactionSource']) || (request.resource.data.interactionSource is string && request.resource.data.interactionSource.size() <= 64))
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['clickedAt']) || request.resource.data.clickedAt == request.time || request.resource.data.clickedAt == resource.data.clickedAt)
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['lastClickedAt']) || request.resource.data.lastClickedAt == request.time || request.resource.data.lastClickedAt == resource.data.lastClickedAt)
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['targetOpenedAt']) || request.resource.data.targetOpenedAt == request.time || request.resource.data.targetOpenedAt == resource.data.targetOpenedAt)
       );
       allow delete: if isAdmin();
     }

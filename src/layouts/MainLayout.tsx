@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import {
   FloatingNavigation,
@@ -33,6 +33,7 @@ export const MainLayout: React.FC = () => {
   const isAdminRoute = location.pathname.startsWith('/admin');
   const [celebrationBadge, setCelebrationBadge] = useState<BadgeItem | null>(null);
   const [showNotificationPrompt, setShowNotificationPrompt] = useState<boolean>(false);
+  const trackedUrlEventsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     // Evaluate badges on mount and route change
@@ -76,6 +77,12 @@ export const MainLayout: React.FC = () => {
 
     if (nid && typeof nid === 'string' && nid.trim()) {
       const eventId = nid.trim();
+      const trackingKey = `${eventId}_${src}`;
+      if (trackedUrlEventsRef.current.has(trackingKey)) {
+        return;
+      }
+      trackedUrlEventsRef.current.add(trackingKey);
+
       // 1. Non-blocking click recording
       recordNotificationClick(eventId, src).catch(() => {});
 

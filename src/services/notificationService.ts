@@ -17,7 +17,7 @@ import {
   onSnapshot,
 } from 'firebase/firestore';
 import { User } from 'firebase/auth';
-import app, { db, isFirebaseConfigured, vapidKey as defaultVapidKey } from '../firebase';
+import app, { db, auth, isFirebaseConfigured, vapidKey as defaultVapidKey } from '../firebase';
 import firebaseAppletConfig from '../../firebase-applet-config.json';
 import {
   NotificationPermissionState,
@@ -1738,12 +1738,14 @@ export async function recordNotificationClick(
   if (!eventId || typeof eventId !== 'string' || !eventId.trim()) {
     return false;
   }
-  if (!isFirebaseConfigured) {
+  if (!isFirebaseConfigured || !auth.currentUser) {
     return false;
   }
 
   try {
-    const eventRef = doc(db, 'notificationEvents', eventId.trim());
+    const cleanEventId = eventId.trim();
+    const cleanSource = (typeof source === 'string' ? source.trim() : 'push_notification').slice(0, 64) || 'push_notification';
+    const eventRef = doc(db, 'notificationEvents', cleanEventId);
     const eventSnap = await getDoc(eventRef);
 
     if (!eventSnap.exists()) {
@@ -1752,11 +1754,17 @@ export async function recordNotificationClick(
 
     const currentData = eventSnap.data();
 
+    // Verify ownership on the client as well
+    if (currentData.userId && currentData.userId !== auth.currentUser.uid) {
+      console.warn('[NotificationTracking] Ownership mismatch for notification click tracking');
+      return false;
+    }
+
     // Prepare update payload
     const updatePayload: Record<string, any> = {
       lastClickedAt: serverTimestamp(),
       openedCount: increment(1),
-      interactionSource: source,
+      interactionSource: cleanSource,
     };
 
     // First-click semantics: only set clickedAt if not already populated
@@ -1781,12 +1789,13 @@ export async function recordNotificationTargetOpened(eventId: string): Promise<b
   if (!eventId || typeof eventId !== 'string' || !eventId.trim()) {
     return false;
   }
-  if (!isFirebaseConfigured) {
+  if (!isFirebaseConfigured || !auth.currentUser) {
     return false;
   }
 
   try {
-    const eventRef = doc(db, 'notificationEvents', eventId.trim());
+    const cleanEventId = eventId.trim();
+    const eventRef = doc(db, 'notificationEvents', cleanEventId);
     const eventSnap = await getDoc(eventRef);
 
     if (!eventSnap.exists()) {
@@ -1794,6 +1803,11 @@ export async function recordNotificationTargetOpened(eventId: string): Promise<b
     }
 
     const currentData = eventSnap.data();
+
+    // Verify ownership on the client
+    if (currentData.userId && currentData.userId !== auth.currentUser.uid) {
+      return false;
+    }
 
     // Only set targetOpenedAt if not already populated to preserve the primary content open timestamp
     if (!currentData.targetOpenedAt) {
