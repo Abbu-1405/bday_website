@@ -1,12 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.processPendingNotificationEvents = exports.onNotificationEventCreated = void 0;
+exports.runScheduledNotificationCheck = exports.processPendingNotificationEvents = exports.scheduledNotificationWorker = exports.onNotificationEventCreated = void 0;
+exports.isInsideQuietHours = isInsideQuietHours;
+exports.calculateNextValidDeliveryTime = calculateNextValidDeliveryTime;
 exports.processEvent = processEvent;
+exports.processScheduledEvents = processScheduledEvents;
 const app_1 = require("firebase-admin/app");
 const firestore_1 = require("firebase-admin/firestore");
 const messaging_1 = require("firebase-admin/messaging");
 const firestore_2 = require("firebase-functions/v2/firestore");
 const https_1 = require("firebase-functions/v2/https");
+const scheduler_1 = require("firebase-functions/v2/scheduler");
 const logger = require("firebase-functions/logger");
 // Target Firebase Project and Database configuration
 const PROJECT_ID = process.env.GCLOUD_PROJECT || 'gen-lang-client-0057157522';
@@ -41,6 +45,81 @@ function isInvalidTokenErrorCode(errorCode) {
     return invalidCodes.includes(errorCode);
 }
 /**
+ * Checks if a given time falls within the user's configured quiet hours in their timezone
+ */
+function isInsideQuietHours(targetDate, timezone = 'UTC', quietHours) {
+    if (!quietHours?.enabled || !quietHours.start || !quietHours.end) {
+        return false;
+    }
+    try {
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: timezone,
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: false,
+        });
+        const parts = formatter.formatToParts(targetDate);
+        const hour = parseInt(parts.find((p) => p.type === 'hour')?.value || '0', 10);
+        const minute = parseInt(parts.find((p) => p.type === 'minute')?.value || '0', 10);
+        const currentMins = hour * 60 + minute;
+        const [startH, startM] = quietHours.start.split(':').map((v) => parseInt(v, 10) || 0);
+        const [endH, endM] = quietHours.end.split(':').map((v) => parseInt(v, 10) || 0);
+        const startMins = startH * 60 + startM;
+        const endMins = endH * 60 + endM;
+        if (startMins < endMins) {
+            // Quiet hours within same day (e.g. 13:00 to 15:00)
+            return currentMins >= startMins && currentMins < endMins;
+        }
+        else if (startMins > endMins) {
+            // Quiet hours cross midnight (e.g. 22:00 to 07:00)
+            return currentMins >= startMins || currentMins < endMins;
+        }
+        return false;
+    }
+    catch (err) {
+        logger.warn('[NotificationEngine] Error evaluating quiet hours:', err);
+        return false;
+    }
+}
+/**
+ * Calculates the next valid non-quiet delivery time if the target falls within quiet hours
+ */
+function calculateNextValidDeliveryTime(targetDate, timezone = 'UTC', quietHours) {
+    if (!quietHours?.enabled || !quietHours.start || !quietHours.end) {
+        return targetDate;
+    }
+    if (!isInsideQuietHours(targetDate, timezone, quietHours)) {
+        return targetDate;
+    }
+    try {
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: timezone,
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: false,
+        });
+        const parts = formatter.formatToParts(targetDate);
+        const hour = parseInt(parts.find((p) => p.type === 'hour')?.value || '0', 10);
+        const minute = parseInt(parts.find((p) => p.type === 'minute')?.value || '0', 10);
+        const currentMins = hour * 60 + minute;
+        const [endH, endM] = quietHours.end.split(':').map((v) => parseInt(v, 10) || 0);
+        const endMins = endH * 60 + endM;
+        let diffMinutes = 0;
+        if (currentMins < endMins) {
+            diffMinutes = endMins - currentMins;
+        }
+        else {
+            diffMinutes = 1440 - currentMins + endMins;
+        }
+        const nextDelivery = new Date(targetDate.getTime() + diffMinutes * 60 * 1000);
+        return nextDelivery;
+    }
+    catch (err) {
+        logger.warn('[NotificationEngine] Error calculating next valid delivery time:', err);
+        return targetDate;
+    }
+}
+/**
  * Core event delivery function executed by Firebase Cloud Functions.
  * Implements atomic claim, device token lookup, FCM multicast delivery,
  * invalid token deactivation, and status finalization.
@@ -56,7 +135,7 @@ async function processEvent(eventId) {
             return { shouldProcess: false, reason: 'Event document does not exist' };
         }
         const data = docSnap.data();
-        if (!data || data.status !== 'pending') {
+        if (!data || (data.status !== 'pending' && data.status !== 'scheduled')) {
             return {
                 shouldProcess: false,
                 reason: `Status is already '${data?.status}', skipping duplicate execution.`,
@@ -65,10 +144,12 @@ async function processEvent(eventId) {
         if (!data.userId || !data.title || !data.body) {
             return { shouldProcess: false, reason: 'Missing required event fields (userId, title, body)' };
         }
-        // Atomically transition from pending -> processing
+        // Atomically transition from pending/scheduled -> processing
         transaction.update(eventRef, {
             status: 'processing',
             processedAt: firestore_1.FieldValue.serverTimestamp(),
+            attemptCount: firestore_1.FieldValue.increment(1),
+            lastAttemptAt: firestore_1.FieldValue.serverTimestamp(),
         });
         eventData = { id: docSnap.id, ...data };
         return { shouldProcess: true };
@@ -197,6 +278,98 @@ async function processEvent(eventId) {
     }
 }
 /**
+ * Server-side Scheduled Events Processor.
+ * Finds all due scheduled events (scheduledAt <= now), checks user quiet hours & preferences,
+ * and executes delivery via processEvent().
+ */
+async function processScheduledEvents() {
+    const now = new Date();
+    logger.info(`[NotificationScheduler] Running scheduled notification check at ${now.toISOString()}`);
+    const snapshot = await db
+        .collection('notificationEvents')
+        .where('status', '==', 'scheduled')
+        .limit(100)
+        .get();
+    if (snapshot.empty) {
+        logger.info('[NotificationScheduler] No scheduled notification events found.');
+        return { processedCount: 0, delayedCount: 0, skippedCount: 0, details: [] };
+    }
+    let processedCount = 0;
+    let delayedCount = 0;
+    let skippedCount = 0;
+    const details = [];
+    for (const docSnap of snapshot.docs) {
+        const eventId = docSnap.id;
+        const data = docSnap.data();
+        // Check scheduled time
+        let scheduledDate = null;
+        if (data.scheduledAt) {
+            if (typeof data.scheduledAt === 'string') {
+                scheduledDate = new Date(data.scheduledAt);
+            }
+            else if (data.scheduledAt.toDate) {
+                scheduledDate = data.scheduledAt.toDate();
+            }
+            else if (data.scheduledAt.seconds) {
+                scheduledDate = new Date(data.scheduledAt.seconds * 1000);
+            }
+        }
+        // If scheduled for a future time, skip for now
+        if (scheduledDate && scheduledDate.getTime() > now.getTime()) {
+            continue;
+        }
+        const userId = data.userId;
+        let userPrefs = null;
+        if (userId) {
+            try {
+                const userDoc = await db.collection('users').doc(userId).get();
+                if (userDoc.exists) {
+                    userPrefs = userDoc.data()?.notificationPreferences;
+                }
+            }
+            catch (err) {
+                logger.warn(`[NotificationScheduler] Notice fetching user prefs for ${userId}:`, err);
+            }
+        }
+        // Check user preference master & category enable flags
+        if (userPrefs && userPrefs.enabled === false) {
+            logger.info(`[NotificationScheduler] User ${userId} has disabled all notifications. Cancelling event ${eventId}.`);
+            await docSnap.ref.update({
+                status: 'failed',
+                failureReason: 'User has disabled notifications in account preferences.',
+            });
+            skippedCount++;
+            details.push({ eventId, status: 'cancelled', reason: 'Preferences disabled' });
+            continue;
+        }
+        const timezone = data.timezone || userPrefs?.timezone || 'UTC';
+        const quietHours = userPrefs ? {
+            enabled: userPrefs.quietHoursEnabled,
+            start: userPrefs.quietHoursStart,
+            end: userPrefs.quietHoursEnd,
+        } : undefined;
+        // Check if event is currently in quiet hours
+        if (quietHours?.enabled && isInsideQuietHours(now, timezone, quietHours)) {
+            const nextTime = calculateNextValidDeliveryTime(now, timezone, quietHours);
+            logger.info(`[NotificationScheduler] Event ${eventId} falls in quiet hours. Rescheduling to ${nextTime.toISOString()}`);
+            await docSnap.ref.update({
+                scheduledAt: nextTime.toISOString(),
+                nextAttemptAt: nextTime.toISOString(),
+                attemptCount: firestore_1.FieldValue.increment(1),
+            });
+            delayedCount++;
+            details.push({ eventId, status: 'delayed', nextDelivery: nextTime.toISOString() });
+            continue;
+        }
+        // Due and eligible: deliver through processEvent
+        const deliveryResult = await processEvent(eventId);
+        processedCount++;
+        details.push({ eventId, status: 'processed', result: deliveryResult });
+    }
+    logger.info(`[NotificationScheduler] Scheduled check complete. Processed: ${processedCount}, Delayed: ${delayedCount}, Skipped: ${skippedCount}`);
+    return { processedCount, delayedCount, skippedCount, details };
+}
+/**
  * Cloud Function Trigger: onNotificationEventCreated
  * Listens to document creation on notificationEvents/{eventId}.
  * Automatically runs on event creation in Firestore.
@@ -216,40 +389,71 @@ exports.onNotificationEventCreated = (0, firestore_2.onDocumentCreated)({
     if (data && data.status === 'pending') {
         return processEvent(eventId);
     }
+    else if (data && data.status === 'scheduled') {
+        logger.info(`[NotificationEngine] Event ${eventId} created with status 'scheduled' for ${data.scheduledAt}. Awaiting scheduler.`);
+        return null;
+    }
     return null;
 });
 /**
+ * Cloud Function Scheduler: scheduledNotificationWorker
+ * Periodically checks for due scheduled events every 5 minutes in production.
+ */
+exports.scheduledNotificationWorker = (0, scheduler_1.onSchedule)({
+    schedule: 'every 5 minutes',
+    timeZone: 'UTC',
+}, async () => {
+    await processScheduledEvents();
+});
+/**
  * Cloud Function HTTPS endpoint: processPendingNotificationEvents
- * Allows manual or scheduled triggering of any pending events with CORS support.
+ * Allows manual or scheduled triggering of pending and due scheduled events with CORS support.
  */
 exports.processPendingNotificationEvents = (0, https_1.onRequest)({ cors: true }, async (req, res) => {
     try {
         logger.info('[NotificationEngine] processPendingNotificationEvents HTTPS function called');
+        // 1. Process due scheduled events first
+        const scheduledSummary = await processScheduledEvents();
+        // 2. Process immediate pending events
         const snapshot = await db
             .collection('notificationEvents')
             .where('status', '==', 'pending')
             .limit(50)
             .get();
-        if (snapshot.empty) {
-            logger.info('[NotificationEngine] No pending notification events in queue');
-            res.json({ success: true, message: 'No pending notification events found', processedCount: 0 });
-            return;
-        }
-        logger.info(`[NotificationEngine] Found ${snapshot.size} pending notification event(s) to process`);
-        const results = [];
-        for (const docSnap of snapshot.docs) {
-            const resVal = await processEvent(docSnap.id);
-            results.push({ id: docSnap.id, result: resVal });
+        const pendingResults = [];
+        if (!snapshot.empty) {
+            logger.info(`[NotificationEngine] Found ${snapshot.size} pending notification event(s) to process`);
+            for (const docSnap of snapshot.docs) {
+                const resVal = await processEvent(docSnap.id);
+                pendingResults.push({ id: docSnap.id, result: resVal });
+            }
         }
         res.json({
             success: true,
-            message: `Processed ${results.length} pending events`,
-            processedCount: results.length,
-            details: results,
+            message: `Processed ${pendingResults.length} pending events and ${scheduledSummary.processedCount} scheduled events.`,
+            pendingCount: pendingResults.length,
+            scheduledCount: scheduledSummary.processedCount,
+            delayedCount: scheduledSummary.delayedCount,
+            scheduledDetails: scheduledSummary.details,
+            pendingDetails: pendingResults,
         });
     }
     catch (err) {
         logger.error('[NotificationEngine] Error in processPendingNotificationEvents:', err);
+        res.status(500).json({ success: false, error: err?.message });
+    }
+});
+/**
+ * Cloud Function HTTPS endpoint: runScheduledNotificationCheck
+ * Explicit HTTPS endpoint for Cloud Scheduler or manual administrator triggering of due scheduled notifications.
+ */
+exports.runScheduledNotificationCheck = (0, https_1.onRequest)({ cors: true }, async (req, res) => {
+    try {
+        const summary = await processScheduledEvents();
+        res.json({ success: true, ...summary });
+    }
+    catch (err) {
+        logger.error('[NotificationEngine] Error in runScheduledNotificationCheck:', err);
         res.status(500).json({ success: false, error: err?.message });
     }
 });

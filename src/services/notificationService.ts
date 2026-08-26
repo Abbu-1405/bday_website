@@ -9,6 +9,7 @@ import {
   deleteDoc,
   addDoc,
   query,
+  where,
   orderBy,
   limit,
   serverTimestamp,
@@ -23,10 +24,19 @@ import {
   NotificationToken,
   NotificationEvent,
   NotificationEventType,
+  NotificationEventStatus,
+  NotificationDeliveryMode,
   NotificationPreferences,
   DEFAULT_NOTIFICATION_PREFERENCES,
   CreateNotificationEventParams,
+  TemplateVariables,
+  NotificationTemplate,
 } from '../types';
+import {
+  renderNotificationContent,
+  getTemplateForCategory,
+  DEFAULT_NOTIFICATION_TEMPLATES,
+} from './notificationTemplateService';
 
 const TOKEN_STORAGE_KEY = 'starlit_fcm_token';
 const TOKEN_SYNCED_UID_KEY = 'starlit_fcm_uid';
@@ -463,17 +473,149 @@ export async function sendLocalTestNotification(
 }
 
 /* ==========================================================================
-   PHASE 2 — NOTIFICATION EVENT ENGINE (EVENT QUEUE & PREFERENCES)
+   PHASE 2 & PHASE 4 — NOTIFICATION EVENT ENGINE, PREFERENCES & SCHEDULER
    ========================================================================== */
 
 const preferencesCache = new Map<string, { prefs: NotificationPreferences; timestamp: number }>();
 const PREF_CACHE_TTL_MS = 60000; // 1 minute local cache
 
+// Anti-spam cooldown cache: maps `${userId}_${category}` -> timestamp of last event creation
+const cooldownTracker = new Map<string, number>();
+export const COOLDOWN_WINDOW_MS = 15 * 60 * 1000; // 15-minute cooldown per category
+
+/**
+ * Safely determines if a timezone string is valid
+ */
+export function isValidTimezone(tz: string): boolean {
+  if (!tz || typeof tz !== 'string') return false;
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: tz });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Resolves the client/browser IANA timezone or 'UTC' fallback
+ */
+export function getDetectedTimezone(): string {
+  try {
+    if (typeof Intl !== 'undefined' && Intl.DateTimeFormat) {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (tz && isValidTimezone(tz)) {
+        return tz;
+      }
+    }
+  } catch {
+    // Fallback
+  }
+  return 'UTC';
+}
+
+/**
+ * Checks if a given time falls within the user's configured quiet hours in their timezone
+ */
+export function isInsideQuietHours(
+  targetDate: Date,
+  timezone: string = 'UTC',
+  quietHours?: { enabled?: boolean; start?: string; end?: string }
+): boolean {
+  if (!quietHours?.enabled || !quietHours.start || !quietHours.end) {
+    return false;
+  }
+
+  try {
+    const tz = isValidTimezone(timezone) ? timezone : 'UTC';
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false,
+    });
+    const parts = formatter.formatToParts(targetDate);
+    const hour = parseInt(parts.find((p) => p.type === 'hour')?.value || '0', 10);
+    const minute = parseInt(parts.find((p) => p.type === 'minute')?.value || '0', 10);
+    const currentMins = hour * 60 + minute;
+
+    const [startH, startM] = quietHours.start.split(':').map((v) => parseInt(v, 10) || 0);
+    const [endH, endM] = quietHours.end.split(':').map((v) => parseInt(v, 10) || 0);
+    const startMins = startH * 60 + startM;
+    const endMins = endH * 60 + endM;
+
+    if (startMins < endMins) {
+      // Quiet hours within same day (e.g. 13:00 to 15:00)
+      return currentMins >= startMins && currentMins < endMins;
+    } else if (startMins > endMins) {
+      // Quiet hours cross midnight (e.g. 22:00 to 07:00)
+      return currentMins >= startMins || currentMins < endMins;
+    }
+    return false;
+  } catch (err) {
+    console.warn('[NotificationEngine] Error evaluating quiet hours:', err);
+    return false;
+  }
+}
+
+/**
+ * Calculates the next valid non-quiet delivery time if the target falls within quiet hours
+ */
+export function adjustForQuietHours(
+  targetDate: Date,
+  timezone: string = 'UTC',
+  quietHours?: { enabled?: boolean; start?: string; end?: string }
+): Date {
+  if (!quietHours?.enabled || !quietHours.start || !quietHours.end) {
+    return targetDate;
+  }
+
+  if (!isInsideQuietHours(targetDate, timezone, quietHours)) {
+    return targetDate;
+  }
+
+  try {
+    const tz = isValidTimezone(timezone) ? timezone : 'UTC';
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false,
+    });
+    const parts = formatter.formatToParts(targetDate);
+    const hour = parseInt(parts.find((p) => p.type === 'hour')?.value || '0', 10);
+    const minute = parseInt(parts.find((p) => p.type === 'minute')?.value || '0', 10);
+    const currentMins = hour * 60 + minute;
+
+    const [endH, endM] = quietHours.end.split(':').map((v) => parseInt(v, 10) || 0);
+    const endMins = endH * 60 + endM;
+
+    let diffMinutes = 0;
+    if (currentMins < endMins) {
+      diffMinutes = endMins - currentMins;
+    } else {
+      diffMinutes = 1440 - currentMins + endMins;
+    }
+
+    // Add 2 minutes cushion past quiet hours end
+    const nextDelivery = new Date(targetDate.getTime() + (diffMinutes + 2) * 60 * 1000);
+    return nextDelivery;
+  } catch (err) {
+    console.warn('[NotificationEngine] Error adjusting for quiet hours:', err);
+    return targetDate;
+  }
+}
+
 /**
  * Retrieves the user's notification preferences from Firestore or local cache
  */
 export async function getNotificationPreferences(userId: string): Promise<NotificationPreferences> {
-  if (!userId) return DEFAULT_NOTIFICATION_PREFERENCES;
+  const defaultTz = getDetectedTimezone();
+  const fallbackDefaults: NotificationPreferences = {
+    ...DEFAULT_NOTIFICATION_PREFERENCES,
+    timezone: defaultTz,
+  };
+
+  if (!userId) return fallbackDefaults;
 
   const cached = preferencesCache.get(userId);
   if (cached && Date.now() - cached.timestamp < PREF_CACHE_TTL_MS) {
@@ -487,7 +629,7 @@ export async function getNotificationPreferences(userId: string): Promise<Notifi
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed && typeof parsed === 'object') {
-          const merged = { ...DEFAULT_NOTIFICATION_PREFERENCES, ...parsed };
+          const merged: NotificationPreferences = { ...fallbackDefaults, ...parsed };
           preferencesCache.set(userId, { prefs: merged, timestamp: Date.now() });
         }
       }
@@ -497,7 +639,7 @@ export async function getNotificationPreferences(userId: string): Promise<Notifi
   }
 
   if (!isFirebaseConfigured) {
-    return DEFAULT_NOTIFICATION_PREFERENCES;
+    return fallbackDefaults;
   }
 
   try {
@@ -514,6 +656,11 @@ export async function getNotificationPreferences(userId: string): Promise<Notifi
           secrets: userPrefs.secrets !== false,
           moments: userPrefs.moments !== false,
           birthday: userPrefs.birthday !== false,
+          timezone: isValidTimezone(userPrefs.timezone) ? userPrefs.timezone : defaultTz,
+          quietHoursEnabled: Boolean(userPrefs.quietHoursEnabled),
+          quietHoursStart: userPrefs.quietHoursStart || '22:00',
+          quietHoursEnd: userPrefs.quietHoursEnd || '07:00',
+          birthDate: userPrefs.birthDate || data.birthDate || undefined,
         };
         preferencesCache.set(userId, { prefs: resolved, timestamp: Date.now() });
         if (typeof localStorage !== 'undefined') {
@@ -526,7 +673,7 @@ export async function getNotificationPreferences(userId: string): Promise<Notifi
     console.warn('[NotificationEngine] Notice loading user preferences:', err);
   }
 
-  return DEFAULT_NOTIFICATION_PREFERENCES;
+  return fallbackDefaults;
 }
 
 /**
@@ -561,6 +708,7 @@ export async function updateNotificationPreferences(
       userDocRef,
       {
         notificationPreferences: updated,
+        ...(updated.birthDate ? { birthDate: updated.birthDate } : {}),
         updatedAt: new Date().toISOString(),
       },
       { merge: true }
@@ -629,10 +777,10 @@ function generateDeterministicEventId(
 /**
  * Creates a notification event in Firestore under notificationEvents/{eventId}
  * IMPORTANT:
- * - This creates the event in the queue with status "pending".
- * - The frontend does NOT send FCM directly (Phase 3 trusted server handles push dispatch).
- * - Implements deduplication if an eventKey is provided.
- * - Non-blocking: returns cleanly without interrupting user actions.
+ * - Immediate notifications get deliveryMode: 'immediate' and status: 'pending'.
+ * - Scheduled notifications get deliveryMode: 'scheduled' and status: 'scheduled' with future scheduledAt.
+ * - Handles quiet hours adjustment and anti-spam cooldown window.
+ * - The frontend does NOT send FCM directly (Phase 3 & 4 server workers handle dispatch).
  */
 export async function createNotificationEvent(
   params: CreateNotificationEventParams
@@ -647,31 +795,110 @@ export async function createNotificationEvent(
     return { success: false, error: 'Firebase is not configured.' };
   }
 
-  const { userId, type, title, body, data, eventKey } = params;
+  const {
+    userId,
+    type,
+    title: explicitTitle,
+    body: explicitBody,
+    templateId: explicitTemplateId,
+    templateVariables,
+    data: rawData,
+    eventKey,
+    deliveryMode: requestedDeliveryMode,
+    scheduledAt: rawScheduledAt,
+    timezone: requestedTimezone,
+    cooldownCategory,
+    bypassPreferences,
+    bypassQuietHours,
+  } = params;
 
-  if (!userId || !type || !title || !body) {
+  if (!userId || !type) {
     return {
       success: false,
-      error: 'Missing required parameters: userId, type, title, body.',
+      error: 'Missing required parameters: userId, type.',
     };
   }
 
   try {
-    // 1. Check user notification preferences
-    const isEligible = await shouldCreateNotification({ userId, type });
-    if (!isEligible) {
+    // 0. Phase 5 Template & Variable Resolution
+    let finalTitle = explicitTitle;
+    let finalBody = explicitBody;
+    let finalTemplateId = explicitTemplateId || null;
+    let finalTemplateVersion: number | null = null;
+    let defaultActionRoute: string = '/';
+
+    // If explicit title/body not provided, or if templateVariables are provided, resolve through template engine
+    if (!finalTitle || !finalBody || templateVariables) {
+      try {
+        const rendered = await renderNotificationContent({
+          category: type,
+          variables: templateVariables || {},
+        });
+        finalTitle = finalTitle || rendered.title;
+        finalBody = finalBody || rendered.body;
+        finalTemplateId = finalTemplateId || rendered.templateId;
+        finalTemplateVersion = rendered.templateVersion;
+        defaultActionRoute = rendered.actionRoute;
+      } catch (tmplErr) {
+        console.warn('[NotificationEngine] Template resolution fallback:', tmplErr);
+        const def = DEFAULT_NOTIFICATION_TEMPLATES[type as NotificationEventType] || DEFAULT_NOTIFICATION_TEMPLATES.GENERAL;
+        finalTitle = finalTitle || def.title;
+        finalBody = finalBody || def.body;
+        finalTemplateId = finalTemplateId || def.id;
+        finalTemplateVersion = def.version;
+        defaultActionRoute = def.actionRoute;
+      }
+    } else {
+      // Resolve template version for explicit custom push
+      try {
+        const activeTmpl = await getTemplateForCategory(type);
+        finalTemplateId = finalTemplateId || activeTmpl.id;
+        finalTemplateVersion = activeTmpl.version;
+        defaultActionRoute = activeTmpl.actionRoute;
+      } catch {
+        finalTemplateId = finalTemplateId || 'custom';
+        finalTemplateVersion = 1;
+      }
+    }
+
+    if (!finalTitle || !finalBody) {
       return {
-        success: true,
-        skipped: true,
-        reason: 'User preferences have disabled this notification type.',
+        success: false,
+        error: 'Unable to resolve notification title and body.',
       };
     }
 
-    // 2. Compute deterministic event ID if eventKey provided
+    // 1. Check user notification preferences
+    const userPrefs = await getNotificationPreferences(userId);
+    if (!bypassPreferences) {
+      const isEligible = await shouldCreateNotification({ userId, type, preferences: userPrefs });
+      if (!isEligible) {
+        return {
+          success: true,
+          skipped: true,
+          reason: 'User preferences have disabled this notification type.',
+        };
+      }
+    }
+
+    // 2. Anti-spam cooldown check (for repetitive events)
+    const categoryKey = cooldownCategory || type;
+    const cooldownKey = `${userId}_${categoryKey}`;
+    const lastTrigger = cooldownTracker.get(cooldownKey);
+    const now = Date.now();
+    if (!eventKey && lastTrigger && now - lastTrigger < COOLDOWN_WINDOW_MS && type !== 'BIRTHDAY') {
+      return {
+        success: true,
+        skipped: true,
+        reason: `Anti-spam cooldown active for category '${categoryKey}'. Next allowed in ${Math.ceil((COOLDOWN_WINDOW_MS - (now - lastTrigger)) / 60000)}m.`,
+      };
+    }
+
+    // 3. Compute deterministic event ID if eventKey provided
     const eventId = generateDeterministicEventId(userId, type, eventKey);
     const eventRef = doc(db, 'notificationEvents', eventId);
 
-    // 3. Deduplication check: if event with this deterministic ID already exists, do not duplicate
+    // 4. Deduplication check: if event with this deterministic ID already exists, do not duplicate
     if (eventKey) {
       try {
         const existingSnap = await getDoc(eventRef);
@@ -688,23 +915,77 @@ export async function createNotificationEvent(
       }
     }
 
-    // 4. Create pending notification event document
-    const eventPayload = {
+    // 5. Timezone & Quiet Hours Resolution
+    const resolvedTimezone = requestedTimezone || userPrefs.timezone || getDetectedTimezone();
+    let isScheduled = requestedDeliveryMode === 'scheduled' || Boolean(rawScheduledAt);
+    let resolvedScheduledDate: Date | null = null;
+
+    if (rawScheduledAt) {
+      if (rawScheduledAt instanceof Date) {
+        resolvedScheduledDate = rawScheduledAt;
+      } else if (typeof rawScheduledAt === 'string' || typeof rawScheduledAt === 'number') {
+        resolvedScheduledDate = new Date(rawScheduledAt);
+      }
+    }
+
+    // If scheduled for a future time
+    if (resolvedScheduledDate && resolvedScheduledDate.getTime() > now) {
+      isScheduled = true;
+    }
+
+    // Apply quiet hours adjustment if applicable
+    if (isScheduled && resolvedScheduledDate && !bypassQuietHours) {
+      const quietHours = {
+        enabled: userPrefs.quietHoursEnabled,
+        start: userPrefs.quietHoursStart,
+        end: userPrefs.quietHoursEnd,
+      };
+      resolvedScheduledDate = adjustForQuietHours(resolvedScheduledDate, resolvedTimezone, quietHours);
+    }
+
+    const deliveryMode: NotificationDeliveryMode = isScheduled ? 'scheduled' : 'immediate';
+    const status: NotificationEventStatus = isScheduled ? 'scheduled' : 'pending';
+
+    // 6. Deep link route sanitization
+    const finalData = { ...(rawData || {}) };
+    if (!finalData.url || typeof finalData.url !== 'string' || !finalData.url.startsWith('/')) {
+      finalData.url = defaultActionRoute;
+    }
+
+    // 7. Create event payload for Firestore (Store immutable rendered title & body)
+    const eventPayload: Record<string, any> = {
       userId,
       type,
-      title: title.trim().slice(0, 200),
-      body: body.trim().slice(0, 1000),
-      data: data || {},
-      status: 'pending',
-      sentAt: null,
+      title: finalTitle.trim().slice(0, 200),
+      body: finalBody.trim().slice(0, 1000),
+      templateId: finalTemplateId,
+      templateVersion: finalTemplateVersion,
+      data: finalData,
+      status,
+      deliveryMode,
+      timezone: resolvedTimezone,
+      attemptCount: 0,
       createdAt: serverTimestamp(),
     };
 
+    if (isScheduled && resolvedScheduledDate) {
+      eventPayload.scheduledAt = resolvedScheduledDate.toISOString();
+    }
+    if (cooldownCategory) {
+      eventPayload.cooldownCategory = cooldownCategory;
+    }
+
     await setDoc(eventRef, eventPayload);
+    cooldownTracker.set(cooldownKey, now);
 
     console.log('[NotificationEngine] Event queued successfully:', {
       eventId,
       type,
+      templateId: finalTemplateId,
+      templateVersion: finalTemplateVersion,
+      status,
+      deliveryMode,
+      scheduledAt: eventPayload.scheduledAt,
       userId,
     });
 
@@ -722,7 +1003,150 @@ export async function createNotificationEvent(
 }
 
 /**
- * High-level convenience triggers for the 6 primary notification event types
+ * Phase 4 Scheduling & Personalization Helpers
+ */
+
+/**
+ * Schedules an Open When envelope notification for future delivery or availability
+ */
+export async function scheduleOpenWhenNotification(
+  userId: string,
+  letterId: string,
+  envelopeTitle: string,
+  availableAt: Date | string
+) {
+  const availDate = typeof availableAt === 'string' ? new Date(availableAt) : availableAt;
+  const isFuture = availDate.getTime() > Date.now();
+  const dateKey = availDate.toISOString().slice(0, 10);
+
+  return createNotificationEvent({
+    userId,
+    type: 'OPEN_WHEN_AVAILABLE',
+    templateVariables: {
+      openWhenTitle: envelopeTitle,
+      scheduledDate: availDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    },
+    data: { letterId, url: '/open-when' },
+    eventKey: `openwhen_${letterId}_${dateKey}`,
+    deliveryMode: isFuture ? 'scheduled' : 'immediate',
+    scheduledAt: isFuture ? availDate : undefined,
+    cooldownCategory: 'open_when',
+  });
+}
+
+/**
+ * Calculates and schedules a Birthday celebration notification in the user's local timezone
+ */
+export async function scheduleBirthdayNotification(
+  userId: string,
+  birthDateOrMonthDay: string,
+  customMessage?: string
+) {
+  if (!birthDateOrMonthDay) {
+    return {
+      success: false,
+      error: 'No birth date specified. Please set birthday in user settings.',
+    };
+  }
+
+  // Parse birth date (supports 'YYYY-MM-DD' or 'MM-DD')
+  let birthMonth = 0;
+  let birthDay = 0;
+  const parts = birthDateOrMonthDay.split('-').map((v) => parseInt(v, 10));
+  if (parts.length === 3) {
+    birthMonth = parts[1] - 1;
+    birthDay = parts[2];
+  } else if (parts.length === 2) {
+    birthMonth = parts[0] - 1;
+    birthDay = parts[1];
+  } else {
+    return { success: false, error: 'Invalid birth date format. Use YYYY-MM-DD or MM-DD.' };
+  }
+
+  const prefs = await getNotificationPreferences(userId);
+  const tz = prefs.timezone || getDetectedTimezone();
+
+  // Determine the next birthday occurrence (set to 09:00 AM local time)
+  const now = new Date();
+  let targetYear = now.getFullYear();
+  let candidateDate = new Date(Date.UTC(targetYear, birthMonth, birthDay, 9, 0, 0));
+
+  // If already passed this year, schedule for next year
+  if (candidateDate.getTime() < now.getTime()) {
+    targetYear += 1;
+    candidateDate = new Date(Date.UTC(targetYear, birthMonth, birthDay, 9, 0, 0));
+  }
+
+  return createNotificationEvent({
+    userId,
+    type: 'BIRTHDAY',
+    body: customMessage,
+    templateVariables: {
+      scheduledDate: `${targetYear}`,
+    },
+    data: { url: '/settings' },
+    eventKey: `birthday_${targetYear}`,
+    deliveryMode: 'scheduled',
+    scheduledAt: candidateDate,
+    timezone: tz,
+    cooldownCategory: 'birthday',
+  });
+}
+
+/**
+ * Schedules a future letter availability notification
+ */
+export async function scheduleLetterAvailableNotification(
+  userId: string,
+  letterId: string,
+  title: string,
+  availableAt: Date | string
+) {
+  const availDate = typeof availableAt === 'string' ? new Date(availableAt) : availableAt;
+  const isFuture = availDate.getTime() > Date.now();
+
+  return createNotificationEvent({
+    userId,
+    type: 'LETTER_AVAILABLE',
+    templateVariables: {
+      letterTitle: title || 'A new letter',
+    },
+    data: { letterId, url: '/letters' },
+    eventKey: `letter_${letterId}_${availDate.toISOString().slice(0, 10)}`,
+    deliveryMode: isFuture ? 'scheduled' : 'immediate',
+    scheduledAt: isFuture ? availDate : undefined,
+    cooldownCategory: 'letter',
+  });
+}
+
+/**
+ * Schedules a future secret vault reveal notification
+ */
+export async function scheduleSecretUnlockedNotification(
+  userId: string,
+  secretId: string,
+  secretTitle: string,
+  unlockAt: Date | string
+) {
+  const unlockDate = typeof unlockAt === 'string' ? new Date(unlockAt) : unlockAt;
+  const isFuture = unlockDate.getTime() > Date.now();
+
+  return createNotificationEvent({
+    userId,
+    type: 'SECRET_UNLOCKED',
+    templateVariables: {
+      secretTitle: secretTitle || 'A new secret',
+    },
+    data: { secretId, url: '/secret-vault' },
+    eventKey: `secret_${secretId}_${unlockDate.toISOString().slice(0, 10)}`,
+    deliveryMode: isFuture ? 'scheduled' : 'immediate',
+    scheduledAt: isFuture ? unlockDate : undefined,
+    cooldownCategory: 'secret',
+  });
+}
+
+/**
+ * High-level convenience triggers for the 6 primary notification event types (Immediate)
  */
 
 export async function notifyLetterAvailable(
@@ -733,10 +1157,13 @@ export async function notifyLetterAvailable(
   return createNotificationEvent({
     userId,
     type: 'LETTER_AVAILABLE',
-    title: 'New Letter Received ✉️',
-    body: title ? `A letter titled "${title}" was written for you.` : 'A new heartfelt letter is waiting for you.',
-    data: { letterId, url: '/reflections' },
+    templateVariables: {
+      letterTitle: title || 'A new letter',
+    },
+    data: { letterId, url: '/letters' },
     eventKey: `letter_${letterId}`,
+    deliveryMode: 'immediate',
+    cooldownCategory: 'letter',
   });
 }
 
@@ -748,10 +1175,13 @@ export async function notifyOpenWhenAvailable(
   return createNotificationEvent({
     userId,
     type: 'OPEN_WHEN_AVAILABLE',
-    title: 'Open When Envelope ✨',
-    body: `Your "${envelopeTitle}" letter is available in your archive.`,
+    templateVariables: {
+      openWhenTitle: envelopeTitle,
+    },
     data: { letterId, url: '/open-when' },
     eventKey: `openwhen_${letterId}`,
+    deliveryMode: 'immediate',
+    cooldownCategory: 'open_when',
   });
 }
 
@@ -763,12 +1193,13 @@ export async function notifySecretUnlocked(
   return createNotificationEvent({
     userId,
     type: 'SECRET_UNLOCKED',
-    title: 'Secret Vault Unlocked 🗝️',
-    body: secretTitle
-      ? `You uncovered a hidden secret: "${secretTitle}".`
-      : 'A mysterious secret has been unlocked in your vault.',
+    templateVariables: {
+      secretTitle: secretTitle || 'A new secret',
+    },
     data: { secretId, url: '/secret-vault' },
     eventKey: `secret_${secretId}`,
+    deliveryMode: 'immediate',
+    cooldownCategory: 'secret',
   });
 }
 
@@ -780,12 +1211,13 @@ export async function notifyMomentAvailable(
   return createNotificationEvent({
     userId,
     type: 'MOMENT_AVAILABLE',
-    title: 'Cherished Moment 📸',
-    body: momentTitle
-      ? `A memory was opened: "${momentTitle}".`
-      : 'A special photo memory is waiting in your gallery.',
+    templateVariables: {
+      momentTitle: momentTitle || 'A new moment',
+    },
     data: { momentId, url: '/moments' },
     eventKey: `moment_${momentId}`,
+    deliveryMode: 'immediate',
+    cooldownCategory: 'moment',
   });
 }
 
@@ -796,17 +1228,18 @@ export async function notifyBirthday(
   return createNotificationEvent({
     userId,
     type: 'BIRTHDAY',
-    title: 'Happy Birthday! 🎂✨',
-    body: customMessage || 'Wishing you the happiest birthday filled with love, wonder, and starlit warmth.',
-    data: { url: '/countdown' },
+    body: customMessage,
+    data: { url: '/settings' },
     eventKey: `birthday_${new Date().getFullYear()}`,
+    deliveryMode: 'immediate',
+    cooldownCategory: 'birthday',
   });
 }
 
 export async function notifyGeneral(
   userId: string,
-  title: string,
-  body: string,
+  title?: string,
+  body?: string,
   data?: Record<string, any>,
   eventKey?: string
 ) {
@@ -817,11 +1250,152 @@ export async function notifyGeneral(
     body,
     data,
     eventKey,
+    deliveryMode: 'immediate',
   });
 }
 
 /**
- * Fetches recent notification events for the Admin dashboard
+ * Fetches recent notification events for a specific user (User History in Settings)
+ */
+export async function fetchUserNotifications(
+  userId: string,
+  maxCount: number = 20
+): Promise<NotificationEvent[]> {
+  if (!isFirebaseConfigured || !userId) return [];
+
+  try {
+    const eventsRef = collection(db, 'notificationEvents');
+    const q = query(
+      eventsRef,
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc'),
+      limit(maxCount)
+    );
+    const snapshot = await getDocs(q);
+
+    const list: NotificationEvent[] = [];
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      let createdStr = 'Recently';
+      if (data.createdAt?.toDate) {
+        createdStr = data.createdAt.toDate().toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+      } else if (data.createdAt?.seconds) {
+        createdStr = new Date(data.createdAt.seconds * 1000).toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+      }
+
+      list.push({
+        id: docSnap.id,
+        userId: data.userId || userId,
+        type: data.type || 'GENERAL',
+        title: data.title || 'Notification',
+        body: data.body || '',
+        templateId: data.templateId || null,
+        templateVersion: data.templateVersion || null,
+        data: data.data || {},
+        status: data.status || 'pending',
+        deliveryMode: data.deliveryMode || 'immediate',
+        scheduledAt: data.scheduledAt || null,
+        timezone: data.timezone || null,
+        createdAt: createdStr,
+        sentAt: data.sentAt || null,
+        successfulTokenCount: typeof data.successfulTokenCount === 'number' ? data.successfulTokenCount : undefined,
+      });
+    });
+
+    return list;
+  } catch (err) {
+    console.warn('[NotificationEngine] Error fetching user notifications:', err);
+    return [];
+  }
+}
+
+/**
+ * Real-time subscription to a user's recent notifications
+ */
+export function subscribeUserNotifications(
+  userId: string,
+  onUpdate: (events: NotificationEvent[]) => void,
+  maxCount: number = 20
+): () => void {
+  if (!isFirebaseConfigured || !userId) {
+    onUpdate([]);
+    return () => {};
+  }
+
+  try {
+    const eventsRef = collection(db, 'notificationEvents');
+    const q = query(
+      eventsRef,
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc'),
+      limit(maxCount)
+    );
+
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const list: NotificationEvent[] = [];
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          let createdStr = 'Recently';
+          if (data.createdAt?.toDate) {
+            createdStr = data.createdAt.toDate().toLocaleString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            });
+          } else if (data.createdAt?.seconds) {
+            createdStr = new Date(data.createdAt.seconds * 1000).toLocaleString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            });
+          }
+
+          list.push({
+            id: docSnap.id,
+            userId: data.userId || userId,
+            type: data.type || 'GENERAL',
+            title: data.title || 'Notification',
+            body: data.body || '',
+            templateId: data.templateId || null,
+            templateVersion: data.templateVersion || null,
+            data: data.data || {},
+            status: data.status || 'pending',
+            deliveryMode: data.deliveryMode || 'immediate',
+            scheduledAt: data.scheduledAt || null,
+            timezone: data.timezone || null,
+            createdAt: createdStr,
+            sentAt: data.sentAt || null,
+            successfulTokenCount: typeof data.successfulTokenCount === 'number' ? data.successfulTokenCount : undefined,
+          });
+        });
+        onUpdate(list);
+      },
+      (err) => {
+        console.warn('[NotificationEngine] User notifications subscription notice:', err);
+      }
+    );
+  } catch (err) {
+    console.warn('[NotificationEngine] Error subscribing to user notifications:', err);
+    return () => {};
+  }
+}
+
+/**
+ * Fetches recent notification events for the Admin dashboard (includes scheduling metadata)
  */
 export async function fetchAdminNotificationEvents(
   maxCount: number = 50
@@ -861,8 +1435,17 @@ export async function fetchAdminNotificationEvents(
         type: data.type || 'GENERAL',
         title: data.title || 'Untitled Notification',
         body: data.body || '',
+        templateId: data.templateId || null,
+        templateVersion: data.templateVersion || null,
         data: data.data || {},
         status: data.status || 'pending',
+        deliveryMode: data.deliveryMode || 'immediate',
+        scheduledAt: data.scheduledAt || null,
+        timezone: data.timezone || null,
+        cooldownCategory: data.cooldownCategory || null,
+        attemptCount: data.attemptCount ?? 0,
+        lastAttemptAt: data.lastAttemptAt || null,
+        nextAttemptAt: data.nextAttemptAt || null,
         createdAt: createdStr,
         processedAt: data.processedAt || null,
         sentAt: data.sentAt || null,
@@ -927,8 +1510,17 @@ export function subscribeAdminNotificationEvents(
             type: data.type || 'GENERAL',
             title: data.title || 'Untitled Notification',
             body: data.body || '',
+            templateId: data.templateId || null,
+            templateVersion: data.templateVersion || null,
             data: data.data || {},
             status: data.status || 'pending',
+            deliveryMode: data.deliveryMode || 'immediate',
+            scheduledAt: data.scheduledAt || null,
+            timezone: data.timezone || null,
+            cooldownCategory: data.cooldownCategory || null,
+            attemptCount: data.attemptCount ?? 0,
+            lastAttemptAt: data.lastAttemptAt || null,
+            nextAttemptAt: data.nextAttemptAt || null,
             createdAt: createdStr,
             processedAt: data.processedAt || null,
             sentAt: data.sentAt || null,
@@ -961,10 +1553,12 @@ export async function triggerServerTestNotification(params: {
   body?: string;
   type?: NotificationEventType | string;
   url?: string;
+  deliveryMode?: NotificationDeliveryMode;
+  scheduledAt?: Date | string;
 }): Promise<{ success: boolean; eventId?: string; error?: string }> {
   try {
     const title = params.title || 'Starlit Letters Push Verification ✨';
-    const body = params.body || 'Phase 3 server-side FCM push delivery is active and working!';
+    const body = params.body || 'Phase 3 & Phase 4 server-side FCM push delivery & scheduler active!';
     const type = (params.type as NotificationEventType) || 'GENERAL';
     const url = params.url || '/settings';
 
@@ -974,6 +1568,8 @@ export async function triggerServerTestNotification(params: {
       type,
       title,
       body,
+      deliveryMode: params.deliveryMode || 'immediate',
+      scheduledAt: params.scheduledAt,
       data: {
         url,
         isTest: 'true',
@@ -1002,11 +1598,41 @@ export async function triggerServerTestNotification(params: {
 }
 
 /**
+ * Triggers server-side processing for scheduled & pending events
+ */
+export async function triggerServerScheduledCheck(): Promise<{
+  success: boolean;
+  processedCount?: number;
+  delayedCount?: number;
+  message?: string;
+  error?: string;
+}> {
+  const functionsUrl = (import.meta as any).env?.VITE_FIREBASE_FUNCTIONS_URL;
+  if (functionsUrl) {
+    try {
+      const response = await fetch(`${functionsUrl.replace(/\/$/, '')}/runScheduledNotificationCheck`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          success: true,
+          processedCount: data.processedCount ?? 0,
+          delayedCount: data.delayedCount ?? 0,
+          message: `Scheduler checked: ${data.processedCount ?? 0} dispatched, ${data.delayedCount ?? 0} delayed for quiet hours.`,
+        };
+      }
+    } catch (err: any) {
+      console.warn('[NotificationEngine] HTTPS Cloud Function scheduler invoke notice:', err);
+    }
+  }
+
+  return triggerServerQueueProcessing();
+}
+
+/**
  * Triggers queue processing for pending notification events.
- * In production Firebase architecture:
- * 1. If VITE_FIREBASE_FUNCTIONS_URL is provided, calls the processPendingNotificationEvents HTTPS function.
- * 2. Otherwise queries Firestore directly for pending events and reports queue status.
- * (Note: onNotificationEventCreated Firestore trigger automatically delivers all newly created events in real time).
  */
 export async function triggerServerQueueProcessing(): Promise<{
   success: boolean;
@@ -1025,8 +1651,8 @@ export async function triggerServerQueueProcessing(): Promise<{
         const data = await response.json();
         return {
           success: true,
-          processedCount: data.processedCount ?? 0,
-          message: data.message || `Processed ${data.processedCount ?? 0} events via Cloud Function`,
+          processedCount: data.pendingCount ?? data.processedCount ?? 0,
+          message: data.message || `Processed queue via Cloud Function`,
         };
       }
     } catch (err: any) {
@@ -1040,25 +1666,27 @@ export async function triggerServerQueueProcessing(): Promise<{
     const q = query(eventsRef, orderBy('createdAt', 'desc'), limit(50));
     const snapshot = await getDocs(q);
     let pendingCount = 0;
+    let scheduledCount = 0;
     snapshot.forEach((docSnap) => {
-      if (docSnap.data()?.status === 'pending') {
-        pendingCount++;
-      }
+      const st = docSnap.data()?.status;
+      if (st === 'pending') pendingCount++;
+      if (st === 'scheduled') scheduledCount++;
     });
 
     return {
       success: true,
       processedCount: pendingCount,
       message:
-        pendingCount === 0
+        pendingCount === 0 && scheduledCount === 0
           ? 'All events are up to date and processed in real time by the Firebase Cloud Function trigger.'
-          : `${pendingCount} event(s) currently awaiting Cloud Function execution.`,
+          : `${pendingCount} pending event(s) and ${scheduledCount} scheduled event(s) in queue.`,
     };
   } catch (err: any) {
     return {
       success: false,
-      error: err?.message || 'Failed to inspect pending notification queue',
+      error: err?.message || 'Failed to inspect notification queue',
     };
   }
 }
+
 

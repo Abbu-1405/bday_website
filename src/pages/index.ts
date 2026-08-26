@@ -11,4 +11,5 @@ export { default as WhatAmIToYou } from './WhatAmIToYou';
 export { default as Reflections } from './Reflections';
 export { default as Bts } from './Bts';
 export { default as Settings } from './Settings';
+export { default as NotificationHistory } from './NotificationHistory';
 export { default as Admin } from './Admin';

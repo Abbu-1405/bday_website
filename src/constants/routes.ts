@@ -12,5 +12,6 @@ export const ROUTES = {
   REFLECTIONS: '/reflections',
   BTS: '/bts',
   SETTINGS: '/settings',
+  NOTIFICATIONS: '/notifications',
   ADMIN: '/admin',
 } as const;

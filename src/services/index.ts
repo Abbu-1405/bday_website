@@ -12,3 +12,4 @@ export * from './reflectionsService';
 export * from './btsActivityService';
 export * from './doodleService';
 export * from './notificationService';
+export * from './notificationTemplateService';

@@ -12,6 +12,7 @@ import {
   HelpCircle,
   Lock,
   Settings as SettingsIcon,
+  Bell,
   ChevronUp,
   BookOpen,
   Film,
@@ -47,6 +48,7 @@ export const FloatingNavigation: React.FC<FloatingNavigationProps> = ({ classNam
     { path: ROUTES.REFLECTIONS, label: 'Your Reflections', icon: <BookOpen className="h-3.5 w-3.5 shrink-0" /> },
     { path: ROUTES.BTS, label: 'BTS', icon: <Film className="h-3.5 w-3.5 shrink-0" /> },
     { path: ROUTES.SECRET_VAULT, label: 'Secret Vault', icon: <Lock className="h-3.5 w-3.5 shrink-0" /> },
+    { path: ROUTES.NOTIFICATIONS, label: 'Notifications', icon: <Bell className="h-3.5 w-3.5 shrink-0" /> },
     { path: ROUTES.SETTINGS, label: 'Settings', icon: <SettingsIcon className="h-3.5 w-3.5 shrink-0" /> },
   ];
 

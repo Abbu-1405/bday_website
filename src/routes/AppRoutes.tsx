@@ -17,6 +17,7 @@ import {
   Reflections,
   Bts,
   Settings,
+  NotificationHistory,
   Admin,
 } from '../pages';
 
@@ -38,6 +39,7 @@ export const AppRoutes: React.FC = () => {
 
         <Route path={ROUTES.SECRET_VAULT} element={<SecretVault />} />
         <Route path={ROUTES.SETTINGS} element={<Settings />} />
+        <Route path={ROUTES.NOTIFICATIONS} element={<NotificationHistory />} />
 
         {/* Protected Routes */}
         <Route

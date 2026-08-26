@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   User,
   LogIn,
@@ -18,12 +19,22 @@ import {
   BellOff,
   Send,
   Info,
-  ExternalLink,
+  Clock,
+  Moon,
+  Calendar,
+  Globe,
+  History,
+  CheckCircle2,
+  FolderLock,
+  Mail,
+  Image,
+  ChevronRight,
 } from 'lucide-react';
 import { Container, Surface, Button, Badge } from '../components';
 import { useAuth, useTheme } from '../hooks';
 import { useAudio, AMBIENT_TRACKS } from '../contexts';
-import { Theme, NotificationPermissionState, NotificationPreferences, DEFAULT_NOTIFICATION_PREFERENCES } from '../types';
+import { ROUTES } from '../constants';
+import { Theme, NotificationPermissionState, NotificationPreferences, NotificationEvent, DEFAULT_NOTIFICATION_PREFERENCES } from '../types';
 import {
   isPushSupported,
   getNotificationPermission,
@@ -33,7 +44,28 @@ import {
   sendLocalTestNotification,
   getNotificationPreferences,
   updateNotificationPreferences,
+  getDetectedTimezone,
+  isValidTimezone,
+  subscribeUserNotifications,
+  scheduleBirthdayNotification,
 } from '../services';
+
+const COMMON_TIMEZONES = [
+  'UTC',
+  'America/New_York',
+  'America/Chicago',
+  'America/Denver',
+  'America/Los_Angeles',
+  'Europe/London',
+  'Europe/Paris',
+  'Europe/Berlin',
+  'Asia/Dubai',
+  'Asia/Kolkata',
+  'Asia/Singapore',
+  'Asia/Tokyo',
+  'Australia/Sydney',
+  'Pacific/Auckland',
+];
 
 export default function Settings() {
   const { currentUser, loading, isAdmin, loginWithGoogle, logout } = useAuth();
@@ -51,6 +83,7 @@ export default function Settings() {
   const [activeToken, setActiveToken] = useState<string | null>(null);
   const [preferences, setPreferences] = useState<NotificationPreferences>(DEFAULT_NOTIFICATION_PREFERENCES);
   const [isUpdatingPref, setIsUpdatingPref] = useState(false);
+  const [userNotifications, setUserNotifications] = useState<NotificationEvent[]>([]);
 
   useEffect(() => {
     async function checkPush() {
@@ -69,6 +102,22 @@ export default function Settings() {
     checkPush();
   }, [currentUser]);
 
+  // Subscribe to user notification history
+  useEffect(() => {
+    if (!currentUser?.uid) {
+      setUserNotifications([]);
+      return;
+    }
+
+    const unsubscribe = subscribeUserNotifications(currentUser.uid, (list) => {
+      setUserNotifications(list);
+    }, 15);
+
+    return () => {
+      unsubscribe();
+    };
+  }, [currentUser?.uid]);
+
   const handleTogglePref = async (key: keyof NotificationPreferences) => {
     if (!currentUser?.uid) return;
     const updated: NotificationPreferences = {
@@ -78,6 +127,26 @@ export default function Settings() {
     setPreferences(updated);
     setIsUpdatingPref(true);
     await updateNotificationPreferences(currentUser.uid, updated);
+    setIsUpdatingPref(false);
+  };
+
+  const handleUpdateFieldPref = async (updates: Partial<NotificationPreferences>) => {
+    if (!currentUser?.uid) return;
+    const updated: NotificationPreferences = {
+      ...preferences,
+      ...updates,
+    };
+    setPreferences(updated);
+    setIsUpdatingPref(true);
+    await updateNotificationPreferences(currentUser.uid, updated);
+
+    // If birth date was updated, schedule the birthday event in background
+    if (updates.birthDate && updated.birthday !== false) {
+      scheduleBirthdayNotification(currentUser.uid, updates.birthDate).catch((e) => {
+        console.warn('Birthday scheduling notice:', e);
+      });
+    }
+
     setIsUpdatingPref(false);
   };
 
@@ -871,6 +940,209 @@ export default function Settings() {
                       />
                     </div>
                   </div>
+                </div>
+
+                {/* Timezone, Quiet Hours & Birthday Configuration */}
+                <div className="pt-3 border-t border-[var(--color-border-light)] space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h5 className="font-serif font-bold text-xs text-[var(--color-text)] flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5 text-[var(--color-primary)]" />
+                      <span>Scheduling, Timezone & Quiet Hours</span>
+                    </h5>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-serif">
+                    {/* Timezone Selector */}
+                    <div className="p-3.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-light)] space-y-2">
+                      <div className="flex items-center gap-1.5 text-[var(--color-text)] font-semibold">
+                        <Globe className="h-3.5 w-3.5 text-[var(--color-primary)]" />
+                        <span>Your Timezone</span>
+                      </div>
+                      <p className="text-[11px] text-[var(--color-text-secondary)]">
+                        Used for accurately scheduling birthday greetings & envelope unlocking.
+                      </p>
+                      <select
+                        value={preferences.timezone || getDetectedTimezone()}
+                        onChange={(e) => handleUpdateFieldPref({ timezone: e.target.value })}
+                        className="w-full text-xs font-mono py-1.5 px-2.5 rounded-lg bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] text-[var(--color-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                      >
+                        {COMMON_TIMEZONES.map((tz) => (
+                          <option key={tz} value={tz}>
+                            {tz}
+                          </option>
+                        ))}
+                        {!COMMON_TIMEZONES.includes(preferences.timezone || getDetectedTimezone()) && (
+                          <option value={preferences.timezone || getDetectedTimezone()}>
+                            {preferences.timezone || getDetectedTimezone()} (Detected)
+                          </option>
+                        )}
+                      </select>
+                    </div>
+
+                    {/* Birthday Picker */}
+                    <div className="p-3.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-light)] space-y-2">
+                      <div className="flex items-center gap-1.5 text-[var(--color-text)] font-semibold">
+                        <Calendar className="h-3.5 w-3.5 text-[var(--color-accent)]" />
+                        <span>Birth Date</span>
+                      </div>
+                      <p className="text-[11px] text-[var(--color-text-secondary)]">
+                        Sets your yearly starlit birthday reminder and countdown celebrations.
+                      </p>
+                      <input
+                        type="date"
+                        value={preferences.birthDate || ''}
+                        onChange={(e) => handleUpdateFieldPref({ birthDate: e.target.value })}
+                        className="w-full text-xs font-sans py-1.5 px-2.5 rounded-lg bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] text-[var(--color-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Quiet Hours Card */}
+                  <div className="p-3.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-light)] space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Moon className="h-4 w-4 text-[var(--color-primary)]" />
+                        <div>
+                          <p className="font-semibold text-xs text-[var(--color-text)]">Quiet Hours Protection</p>
+                          <p className="text-[11px] text-[var(--color-text-secondary)]">
+                            Automatically delay non-urgent notifications during your sleep hours until morning.
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        onClick={() => handleTogglePref('quietHoursEnabled')}
+                        className={`w-9 h-5 rounded-full transition-colors flex items-center px-0.5 cursor-pointer shrink-0 ${
+                          preferences.quietHoursEnabled ? 'bg-[var(--color-primary)]' : 'bg-neutral-300 dark:bg-neutral-700'
+                        }`}
+                      >
+                        <div
+                          className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                            preferences.quietHoursEnabled ? 'translate-x-4' : 'translate-x-0'
+                          }`}
+                        />
+                      </div>
+                    </div>
+
+                    {preferences.quietHoursEnabled && (
+                      <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[var(--color-border-light)]">
+                        <div>
+                          <label className="block text-[11px] text-[var(--color-text-secondary)] mb-1">
+                            Quiet Start (Sleep)
+                          </label>
+                          <input
+                            type="time"
+                            value={preferences.quietHoursStart || '22:00'}
+                            onChange={(e) => handleUpdateFieldPref({ quietHoursStart: e.target.value })}
+                            className="w-full text-xs font-mono py-1.5 px-2 rounded-lg bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] text-[var(--color-text)]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] text-[var(--color-text-secondary)] mb-1">
+                            Quiet End (Wake)
+                          </label>
+                          <input
+                            type="time"
+                            value={preferences.quietHoursEnd || '07:00'}
+                            onChange={(e) => handleUpdateFieldPref({ quietHoursEnd: e.target.value })}
+                            className="w-full text-xs font-mono py-1.5 px-2 rounded-lg bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] text-[var(--color-text)]"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* User Recent Notifications History */}
+            {currentUser && userNotifications.length > 0 && (
+              <div className="p-4 sm:p-5 rounded-2xl bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] space-y-3">
+                <div className="flex items-center justify-between border-b border-[var(--color-border-light)] pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <History className="h-4 w-4 text-[var(--color-primary)]" />
+                    <h4 className="font-serif font-bold text-sm text-[var(--color-text)]">
+                      Recent Notification History
+                    </h4>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="neutral" size="sm" className="font-mono text-[10px]">
+                      {userNotifications.length} recent
+                    </Badge>
+                    <Link
+                      to={ROUTES.NOTIFICATIONS}
+                      className="inline-flex items-center gap-1 text-[11px] font-serif text-[var(--color-primary)] hover:underline font-semibold"
+                    >
+                      <span>View All</span>
+                      <ChevronRight className="h-3 w-3" />
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                  {userNotifications.map((evt) => {
+                    const dateFormatted = evt.createdAt
+                      ? new Date(
+                          typeof evt.createdAt === 'object' && 'toDate' in evt.createdAt
+                            ? (evt.createdAt as { toDate: () => Date }).toDate()
+                            : (evt.createdAt as unknown as string)
+                        ).toLocaleString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
+                      : 'Just now';
+
+                    return (
+                      <div
+                        key={evt.id}
+                        className="p-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-light)] flex items-start justify-between gap-3 text-xs font-serif"
+                      >
+                        <div className="flex items-start gap-2.5">
+                          <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] flex items-center justify-center text-[var(--color-primary)] shrink-0 mt-0.5">
+                            {evt.type === 'SECRET_UNLOCKED' ? (
+                              <FolderLock className="h-3.5 w-3.5" />
+                            ) : evt.type === 'MOMENT_AVAILABLE' ? (
+                              <Image className="h-3.5 w-3.5" />
+                            ) : evt.type === 'BIRTHDAY' ? (
+                              <Sparkles className="h-3.5 w-3.5" />
+                            ) : (
+                              <Mail className="h-3.5 w-3.5" />
+                            )}
+                          </div>
+                          <div className="space-y-0.5">
+                            <p className="font-bold text-[var(--color-text)] text-xs">{evt.title}</p>
+                            <p className="text-[11px] text-[var(--color-text-secondary)] line-clamp-1">{evt.body}</p>
+                            <span className="text-[10px] text-[var(--color-muted)] font-mono">{dateFormatted}</span>
+                          </div>
+                        </div>
+
+                        <div className="shrink-0 text-right space-y-1">
+                          <Badge
+                            variant={
+                              evt.status === 'sent'
+                                ? 'success'
+                                : evt.status === 'scheduled'
+                                ? 'primary'
+                                : evt.status === 'failed'
+                                ? 'error'
+                                : 'neutral'
+                            }
+                            size="sm"
+                            className="text-[10px] capitalize font-mono"
+                          >
+                            {evt.status === 'sent' ? (
+                              <span className="flex items-center gap-1">
+                                <CheckCircle2 className="h-2.5 w-2.5" /> Delivered
+                              </span>
+                            ) : (
+                              evt.status
+                            )}
+                          </Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
