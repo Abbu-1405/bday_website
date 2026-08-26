@@ -37,6 +37,7 @@ import {
   getTemplateForCategory,
   DEFAULT_NOTIFICATION_TEMPLATES,
 } from './notificationTemplateService';
+import { getNotificationGlobalControl } from './notificationAnalyticsService';
 
 const TOKEN_STORAGE_KEY = 'starlit_fcm_token';
 const TOKEN_SYNCED_UID_KEY = 'starlit_fcm_uid';
@@ -820,7 +821,23 @@ export async function createNotificationEvent(
   }
 
   try {
-    // 0. Phase 5 Template & Variable Resolution
+    // 0. Check Global Emergency Switch
+    if (rawData?.isTest !== 'true') {
+      try {
+        const globalControl = await getNotificationGlobalControl();
+        if (globalControl.globalEnabled === false) {
+          return {
+            success: false,
+            skipped: true,
+            reason: `Notification creation paused by administrator emergency stop (${globalControl.reason || 'All notifications paused'}).`,
+          };
+        }
+      } catch (gErr) {
+        console.warn('[NotificationEngine] Notice verifying global notification control state:', gErr);
+      }
+    }
+
+    // Phase 5 Template & Variable Resolution
     let finalTitle = explicitTitle;
     let finalBody = explicitBody;
     let finalTemplateId = explicitTemplateId || null;

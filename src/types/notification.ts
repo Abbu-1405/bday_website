@@ -136,3 +136,117 @@ export interface CreateNotificationEventParams {
   bypassPreferences?: boolean;
   bypassQuietHours?: boolean;
 }
+
+export type NotificationTimeRange = 'today' | '7d' | '30d' | 'all';
+
+export interface NotificationAnalyticsSummary {
+  total: number;
+  pending: number;
+  scheduled: number;
+  processing: number;
+  sent: number;
+  failed: number;
+  successRate: number; // percentage (0 - 100)
+  immediateCount: number;
+  scheduledCount: number;
+  quietHoursDelayedCount: number;
+  totalTokensAttempted: number;
+  totalTokensSuccessful: number;
+  totalTokensFailed: number;
+  tokenDeliverySuccessRate: number;
+  avgProcessingTimeMs: number;
+  avgAttemptCount: number;
+}
+
+export interface NotificationCategoryStatItem {
+  category: NotificationEventType;
+  label: string;
+  count: number;
+  percentage: number;
+  sent: number;
+  failed: number;
+  pending: number;
+  scheduled: number;
+  successRate: number;
+}
+
+export interface NotificationTimeSeriesPoint {
+  dateKey: string;
+  label: string;
+  timestamp: number;
+  total: number;
+  sent: number;
+  failed: number;
+  scheduled: number;
+  pending: number;
+}
+
+export interface NotificationFailureItem {
+  id: string;
+  eventId: string;
+  category: NotificationEventType | string;
+  reason: string;
+  reasonGroup: 'NO_TOKENS' | 'INVALID_TOKEN' | 'PREFERENCES_DISABLED' | 'FCM_ERROR' | 'TIMEOUT' | 'OTHER';
+  timestamp: string;
+  userId: string;
+  title: string;
+}
+
+export interface NotificationFailureGroup {
+  group: string;
+  label: string;
+  count: number;
+  percentage: number;
+  description: string;
+  recentExamples: NotificationFailureItem[];
+}
+
+export interface NotificationTokenHealth {
+  totalRegisteredTokens: number;
+  enabledTokens: number;
+  invalidatedTokens: number;
+  invalidTokenRate: number; // percentage
+  platformBreakdown: { name: string; count: number; percentage: number }[];
+  browserBreakdown: { name: string; count: number; percentage: number }[];
+  recentInvalidatedTokens: {
+    id: string;
+    userId: string;
+    platform: string;
+    browser: string;
+    invalidReason?: string;
+    invalidatedAt?: string;
+  }[];
+}
+
+export interface NotificationGlobalControl {
+  globalEnabled: boolean;
+  emergencyDisabledAt?: string | null;
+  disabledBy?: string | null;
+  reason?: string | null;
+  lastUpdatedAt?: string | null;
+  updatedBy?: string | null;
+}
+
+export interface NotificationSystemHealth {
+  status: 'healthy' | 'degraded' | 'error';
+  vapidConfigured: boolean;
+  isPushSupported: boolean;
+  cloudFunctionsTriggerReady: boolean;
+  pendingQueueCount: number;
+  processingCount: number;
+  recentFailureRate24h: number;
+  activeTokenCount: number;
+  invalidTokenCount: number;
+  globalEnabled: boolean;
+  lastCheckedAt: string;
+}
+
+export interface NotificationHistoryFilterState {
+  status: 'all' | NotificationEventStatus;
+  category: 'all' | NotificationEventType;
+  deliveryMode: 'all' | NotificationDeliveryMode;
+  timeRange: NotificationTimeRange;
+  searchQuery: string;
+  templateId: string;
+  hasFailureOnly: boolean;
+}

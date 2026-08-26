@@ -17,6 +17,9 @@ import {
   Play,
   FileText,
   Layers,
+  BarChart3,
+  History,
+  Eye,
 } from 'lucide-react';
 import {
   fetchAdminNotificationEvents,
@@ -27,18 +30,23 @@ import {
 import { NotificationEvent } from '../../types';
 import { useAuth } from '../../hooks';
 import { AdminNotificationTemplates } from './AdminNotificationTemplates';
+import { AdminNotificationAnalytics } from './notifications/AdminNotificationAnalytics';
+import { AdminNotificationHistory } from './notifications/AdminNotificationHistory';
+import { AdminNotificationEventInspector } from './notifications/AdminNotificationEventInspector';
+import { AdminTestPushModal } from './notifications/AdminTestPushModal';
 
-type NotificationSubTab = 'queue' | 'templates';
+type NotificationSubTab = 'analytics' | 'queue' | 'history' | 'templates';
 
 export function AdminNotificationQueue() {
   const { currentUser } = useAuth();
-  const [activeSubTab, setActiveSubTab] = useState<NotificationSubTab>('queue');
+  const [activeSubTab, setActiveSubTab] = useState<NotificationSubTab>('analytics');
   const [events, setEvents] = useState<NotificationEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isProcessingQueue, setIsProcessingQueue] = useState(false);
-  const [isSendingTest, setIsSendingTest] = useState(false);
+  const [showTestModal, setShowTestModal] = useState(false);
+  const [selectedInspectEvent, setSelectedInspectEvent] = useState<NotificationEvent | null>(null);
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
 
   const loadEvents = async () => {
@@ -54,10 +62,7 @@ export function AdminNotificationQueue() {
   };
 
   useEffect(() => {
-    // Initial fetch
     loadEvents();
-
-    // Setup live real-time subscription
     const unsubscribe = subscribeAdminNotificationEvents((liveEvents) => {
       setEvents(liveEvents);
       setLoading(false);
@@ -85,130 +90,66 @@ export function AdminNotificationQueue() {
     }
   };
 
-  const handleSendTestPush = async () => {
-    if (!currentUser?.uid) return;
-    setIsSendingTest(true);
-    setActionFeedback(null);
-    try {
-      const res = await triggerServerTestNotification({
-        userId: currentUser.uid,
-        title: 'Starlit Letters Push Verification ✨',
-        body: 'Phase 5 notification templates and server push engine are active and working!',
-        url: '/settings',
-      });
-      if (res.success) {
-        setActionFeedback(`Test event queued (ID: ${res.eventId?.slice(-8)}). Cloud Function Firestore trigger will claim and deliver.`);
-      } else {
-        setActionFeedback(`Test push notice: ${res.error}`);
-      }
-    } catch (err: any) {
-      setActionFeedback(`Test failed: ${err?.message}`);
-    } finally {
-      setIsSendingTest(false);
-    }
-  };
+  const pendingCount = events.filter((e) => e.status === 'pending').length;
+  const processingCount = events.filter((e) => e.status === 'processing').length;
+  const scheduledCount = events.filter((e) => e.status === 'scheduled').length;
 
   const filteredEvents = events.filter((evt) => {
-    const matchesFilter = filterType === 'all' || evt.type === filterType;
-    const matchesSearch =
-      searchQuery === '' ||
-      evt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      evt.body.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      evt.userId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (evt.templateId && evt.templateId.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesFilter && matchesSearch;
+    if (filterType !== 'all' && evt.type !== filterType) return false;
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      evt.title?.toLowerCase().includes(q) ||
+      evt.body?.toLowerCase().includes(q) ||
+      evt.userId?.toLowerCase().includes(q) ||
+      evt.id?.toLowerCase().includes(q)
+    );
   });
 
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'LETTER_AVAILABLE':
-        return <Mail className="w-4 h-4 text-sky-400" />;
+        return <Mail className="w-4 h-4 text-rose-400" />;
       case 'OPEN_WHEN_AVAILABLE':
-        return <FolderLock className="w-4 h-4 text-indigo-400" />;
+        return <FolderLock className="w-4 h-4 text-amber-400" />;
       case 'SECRET_UNLOCKED':
-        return <Sparkles className="w-4 h-4 text-amber-400" />;
+        return <Sparkles className="w-4 h-4 text-purple-400" />;
       case 'MOMENT_AVAILABLE':
         return <Image className="w-4 h-4 text-emerald-400" />;
       case 'BIRTHDAY':
         return <Calendar className="w-4 h-4 text-pink-400" />;
       case 'GENERAL':
       default:
-        return <Bell className="w-4 h-4 text-purple-400" />;
-    }
-  };
-
-  const getStatusBadge = (status: string, evt: NotificationEvent) => {
-    switch (status) {
-      case 'sent':
-        return (
-          <div className="flex flex-col gap-0.5">
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <CheckCircle2 className="w-3 h-3" />
-              Delivered
-            </span>
-            {typeof evt.successfulTokenCount === 'number' && (
-              <span className="text-[10px] text-emerald-500/80 font-mono">
-                {evt.successfulTokenCount} device{evt.successfulTokenCount === 1 ? '' : 's'}
-              </span>
-            )}
-          </div>
-        );
-      case 'processing':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-sky-500/10 text-sky-400 border border-sky-500/20">
-            <Loader2 className="w-3 h-3 animate-spin" />
-            Processing
-          </span>
-        );
-      case 'failed':
-        return (
-          <div className="flex flex-col gap-0.5 max-w-[160px]">
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20">
-              <AlertTriangle className="w-3 h-3" />
-              Failed
-            </span>
-            {evt.failureReason && (
-              <span className="text-[10px] text-rose-400/80 truncate" title={evt.failureReason}>
-                {evt.failureReason}
-              </span>
-            )}
-          </div>
-        );
-      case 'scheduled':
-        return (
-          <div className="flex flex-col gap-0.5">
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20">
-              <Clock className="w-3 h-3" />
-              Scheduled
-            </span>
-            {evt.scheduledAt && (
-              <span className="text-[10px] text-purple-400/80 font-mono">
-                {typeof evt.scheduledAt === 'string' ? evt.scheduledAt.slice(0, 16).replace('T', ' ') : 'Upcoming'}
-              </span>
-            )}
-          </div>
-        );
-      case 'pending':
-      default:
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
-            <Clock className="w-3 h-3" />
-            Pending Dispatch
-          </span>
-        );
+        return <Bell className="w-4 h-4 text-indigo-400" />;
     }
   };
 
   return (
     <div className="space-y-6" id="admin-notifications-container">
       {/* Sub-Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+      <div className="flex flex-wrap items-center gap-2 border-b border-slate-800 pb-3">
+        <button
+          id="tab-btn-analytics"
+          onClick={() => setActiveSubTab('analytics')}
+          className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+            activeSubTab === 'analytics'
+              ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 shadow-sm'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+          }`}
+        >
+          <BarChart3 className="w-4 h-4" />
+          Analytics & Control Center
+          <span className="px-1.5 py-0.2 bg-indigo-500/20 text-indigo-300 text-[10px] font-mono rounded border border-indigo-500/30">
+            Phase 6
+          </span>
+        </button>
+
         <button
           id="tab-btn-queue"
           onClick={() => setActiveSubTab('queue')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+          className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
             activeSubTab === 'queue'
-              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-sm'
+              ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 shadow-sm'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
           }`}
         >
@@ -220,37 +161,55 @@ export function AdminNotificationQueue() {
         </button>
 
         <button
+          id="tab-btn-history"
+          onClick={() => setActiveSubTab('history')}
+          className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+            activeSubTab === 'history'
+              ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 shadow-sm'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+          }`}
+        >
+          <History className="w-4 h-4" />
+          Event History & Inspector
+        </button>
+
+        <button
           id="tab-btn-templates"
           onClick={() => setActiveSubTab('templates')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+          className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
             activeSubTab === 'templates'
-              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-sm'
+              ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 shadow-sm'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
           }`}
         >
           <FileText className="w-4 h-4" />
-          Notification Templates & Personalization
-          <span className="px-1.5 py-0.2 bg-amber-500/15 text-amber-300 text-[10px] font-mono rounded border border-amber-500/30">
+          Notification Templates
+          <span className="px-1.5 py-0.2 bg-slate-800 text-slate-400 text-[10px] font-mono rounded">
             Phase 5
           </span>
         </button>
       </div>
 
-      {activeSubTab === 'templates' ? (
-        <AdminNotificationTemplates />
-      ) : (
+      {/* Sub-Tab Views */}
+      {activeSubTab === 'analytics' && <AdminNotificationAnalytics />}
+
+      {activeSubTab === 'history' && <AdminNotificationHistory />}
+
+      {activeSubTab === 'templates' && <AdminNotificationTemplates />}
+
+      {activeSubTab === 'queue' && (
         <div className="space-y-6">
           {/* Header & Controls */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                   <Bell className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-slate-100">Notification Event Engine & Push Worker</h3>
+                  <h3 className="text-sm font-semibold text-slate-100">Live Notification Queue & Worker Monitor</h3>
                   <p className="text-xs text-slate-400">
-                    Phase 3 & 4 Server-Side Multicast FCM Worker: claims pending events atomically and dispatches to registered tokens.
+                    Real-time atomic claims, multicast delivery states, and scheduler status
                   </p>
                 </div>
               </div>
@@ -258,12 +217,10 @@ export function AdminNotificationQueue() {
 
             <div className="flex flex-wrap items-center gap-2.5">
               <button
-                onClick={handleSendTestPush}
-                disabled={isSendingTest || !currentUser}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-slate-950 text-xs font-bold transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
-                title="Create and deliver test notification through server worker"
+                onClick={() => setShowTestModal(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-colors shadow-sm cursor-pointer"
               >
-                {isSendingTest ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                <Send className="w-3.5 h-3.5" />
                 Send Test Push
               </button>
 
@@ -271,7 +228,6 @@ export function AdminNotificationQueue() {
                 onClick={handleProcessQueue}
                 disabled={isProcessingQueue}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition-colors disabled:opacity-50 cursor-pointer"
-                title="Process pending events"
               >
                 {isProcessingQueue ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
                 Process Pending
@@ -280,7 +236,7 @@ export function AdminNotificationQueue() {
               <button
                 onClick={loadEvents}
                 disabled={loading}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition-colors cursor-pointer"
+                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition-colors cursor-pointer"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
               </button>
@@ -288,41 +244,61 @@ export function AdminNotificationQueue() {
           </div>
 
           {actionFeedback && (
-            <div className="p-3 bg-amber-950/40 border border-amber-800/50 rounded-xl text-xs text-amber-300 font-sans flex items-center justify-between">
+            <div className="p-3 bg-indigo-950/40 border border-indigo-800/50 rounded-xl text-xs text-indigo-300 font-sans flex items-center justify-between">
               <span>{actionFeedback}</span>
               <button
                 onClick={() => setActionFeedback(null)}
-                className="text-amber-400 hover:text-amber-200 ml-2 font-mono text-xs cursor-pointer"
+                className="text-indigo-400 hover:text-indigo-200 ml-2 font-mono text-xs cursor-pointer"
               >
                 ✕
               </button>
             </div>
           )}
 
-          {/* Filter & Search Bar */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          {/* Quick Metrics Bar */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl">
+              <span className="text-slate-400 text-[11px] font-mono">TOTAL EVENTS</span>
+              <div className="text-lg font-bold text-slate-100 font-mono mt-0.5">{events.length}</div>
+            </div>
+            <div className="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl">
+              <span className="text-amber-400 text-[11px] font-mono">PENDING DISPATCH</span>
+              <div className="text-lg font-bold text-amber-300 font-mono mt-0.5">{pendingCount}</div>
+            </div>
+            <div className="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl">
+              <span className="text-purple-400 text-[11px] font-mono">SCHEDULED</span>
+              <div className="text-lg font-bold text-purple-300 font-mono mt-0.5">{scheduledCount}</div>
+            </div>
+            <div className="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl">
+              <span className="text-sky-400 text-[11px] font-mono">PROCESSING</span>
+              <div className="text-lg font-bold text-sky-300 font-mono mt-0.5">{processingCount}</div>
+            </div>
+          </div>
+
+          {/* Filter and Search Bar */}
+          <div className="flex flex-col sm:flex-row gap-3 bg-slate-900 p-3 rounded-2xl border border-slate-800">
             <div className="relative flex-1">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
               <input
                 type="text"
+                placeholder="Search by title, body, user ID, or event ID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search events by title, recipient ID, message, or template ID..."
-                className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 font-mono"
               />
             </div>
 
             <div className="flex items-center gap-2">
-              <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0 ml-1" />
+              <Filter className="w-4 h-4 text-slate-500" />
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
-                className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+                className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 font-mono"
               >
-                <option value="all">All Event Types</option>
+                <option value="all">All Categories</option>
                 <option value="LETTER_AVAILABLE">Letters</option>
                 <option value="OPEN_WHEN_AVAILABLE">Open When</option>
-                <option value="SECRET_UNLOCKED">Secret Vault</option>
+                <option value="SECRET_UNLOCKED">Secrets</option>
                 <option value="MOMENT_AVAILABLE">Moments</option>
                 <option value="BIRTHDAY">Birthday</option>
                 <option value="GENERAL">General</option>
@@ -330,77 +306,93 @@ export function AdminNotificationQueue() {
             </div>
           </div>
 
-          {/* Events Table / List */}
+          {/* Events List */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
             {loading ? (
-              <div className="p-12 text-center text-xs text-slate-400">
-                <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-amber-400" />
-                Loading queued notification events...
+              <div className="p-12 text-center text-slate-500 text-xs">
+                <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                Loading live events...
               </div>
             ) : filteredEvents.length === 0 ? (
-              <div className="p-12 text-center text-xs text-slate-400">
-                <Bell className="w-6 h-6 mx-auto mb-2 text-slate-600" />
-                No notification events match the selected criteria.
+              <div className="p-12 text-center text-slate-500 text-xs">
+                No notification events match the filter.
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-slate-300">
-                  <thead className="bg-slate-950/60 border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
-                    <tr>
-                      <th className="py-3 px-4">Event Type</th>
-                      <th className="py-3 px-4">Template Ref</th>
-                      <th className="py-3 px-4">Recipient UID</th>
-                      <th className="py-3 px-4">Rendered Title & Body</th>
-                      <th className="py-3 px-4">Delivery Status</th>
-                      <th className="py-3 px-4 text-right">Created At</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800/60">
-                    {filteredEvents.map((evt) => (
-                      <tr key={evt.id} className="hover:bg-slate-800/30 transition-colors">
-                        <td className="py-3 px-4 whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            {getTypeIcon(evt.type)}
-                            <span className="font-mono text-slate-200">{evt.type}</span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4 whitespace-nowrap">
-                          {evt.templateId ? (
-                            <div className="flex items-center gap-1.5">
-                              <span className="px-2 py-0.5 bg-slate-800 border border-slate-700/80 text-amber-300 text-[10px] font-mono rounded">
-                                {evt.templateId}
-                              </span>
-                              {evt.templateVersion && (
-                                <span className="text-[10px] text-slate-400 font-mono">
-                                  v{evt.templateVersion}
-                                </span>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-[11px] text-slate-500 italic">custom</span>
-                          )}
-                        </td>
-                        <td className="py-3 px-4 font-mono text-slate-400 max-w-[120px] truncate" title={evt.userId}>
-                          {evt.userId}
-                        </td>
-                        <td className="py-3 px-4 max-w-sm">
-                          <div className="font-medium text-slate-200 truncate">{evt.title}</div>
-                          <div className="text-[11px] text-slate-400 truncate mt-0.5">{evt.body}</div>
-                        </td>
-                        <td className="py-3 px-4 whitespace-nowrap">
-                          {getStatusBadge(evt.status, evt)}
-                        </td>
-                        <td className="py-3 px-4 whitespace-nowrap text-right text-slate-400">
-                          {evt.createdAt}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="divide-y divide-slate-800">
+                {filteredEvents.map((evt) => (
+                  <div
+                    key={evt.id}
+                    onClick={() => setSelectedInspectEvent(evt)}
+                    className="p-4 hover:bg-slate-800/40 transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 cursor-pointer"
+                  >
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className="p-2 rounded-xl bg-slate-950 border border-slate-800 shrink-0 mt-0.5">
+                        {getTypeIcon(evt.type)}
+                      </div>
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-slate-800 text-indigo-300 border border-slate-700">
+                            {evt.type}
+                          </span>
+                          <span className="text-[10px] font-mono text-slate-500">
+                            ID: {evt.id.slice(0, 14)}...
+                          </span>
+                          <span
+                            className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                              evt.status === 'sent'
+                                ? 'bg-emerald-500/10 text-emerald-400'
+                                : evt.status === 'failed'
+                                ? 'bg-rose-500/10 text-rose-400'
+                                : evt.status === 'scheduled'
+                                ? 'bg-purple-500/10 text-purple-400'
+                                : 'bg-amber-500/10 text-amber-400'
+                            }`}
+                          >
+                            {evt.status.toUpperCase()}
+                          </span>
+                        </div>
+                        <h4 className="text-xs font-semibold text-slate-200 truncate">{evt.title}</h4>
+                        <p className="text-[11px] text-slate-400 line-clamp-1">{evt.body}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end sm:self-center">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedInspectEvent(evt);
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-indigo-300 text-[10px] font-medium flex items-center gap-1 transition-colors"
+                      >
+                        <Eye className="w-3 h-3" /> Inspect
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
         </div>
+      )}
+
+      {/* Test Push Modal */}
+      {showTestModal && currentUser?.uid && (
+        <AdminTestPushModal
+          currentUserId={currentUser.uid}
+          onClose={() => setShowTestModal(false)}
+          onSuccess={(eventId) => {
+            setActionFeedback(`Test notification queued successfully (ID: ${eventId.slice(-8)}).`);
+            loadEvents();
+          }}
+        />
+      )}
+
+      {/* Event Inspector Modal */}
+      {selectedInspectEvent && (
+        <AdminNotificationEventInspector
+          event={selectedInspectEvent}
+          onClose={() => setSelectedInspectEvent(null)}
+        />
       )}
     </div>
   );

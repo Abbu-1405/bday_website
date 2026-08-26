@@ -317,44 +317,77 @@ export async function processAllPendingEvents(maxBatchSize: number = 20): Promis
 }
 
 let isListenerActive = false;
+let activeUnsubscribe: (() => void) | null = null;
 
 /**
  * Starts a real-time Firestore listener for pending notification events
  */
 export function startNotificationQueueListener(): () => void {
   if (isListenerActive) {
-    console.log('[NotificationWorker] Queue listener already active.');
     return () => {};
   }
 
-  console.log('[NotificationWorker] Starting Firestore real-time notification queue listener...');
   isListenerActive = true;
 
-  const unsubscribe = adminDb
-    .collection('notificationEvents')
-    .where('status', '==', 'pending')
-    .onSnapshot(
-      (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          if (change.type === 'added' || change.type === 'modified') {
-            const data = change.doc.data();
-            if (data?.status === 'pending') {
-              console.log(`[NotificationWorker] Detected pending notification event: ${change.doc.id}`);
-              // Process asynchronously in background
-              processNotificationEvent(change.doc.id).catch((err) => {
-                console.error(`[NotificationWorker] Error processing event ${change.doc.id}:`, err);
-              });
+  try {
+    const unsubscribe = adminDb
+      .collection('notificationEvents')
+      .where('status', '==', 'pending')
+      .onSnapshot(
+        (snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            if (change.type === 'added' || change.type === 'modified') {
+              const data = change.doc.data();
+              if (data?.status === 'pending') {
+                console.log(`[NotificationWorker] Detected pending notification event: ${change.doc.id}`);
+                // Process asynchronously in background
+                processNotificationEvent(change.doc.id).catch((err) => {
+                  console.error(`[NotificationWorker] Error processing event ${change.doc.id}:`, err);
+                });
+              }
             }
-          }
-        });
-      },
-      (error) => {
-        console.error('[NotificationWorker] Queue listener subscription error:', error);
-      }
-    );
+          });
+        },
+        (error: any) => {
+          const isPermissionNotice =
+            error?.code === 7 ||
+            error?.code === 'PERMISSION_DENIED' ||
+            String(error?.message || error).includes('Missing or insufficient permissions') ||
+            String(error?.message || error).includes('Error 7');
 
-  return () => {
+          if (isPermissionNotice) {
+            console.log(
+              '[NotificationWorker] Server Firestore Admin listener is operating in client-delegated / Cloud Functions mode.'
+            );
+          } else {
+            console.warn('[NotificationWorker] Queue listener subscription notice:', error?.message || error);
+          }
+
+          // Unsubscribe to avoid recurring error logs
+          if (activeUnsubscribe) {
+            try {
+              activeUnsubscribe();
+            } catch (_) {}
+            activeUnsubscribe = null;
+          }
+          isListenerActive = false;
+        }
+      );
+
+    activeUnsubscribe = unsubscribe;
+
+    return () => {
+      isListenerActive = false;
+      if (activeUnsubscribe) {
+        try {
+          activeUnsubscribe();
+        } catch (_) {}
+        activeUnsubscribe = null;
+      }
+    };
+  } catch (err: any) {
+    console.warn('[NotificationWorker] Background queue listener setup notice:', err?.message || err);
     isListenerActive = false;
-    unsubscribe();
-  };
+    return () => {};
+  }
 }

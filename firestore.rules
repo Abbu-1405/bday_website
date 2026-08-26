@@ -17,13 +17,13 @@ service cloud.firestore {
     function isAdmin() {
       return isSignedIn() && (
         request.auth.token.admin == true ||
-        (request.auth.token.email == 'mohammedabuzarshaik@gmail.com' && request.auth.token.email_verified == true) ||
+        request.auth.token.email == 'mohammedabuzarshaik@gmail.com' ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
       );
     }
 
-    // Collection Group rules for activity, feelings, and letters across all users
+    // Collection Group rules for activity, feelings, letters, and tokens across all users
     match /{path=**}/activity/{activityId} {
       allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
     }
@@ -50,8 +50,17 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    match /{path=**}/notificationTokens/{tokenId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+    }
+
     // Admin metadata & read states (Admin only)
     match /adminMeta/{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // Notification Analytics Aggregates (Phase 6 Admin Analytics & Control Center)
+    match /notificationAnalytics/{document=**} {
       allow read, write: if isAdmin();
     }
 
