@@ -1,4 +1,6 @@
 import { recordActivity } from '../services/activityService';
+import { notifySecretUnlocked } from '../services/notificationService';
+import { auth } from '../firebase';
 
 const STORAGE_KEY = 'starlit_secret_vault_discovered';
 const STORAGE_TIMESTAMPS_KEY = 'starlit_secret_vault_timestamps';
@@ -52,6 +54,14 @@ export function discoverSecret(secretId: string): string[] {
         section: 'secret_vault',
         itemId: secretId,
       });
+
+      // Queue notification event if user is signed in
+      const currentUid = auth.currentUser?.uid;
+      if (currentUid) {
+        notifySecretUnlocked(currentUid, secretId).catch((err) => {
+          console.warn('[NotificationEngine] Non-blocking secret notification notice:', err);
+        });
+      }
 
       return updatedIds;
     }

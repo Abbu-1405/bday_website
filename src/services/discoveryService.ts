@@ -28,6 +28,8 @@ export interface TimelineEvent {
 }
 
 import { recordActivity, ActivityType } from './activityService';
+import { notifyOpenWhenAvailable, notifyMomentAvailable } from './notificationService';
+import { auth } from '../firebase';
 
 const STORAGE_KEYS = {
   FIRST_VISIT: 'starlit_first_visit_time',
@@ -86,6 +88,20 @@ export function markSectionItemDiscovered(sectionKey: string, itemId: string): v
         section: sectionKey,
         itemId,
       });
+    }
+
+    // Phase 2 Notification Event dispatch
+    const currentUid = auth.currentUser?.uid;
+    if (currentUid) {
+      if (sectionKey === 'openWhen') {
+        notifyOpenWhenAvailable(currentUid, itemId, 'Open When Envelope').catch((err) => {
+          console.warn('[NotificationEngine] Notice queuing open-when event:', err);
+        });
+      } else if (sectionKey === 'moments') {
+        notifyMomentAvailable(currentUid, itemId).catch((err) => {
+          console.warn('[NotificationEngine] Notice queuing moment event:', err);
+        });
+      }
     }
   }
 }

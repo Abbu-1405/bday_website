@@ -1,6 +1,7 @@
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from '../firebase';
 import { recordActivity } from './activityService';
+import { notifyLetterAvailable } from './notificationService';
 
 export enum OperationType {
   CREATE = 'create',
@@ -83,6 +84,11 @@ export const submitLetter = async (userId: string, title: string | undefined, co
       section: 'what_am_i_to_you',
       itemId: docRef.id,
       userIdOverride: userId,
+    });
+
+    // Create notification event in queue (Phase 2 Notification Engine)
+    await notifyLetterAvailable(userId, docRef.id, title).catch((err) => {
+      console.warn('[NotificationEngine] Non-blocking letter notification notice:', err);
     });
 
     return docRef.id;

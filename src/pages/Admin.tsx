@@ -13,6 +13,7 @@ import {
   Film,
   Pen,
   Eye,
+  Bell,
 } from 'lucide-react';
 import { useAuth } from '../hooks';
 import {
@@ -33,9 +34,10 @@ import { AdminContentHub } from '../components/admin/content/AdminContentHub';
 import { AdminBtsDashboard } from '../components/admin/bts';
 import { AdminDoodlesDashboard } from '../components/admin/doodles';
 import { AdminNotes365Preview } from '../components/admin/preview';
+import { AdminNotificationQueue } from '../components/admin/AdminNotificationQueue';
 import { AdminHeader } from '../components/admin/header';
 
-type AdminTab = 'overview' | 'activity' | 'bts' | 'doodles' | 'preview' | 'users' | 'feelings' | 'letters' | 'content' | 'settings';
+type AdminTab = 'overview' | 'activity' | 'bts' | 'doodles' | 'notifications' | 'preview' | 'users' | 'feelings' | 'letters' | 'content' | 'settings';
 
 export default function Admin() {
   const { currentUser, userProfile, isAdmin, logout } = useAuth();
@@ -100,6 +102,7 @@ export default function Admin() {
     { id: 'activity' as AdminTab, label: 'Activity', icon: Activity },
     { id: 'bts' as AdminTab, label: 'BTS Activity', icon: Film, badge: 'NEW' },
     { id: 'doodles' as AdminTab, label: 'Doodles', icon: Pen },
+    { id: 'notifications' as AdminTab, label: 'Notifications', icon: Bell, badge: 'QUEUE' },
     { id: 'users' as AdminTab, label: 'Users', icon: Users },
     { id: 'feelings' as AdminTab, label: 'Feelings', icon: Heart },
     { id: 'letters' as AdminTab, label: 'Letters', icon: Mail },
@@ -185,6 +188,8 @@ export default function Admin() {
           {activeTab === 'bts' && <AdminBtsDashboard />}
 
           {activeTab === 'doodles' && <AdminDoodlesDashboard />}
+
+          {activeTab === 'notifications' && <AdminNotificationQueue />}
 
           {activeTab === 'users' && (
             <AdminUsersList users={users} loading={usersLoading} />

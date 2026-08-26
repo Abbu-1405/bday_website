@@ -23,7 +23,7 @@ import {
 import { Container, Surface, Button, Badge } from '../components';
 import { useAuth, useTheme } from '../hooks';
 import { useAudio, AMBIENT_TRACKS } from '../contexts';
-import { Theme, NotificationPermissionState } from '../types';
+import { Theme, NotificationPermissionState, NotificationPreferences, DEFAULT_NOTIFICATION_PREFERENCES } from '../types';
 import {
   isPushSupported,
   getNotificationPermission,
@@ -31,6 +31,8 @@ import {
   requestAndRegisterNotification,
   disableNotification,
   sendLocalTestNotification,
+  getNotificationPreferences,
+  updateNotificationPreferences,
 } from '../services';
 
 export default function Settings() {
@@ -47,6 +49,8 @@ export default function Settings() {
   const [isPushLoading, setIsPushLoading] = useState<boolean>(false);
   const [pushFeedback, setPushFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [activeToken, setActiveToken] = useState<string | null>(null);
+  const [preferences, setPreferences] = useState<NotificationPreferences>(DEFAULT_NOTIFICATION_PREFERENCES);
+  const [isUpdatingPref, setIsUpdatingPref] = useState(false);
 
   useEffect(() => {
     async function checkPush() {
@@ -56,9 +60,26 @@ export default function Settings() {
       setVapidConfigured(Boolean(getVapidKey()));
       const stored = typeof localStorage !== 'undefined' ? localStorage.getItem('starlit_fcm_token') : null;
       setActiveToken(stored);
+
+      if (currentUser?.uid) {
+        const userPrefs = await getNotificationPreferences(currentUser.uid);
+        setPreferences(userPrefs);
+      }
     }
     checkPush();
   }, [currentUser]);
+
+  const handleTogglePref = async (key: keyof NotificationPreferences) => {
+    if (!currentUser?.uid) return;
+    const updated: NotificationPreferences = {
+      ...preferences,
+      [key]: !preferences[key],
+    };
+    setPreferences(updated);
+    setIsUpdatingPref(true);
+    await updateNotificationPreferences(currentUser.uid, updated);
+    setIsUpdatingPref(false);
+  };
 
   const handleToggleNotifications = async () => {
     if (!currentUser) {
@@ -699,6 +720,160 @@ export default function Settings() {
                 </Button>
               </div>
             </div>
+
+            {/* Notification Category Preferences */}
+            {currentUser && (
+              <div className="p-4 sm:p-5 rounded-2xl bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] space-y-4">
+                <div className="flex items-center justify-between border-b border-[var(--color-border-light)] pb-3">
+                  <div>
+                    <h4 className="font-serif font-bold text-sm text-[var(--color-text)]">
+                      Notification Categories
+                    </h4>
+                    <p className="text-xs text-[var(--color-text-secondary)] font-serif">
+                      Choose which celestial moments you wish to be notified about.
+                    </p>
+                  </div>
+                  {isUpdatingPref && (
+                    <div className="flex items-center gap-1 text-[11px] font-serif text-[var(--color-text-muted)]">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      <span>Saving...</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-serif">
+                  {/* Letters */}
+                  <div
+                    onClick={() => handleTogglePref('letters')}
+                    className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors ${
+                      preferences.letters
+                        ? 'bg-[var(--color-surface)] border-[var(--color-primary)]/40 text-[var(--color-text)]'
+                        : 'bg-[var(--color-surface)]/50 border-[var(--color-border-light)] text-[var(--color-text-muted)] opacity-70'
+                    }`}
+                  >
+                    <div>
+                      <p className="font-semibold text-xs text-[var(--color-text)]">Heartfelt Letters</p>
+                      <p className="text-[11px] text-[var(--color-text-secondary)]">New written letters in your sanctuary</p>
+                    </div>
+                    <div
+                      className={`w-9 h-5 rounded-full transition-colors flex items-center px-0.5 ${
+                        preferences.letters ? 'bg-[var(--color-primary)]' : 'bg-neutral-300 dark:bg-neutral-700'
+                      }`}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                          preferences.letters ? 'translate-x-4' : 'translate-x-0'
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Open When */}
+                  <div
+                    onClick={() => handleTogglePref('openWhen')}
+                    className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors ${
+                      preferences.openWhen
+                        ? 'bg-[var(--color-surface)] border-[var(--color-primary)]/40 text-[var(--color-text)]'
+                        : 'bg-[var(--color-surface)]/50 border-[var(--color-border-light)] text-[var(--color-text-muted)] opacity-70'
+                    }`}
+                  >
+                    <div>
+                      <p className="font-semibold text-xs text-[var(--color-text)]">Open When Envelopes</p>
+                      <p className="text-[11px] text-[var(--color-text-secondary)]">When letters become available</p>
+                    </div>
+                    <div
+                      className={`w-9 h-5 rounded-full transition-colors flex items-center px-0.5 ${
+                        preferences.openWhen ? 'bg-[var(--color-primary)]' : 'bg-neutral-300 dark:bg-neutral-700'
+                      }`}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                          preferences.openWhen ? 'translate-x-4' : 'translate-x-0'
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Secret Vault */}
+                  <div
+                    onClick={() => handleTogglePref('secrets')}
+                    className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors ${
+                      preferences.secrets
+                        ? 'bg-[var(--color-surface)] border-[var(--color-primary)]/40 text-[var(--color-text)]'
+                        : 'bg-[var(--color-surface)]/50 border-[var(--color-border-light)] text-[var(--color-text-muted)] opacity-70'
+                    }`}
+                  >
+                    <div>
+                      <p className="font-semibold text-xs text-[var(--color-text)]">Secret Vault Unlocks</p>
+                      <p className="text-[11px] text-[var(--color-text-secondary)]">When secrets and clues open</p>
+                    </div>
+                    <div
+                      className={`w-9 h-5 rounded-full transition-colors flex items-center px-0.5 ${
+                        preferences.secrets ? 'bg-[var(--color-primary)]' : 'bg-neutral-300 dark:bg-neutral-700'
+                      }`}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                          preferences.secrets ? 'translate-x-4' : 'translate-x-0'
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Moments Gallery */}
+                  <div
+                    onClick={() => handleTogglePref('moments')}
+                    className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors ${
+                      preferences.moments
+                        ? 'bg-[var(--color-surface)] border-[var(--color-primary)]/40 text-[var(--color-text)]'
+                        : 'bg-[var(--color-surface)]/50 border-[var(--color-border-light)] text-[var(--color-text-muted)] opacity-70'
+                    }`}
+                  >
+                    <div>
+                      <p className="font-semibold text-xs text-[var(--color-text)]">Cherished Moments</p>
+                      <p className="text-[11px] text-[var(--color-text-secondary)]">Photo gallery memories & milestones</p>
+                    </div>
+                    <div
+                      className={`w-9 h-5 rounded-full transition-colors flex items-center px-0.5 ${
+                        preferences.moments ? 'bg-[var(--color-primary)]' : 'bg-neutral-300 dark:bg-neutral-700'
+                      }`}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                          preferences.moments ? 'translate-x-4' : 'translate-x-0'
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Birthday */}
+                  <div
+                    onClick={() => handleTogglePref('birthday')}
+                    className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors ${
+                      preferences.birthday
+                        ? 'bg-[var(--color-surface)] border-[var(--color-primary)]/40 text-[var(--color-text)]'
+                        : 'bg-[var(--color-surface)]/50 border-[var(--color-border-light)] text-[var(--color-text-muted)] opacity-70'
+                    }`}
+                  >
+                    <div>
+                      <p className="font-semibold text-xs text-[var(--color-text)]">Birthday Celebrations</p>
+                      <p className="text-[11px] text-[var(--color-text-secondary)]">Countdown milestones & birthday greetings</p>
+                    </div>
+                    <div
+                      className={`w-9 h-5 rounded-full transition-colors flex items-center px-0.5 ${
+                        preferences.birthday ? 'bg-[var(--color-primary)]' : 'bg-neutral-300 dark:bg-neutral-700'
+                      }`}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                          preferences.birthday ? 'translate-x-4' : 'translate-x-0'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* VAPID Key Setup notice if missing */}
             {!vapidConfigured && (

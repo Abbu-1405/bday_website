@@ -37,6 +37,10 @@
         "activitySummary": {
           "type": "object",
           "description": "Lightweight summary of meaningful user activity counts"
+        },
+        "notificationPreferences": {
+          "type": "object",
+          "description": "User notification preferences across event categories"
         }
       },
       "required": ["uid", "role"]
@@ -360,9 +364,86 @@
         "token",
         "enabled"
       ]
+    },
+    "NotificationEvent": {
+      "title": "Notification Event",
+      "description": "Queued notification event to be processed and delivered to user devices via Cloud Messaging",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Target recipient user ID"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "LETTER_AVAILABLE",
+            "OPEN_WHEN_AVAILABLE",
+            "SECRET_UNLOCKED",
+            "MOMENT_AVAILABLE",
+            "BIRTHDAY",
+            "GENERAL"
+          ],
+          "description": "Event type identifier"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Notification title text"
+        },
+        "body": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Notification body content"
+        },
+        "data": {
+          "type": "object",
+          "description": "Optional payload data metadata such as eventKey, action URL, or content IDs"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "processing", "sent", "failed"],
+          "description": "Delivery queue status"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Server timestamp when event was queued"
+        },
+        "processedAt": {
+          "type": "string",
+          "description": "Timestamp when event began processing or null"
+        },
+        "sentAt": {
+          "type": "string",
+          "description": "Timestamp when event was delivered or null if pending"
+        },
+        "successfulTokenCount": {
+          "type": "number",
+          "description": "Number of devices successfully notified"
+        },
+        "failedTokenCount": {
+          "type": "number",
+          "description": "Number of device tokens that failed delivery"
+        },
+        "failureReason": {
+          "type": "string",
+          "description": "Failure details if status is failed"
+        }
+      },
+      "required": [
+        "userId",
+        "type",
+        "title",
+        "body",
+        "status"
+      ]
     }
   },
   "firestore": {
+    "/notificationEvents/{eventId}": {
+      "schema": "NotificationEvent",
+      "description": "Root collection of notification events awaiting delivery"
+    },
     "/users/{userId}": {
       "schema": "User",
       "description": "User profile document containing account role and timestamp information"

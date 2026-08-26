@@ -55,6 +55,21 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    // Notification Events queue (Phase 2 Event Engine)
+    match /notificationEvents/{eventId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && (
+        request.resource.data.userId == request.auth.uid || isAdmin()
+      ) && request.resource.data.keys().hasAll(['userId', 'type', 'title', 'body', 'status', 'createdAt'])
+        && request.resource.data.userId is string && request.resource.data.userId.size() <= 128
+        && request.resource.data.type is string && request.resource.data.type.size() <= 64
+        && request.resource.data.title is string && request.resource.data.title.size() <= 200
+        && request.resource.data.body is string && request.resource.data.body.size() <= 1000
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if isAdmin();
+    }
+
     // Public Content & Admin Content Management (365 Notes, Wishes, Open When, Secrets, Adore, Moments)
     match /content/{category}/items/{itemId} {
       allow read: if true;

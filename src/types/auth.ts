@@ -1,4 +1,5 @@
 import { User } from 'firebase/auth';
+import { NotificationPreferences } from './notification';
 
 export interface UserProfile {
   uid: string;
@@ -9,6 +10,7 @@ export interface UserProfile {
   createdAt?: string;
   lastSeenAt?: string;
   activitySummary?: Record<string, any>;
+  notificationPreferences?: NotificationPreferences;
 }
 
 export interface AuthContextType {

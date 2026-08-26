@@ -1,9 +1,31 @@
 import { getMessaging, getToken, onMessage, isSupported, deleteToken, Messaging } from 'firebase/messaging';
-import { doc, setDoc, getDoc, updateDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
+import {
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  collection,
+  getDocs,
+  deleteDoc,
+  addDoc,
+  query,
+  orderBy,
+  limit,
+  serverTimestamp,
+} from 'firebase/firestore';
 import { User } from 'firebase/auth';
 import app, { db, isFirebaseConfigured, vapidKey as defaultVapidKey } from '../firebase';
 import firebaseAppletConfig from '../../firebase-applet-config.json';
-import { NotificationPermissionState, NotificationStatusInfo, NotificationToken } from '../types';
+import {
+  NotificationPermissionState,
+  NotificationStatusInfo,
+  NotificationToken,
+  NotificationEvent,
+  NotificationEventType,
+  NotificationPreferences,
+  DEFAULT_NOTIFICATION_PREFERENCES,
+  CreateNotificationEventParams,
+} from '../types';
 
 const TOKEN_STORAGE_KEY = 'starlit_fcm_token';
 const TOKEN_SYNCED_UID_KEY = 'starlit_fcm_uid';
@@ -438,3 +460,496 @@ export async function sendLocalTestNotification(
     return false;
   }
 }
+
+/* ==========================================================================
+   PHASE 2 — NOTIFICATION EVENT ENGINE (EVENT QUEUE & PREFERENCES)
+   ========================================================================== */
+
+const preferencesCache = new Map<string, { prefs: NotificationPreferences; timestamp: number }>();
+const PREF_CACHE_TTL_MS = 60000; // 1 minute local cache
+
+/**
+ * Retrieves the user's notification preferences from Firestore or local cache
+ */
+export async function getNotificationPreferences(userId: string): Promise<NotificationPreferences> {
+  if (!userId) return DEFAULT_NOTIFICATION_PREFERENCES;
+
+  const cached = preferencesCache.get(userId);
+  if (cached && Date.now() - cached.timestamp < PREF_CACHE_TTL_MS) {
+    return cached.prefs;
+  }
+
+  // Check localStorage fallback for fast offline response
+  if (typeof localStorage !== 'undefined') {
+    try {
+      const stored = localStorage.getItem(`starlit_notif_prefs_${userId}`);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === 'object') {
+          const merged = { ...DEFAULT_NOTIFICATION_PREFERENCES, ...parsed };
+          preferencesCache.set(userId, { prefs: merged, timestamp: Date.now() });
+        }
+      }
+    } catch {
+      // Ignore parse failure
+    }
+  }
+
+  if (!isFirebaseConfigured) {
+    return DEFAULT_NOTIFICATION_PREFERENCES;
+  }
+
+  try {
+    const userDocRef = doc(db, 'users', userId);
+    const snap = await getDoc(userDocRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      const userPrefs = data?.notificationPreferences;
+      if (userPrefs && typeof userPrefs === 'object') {
+        const resolved: NotificationPreferences = {
+          enabled: userPrefs.enabled !== false,
+          letters: userPrefs.letters !== false,
+          openWhen: userPrefs.openWhen !== false,
+          secrets: userPrefs.secrets !== false,
+          moments: userPrefs.moments !== false,
+          birthday: userPrefs.birthday !== false,
+        };
+        preferencesCache.set(userId, { prefs: resolved, timestamp: Date.now() });
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem(`starlit_notif_prefs_${userId}`, JSON.stringify(resolved));
+        }
+        return resolved;
+      }
+    }
+  } catch (err) {
+    console.warn('[NotificationEngine] Notice loading user preferences:', err);
+  }
+
+  return DEFAULT_NOTIFICATION_PREFERENCES;
+}
+
+/**
+ * Updates user notification preferences in Firestore and local cache
+ */
+export async function updateNotificationPreferences(
+  userId: string,
+  updates: Partial<NotificationPreferences>
+): Promise<{ success: boolean; preferences?: NotificationPreferences; error?: string }> {
+  if (!userId) {
+    return { success: false, error: 'User ID is required.' };
+  }
+
+  const current = await getNotificationPreferences(userId);
+  const updated: NotificationPreferences = {
+    ...current,
+    ...updates,
+  };
+
+  preferencesCache.set(userId, { prefs: updated, timestamp: Date.now() });
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem(`starlit_notif_prefs_${userId}`, JSON.stringify(updated));
+  }
+
+  if (!isFirebaseConfigured) {
+    return { success: true, preferences: updated };
+  }
+
+  try {
+    const userDocRef = doc(db, 'users', userId);
+    await setDoc(
+      userDocRef,
+      {
+        notificationPreferences: updated,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    );
+    return { success: true, preferences: updated };
+  } catch (err: any) {
+    console.error('[NotificationEngine] Error updating preferences:', err);
+    return {
+      success: false,
+      error: err?.message || 'Failed to save notification preferences.',
+    };
+  }
+}
+
+/**
+ * Determines if a notification event of a given type should be generated for a user
+ */
+export async function shouldCreateNotification(params: {
+  userId: string;
+  type: NotificationEventType | string;
+  preferences?: NotificationPreferences;
+}): Promise<boolean> {
+  const { userId, type, preferences } = params;
+  if (!userId) return false;
+
+  const prefs = preferences || (await getNotificationPreferences(userId));
+
+  // Global master switch
+  if (!prefs.enabled) return false;
+
+  // Category granular check
+  switch (type) {
+    case 'LETTER_AVAILABLE':
+      return prefs.letters !== false;
+    case 'OPEN_WHEN_AVAILABLE':
+      return prefs.openWhen !== false;
+    case 'SECRET_UNLOCKED':
+      return prefs.secrets !== false;
+    case 'MOMENT_AVAILABLE':
+      return prefs.moments !== false;
+    case 'BIRTHDAY':
+      return prefs.birthday !== false;
+    case 'GENERAL':
+    default:
+      return true;
+  }
+}
+
+/**
+ * Generates a clean deterministic document ID for notification event deduplication
+ */
+function generateDeterministicEventId(
+  userId: string,
+  type: string,
+  eventKey?: string
+): string {
+  const cleanUid = userId.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 16);
+  const cleanType = type.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
+  if (eventKey) {
+    const cleanKey = eventKey.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 48);
+    return `evt_${cleanUid}_${cleanType}_${cleanKey}`;
+  }
+  return `evt_${cleanUid}_${cleanType}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/**
+ * Creates a notification event in Firestore under notificationEvents/{eventId}
+ * IMPORTANT:
+ * - This creates the event in the queue with status "pending".
+ * - The frontend does NOT send FCM directly (Phase 3 trusted server handles push dispatch).
+ * - Implements deduplication if an eventKey is provided.
+ * - Non-blocking: returns cleanly without interrupting user actions.
+ */
+export async function createNotificationEvent(
+  params: CreateNotificationEventParams
+): Promise<{
+  success: boolean;
+  eventId?: string;
+  skipped?: boolean;
+  reason?: string;
+  error?: string;
+}> {
+  if (!isFirebaseConfigured) {
+    return { success: false, error: 'Firebase is not configured.' };
+  }
+
+  const { userId, type, title, body, data, eventKey } = params;
+
+  if (!userId || !type || !title || !body) {
+    return {
+      success: false,
+      error: 'Missing required parameters: userId, type, title, body.',
+    };
+  }
+
+  try {
+    // 1. Check user notification preferences
+    const isEligible = await shouldCreateNotification({ userId, type });
+    if (!isEligible) {
+      return {
+        success: true,
+        skipped: true,
+        reason: 'User preferences have disabled this notification type.',
+      };
+    }
+
+    // 2. Compute deterministic event ID if eventKey provided
+    const eventId = generateDeterministicEventId(userId, type, eventKey);
+    const eventRef = doc(db, 'notificationEvents', eventId);
+
+    // 3. Deduplication check: if event with this deterministic ID already exists, do not duplicate
+    if (eventKey) {
+      try {
+        const existingSnap = await getDoc(eventRef);
+        if (existingSnap.exists()) {
+          return {
+            success: true,
+            eventId,
+            skipped: true,
+            reason: 'Notification event already queued or delivered (deduplication matched).',
+          };
+        }
+      } catch {
+        // Continue if getDoc fails
+      }
+    }
+
+    // 4. Create pending notification event document
+    const eventPayload = {
+      userId,
+      type,
+      title: title.trim().slice(0, 200),
+      body: body.trim().slice(0, 1000),
+      data: data || {},
+      status: 'pending',
+      sentAt: null,
+      createdAt: serverTimestamp(),
+    };
+
+    await setDoc(eventRef, eventPayload);
+
+    console.log('[NotificationEngine] Event queued successfully:', {
+      eventId,
+      type,
+      userId,
+    });
+
+    return {
+      success: true,
+      eventId,
+    };
+  } catch (err: any) {
+    console.warn('[NotificationEngine] Non-blocking event creation notice:', err);
+    return {
+      success: false,
+      error: err?.message || 'Failed to create notification event.',
+    };
+  }
+}
+
+/**
+ * High-level convenience triggers for the 6 primary notification event types
+ */
+
+export async function notifyLetterAvailable(
+  userId: string,
+  letterId: string,
+  title?: string
+) {
+  return createNotificationEvent({
+    userId,
+    type: 'LETTER_AVAILABLE',
+    title: 'New Letter Received ✉️',
+    body: title ? `A letter titled "${title}" was written for you.` : 'A new heartfelt letter is waiting for you.',
+    data: { letterId, url: '/reflections' },
+    eventKey: `letter_${letterId}`,
+  });
+}
+
+export async function notifyOpenWhenAvailable(
+  userId: string,
+  letterId: string,
+  envelopeTitle: string
+) {
+  return createNotificationEvent({
+    userId,
+    type: 'OPEN_WHEN_AVAILABLE',
+    title: 'Open When Envelope ✨',
+    body: `Your "${envelopeTitle}" letter is available in your archive.`,
+    data: { letterId, url: '/open-when' },
+    eventKey: `openwhen_${letterId}`,
+  });
+}
+
+export async function notifySecretUnlocked(
+  userId: string,
+  secretId: string,
+  secretTitle?: string
+) {
+  return createNotificationEvent({
+    userId,
+    type: 'SECRET_UNLOCKED',
+    title: 'Secret Vault Unlocked 🗝️',
+    body: secretTitle
+      ? `You uncovered a hidden secret: "${secretTitle}".`
+      : 'A mysterious secret has been unlocked in your vault.',
+    data: { secretId, url: '/secret-vault' },
+    eventKey: `secret_${secretId}`,
+  });
+}
+
+export async function notifyMomentAvailable(
+  userId: string,
+  momentId: string,
+  momentTitle?: string
+) {
+  return createNotificationEvent({
+    userId,
+    type: 'MOMENT_AVAILABLE',
+    title: 'Cherished Moment 📸',
+    body: momentTitle
+      ? `A memory was opened: "${momentTitle}".`
+      : 'A special photo memory is waiting in your gallery.',
+    data: { momentId, url: '/moments' },
+    eventKey: `moment_${momentId}`,
+  });
+}
+
+export async function notifyBirthday(
+  userId: string,
+  customMessage?: string
+) {
+  return createNotificationEvent({
+    userId,
+    type: 'BIRTHDAY',
+    title: 'Happy Birthday! 🎂✨',
+    body: customMessage || 'Wishing you the happiest birthday filled with love, wonder, and starlit warmth.',
+    data: { url: '/countdown' },
+    eventKey: `birthday_${new Date().getFullYear()}`,
+  });
+}
+
+export async function notifyGeneral(
+  userId: string,
+  title: string,
+  body: string,
+  data?: Record<string, any>,
+  eventKey?: string
+) {
+  return createNotificationEvent({
+    userId,
+    type: 'GENERAL',
+    title,
+    body,
+    data,
+    eventKey,
+  });
+}
+
+/**
+ * Fetches recent notification events for the Admin dashboard
+ */
+export async function fetchAdminNotificationEvents(
+  maxCount: number = 50
+): Promise<NotificationEvent[]> {
+  if (!isFirebaseConfigured) return [];
+
+  try {
+    const eventsRef = collection(db, 'notificationEvents');
+    const q = query(eventsRef, orderBy('createdAt', 'desc'), limit(maxCount));
+    const snapshot = await getDocs(q);
+
+    const list: NotificationEvent[] = [];
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      let createdStr = 'Recently';
+      if (data.createdAt?.toDate) {
+        createdStr = data.createdAt.toDate().toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+      } else if (data.createdAt?.seconds) {
+        createdStr = new Date(data.createdAt.seconds * 1000).toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+      }
+
+      list.push({
+        id: docSnap.id,
+        userId: data.userId || 'Unknown',
+        type: data.type || 'GENERAL',
+        title: data.title || 'Untitled Notification',
+        body: data.body || '',
+        data: data.data || {},
+        status: data.status || 'pending',
+        createdAt: createdStr,
+        processedAt: data.processedAt || null,
+        sentAt: data.sentAt || null,
+        successfulTokenCount: typeof data.successfulTokenCount === 'number' ? data.successfulTokenCount : undefined,
+        failedTokenCount: typeof data.failedTokenCount === 'number' ? data.failedTokenCount : undefined,
+        failureReason: data.failureReason || null,
+        error: data.error || null,
+      });
+    });
+
+    return list;
+  } catch (err) {
+    console.warn('[NotificationEngine] Error fetching admin notification events:', err);
+    return [];
+  }
+}
+
+/**
+ * Triggers a test notification through the trusted server-side FCM push delivery pipeline
+ */
+export async function triggerServerTestNotification(params: {
+  userId: string;
+  title?: string;
+  body?: string;
+  type?: string;
+  url?: string;
+}): Promise<{ success: boolean; eventId?: string; deliveryResult?: any; error?: string }> {
+  try {
+    const response = await fetch('/api/notifications/test-event', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      const errJson = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        error: errJson?.error || `Server responded with status ${response.status}`,
+      };
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err: any) {
+    console.error('[NotificationEngine] Error triggering server test push:', err);
+    return {
+      success: false,
+      error: err?.message || 'Network error communicating with push delivery server',
+    };
+  }
+}
+
+/**
+ * Triggers the trusted server to process any pending notification events in the queue
+ */
+export async function triggerServerQueueProcessing(): Promise<{
+  success: boolean;
+  processedCount?: number;
+  results?: any[];
+  error?: string;
+}> {
+  try {
+    const response = await fetch('/api/notifications/process-queue', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errJson = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        error: errJson?.error || `Server responded with status ${response.status}`,
+      };
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err: any) {
+    console.error('[NotificationEngine] Error triggering queue processing:', err);
+    return {
+      success: false,
+      error: err?.message || 'Network error triggering queue processing',
+    };
+  }
+}
+
