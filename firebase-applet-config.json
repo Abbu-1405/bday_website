@@ -1,8 +1,11 @@
 {
   "projectId": "gen-lang-client-0057157522",
+  "appId": "1:1040135494913:web:ee17e2c259d779bbe60f00",
+  "apiKey": "AIzaSyCAj57KTHde1XwxXmg08zNlc4knIRmqumo",
   "authDomain": "gen-lang-client-0057157522.firebaseapp.com",
   "firestoreDatabaseId": "ai-studio-remixstarlitlett-45632027-0698-4661-bfb7-6fea5b923b2b",
   "storageBucket": "gen-lang-client-0057157522.firebasestorage.app",
+  "messagingSenderId": "1040135494913",
   "measurementId": "",
   "recaptchaSiteKey": ""
 }

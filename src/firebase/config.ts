@@ -27,12 +27,12 @@ const storageBucket =
 const messagingSenderId =
   import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ||
   (firebaseAppletConfig as any)?.messagingSenderId ||
-  '';
+  '1040135494913';
 
 const appId =
   import.meta.env.VITE_FIREBASE_APP_ID ||
   (firebaseAppletConfig as any)?.appId ||
-  '';
+  '1:1040135494913:web:ee17e2c259d779bbe60f00';
 
 const firestoreDatabaseId =
   import.meta.env.VITE_FIREBASE_DATABASE_ID ||
