@@ -13,3 +13,4 @@ export * from './btsActivityService';
 export * from './doodleService';
 export * from './notificationService';
 export * from './notificationTemplateService';
+export * from './notificationIntelligenceService';

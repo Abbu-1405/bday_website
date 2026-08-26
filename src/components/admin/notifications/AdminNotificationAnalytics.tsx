@@ -23,6 +23,9 @@ import {
   Target,
   FileText,
   Zap,
+  Brain,
+  Sliders,
+  Moon,
 } from 'lucide-react';
 import {
   NotificationTimeRange,
@@ -34,6 +37,7 @@ import {
   NotificationGlobalControl,
   NotificationSystemHealth,
   NotificationEngagementSummary,
+  NotificationIntelligenceAnalyticsSummary,
 } from '../../../types';
 import {
   fetchNotificationAnalytics,
@@ -44,6 +48,7 @@ import {
 import { AdminTestPushModal } from './AdminTestPushModal';
 import { AdminEmergencySwitchModal } from './AdminEmergencySwitchModal';
 import { AdminNotificationEventInspector } from './AdminNotificationEventInspector';
+import { AdminNotificationIntelligenceControl } from './AdminNotificationIntelligenceControl';
 import { useAuth } from '../../../hooks';
 
 export function AdminNotificationAnalytics() {
@@ -60,6 +65,8 @@ export function AdminNotificationAnalytics() {
   const [systemHealth, setSystemHealth] = useState<NotificationSystemHealth | null>(null);
   const [globalControl, setGlobalControl] = useState<NotificationGlobalControl>({ globalEnabled: true });
   const [engagement, setEngagement] = useState<NotificationEngagementSummary | null>(null);
+  const [intelligence, setIntelligence] = useState<NotificationIntelligenceAnalyticsSummary | null>(null);
+  const [showIntelligenceRules, setShowIntelligenceRules] = useState<boolean>(false);
 
   // Modal states
   const [showTestModal, setShowTestModal] = useState(false);
@@ -83,6 +90,7 @@ export function AdminNotificationAnalytics() {
       setTimeSeries(analyticsData.timeSeries);
       setFailureGroups(analyticsData.failureGroups);
       setEngagement(analyticsData.engagement || null);
+      setIntelligence(analyticsData.intelligence || null);
       setTokenHealth(tHealth);
       setSystemHealth(sHealth);
       setGlobalControl(gControl);
@@ -569,6 +577,233 @@ export function AdminNotificationAnalytics() {
                   No template-specific engagement data captured yet.
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Phase 8: Smart Notification Intelligence & Decision Performance */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
+              <Brain className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-xs font-semibold text-slate-200">
+                  Phase 8: Smart Intelligence & Decision Observability
+                </h4>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                  Explainable Rule Engine
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Deterministic decision funnel, quiet-hours deferrals, cooldown anti-spam, and user preference protection
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setShowIntelligenceRules(!showIntelligenceRules)}
+            className={`px-3 py-1.5 rounded-xl border text-xs font-medium transition-colors flex items-center gap-1.5 self-start sm:self-auto ${
+              showIntelligenceRules
+                ? 'bg-purple-600 text-white border-purple-500 shadow-sm'
+                : 'bg-slate-800 hover:bg-slate-750 text-slate-300 border-slate-700'
+            }`}
+          >
+            <Sliders className="w-3.5 h-3.5" />
+            <span>{showIntelligenceRules ? 'Hide Rules Config' : 'Configure Rules'}</span>
+          </button>
+        </div>
+
+        {/* Expandable Rules Config Drawer */}
+        {showIntelligenceRules && (
+          <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
+            <AdminNotificationIntelligenceControl
+              adminUid={currentUser?.uid}
+              onConfigSaved={() => loadData()}
+            />
+          </div>
+        )}
+
+        {/* Top Funnel Metrics */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800/90 space-y-1">
+            <div className="text-slate-400 text-[11px] flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-slate-400" />
+              <span>Decisions Evaluated</span>
+            </div>
+            <div className="text-lg font-bold text-slate-100 font-mono">
+              {intelligence?.totalDecisions ?? 0}
+            </div>
+            <div className="text-[10px] text-slate-500 font-mono">100% evaluated</div>
+          </div>
+
+          <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800/90 space-y-1">
+            <div className="text-slate-400 text-[11px] flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Allowed Directly</span>
+            </div>
+            <div className="text-lg font-bold text-emerald-400 font-mono">
+              {intelligence?.allowedCount ?? 0}
+            </div>
+            <div className="text-[10px] text-emerald-400/90 font-mono">
+              {intelligence?.allowedRate ?? 0}% throughput
+            </div>
+          </div>
+
+          <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800/90 space-y-1">
+            <div className="text-slate-400 text-[11px] flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-amber-400" />
+              <span>Timing Postponed</span>
+            </div>
+            <div className="text-lg font-bold text-amber-400 font-mono">
+              {intelligence?.delayedCount ?? 0}
+            </div>
+            <div className="text-[10px] text-amber-400/90 font-mono">
+              {intelligence?.delayedRate ?? 0}% deferred
+            </div>
+          </div>
+
+          <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800/90 space-y-1">
+            <div className="text-slate-400 text-[11px] flex items-center gap-1.5">
+              <AlertOctagon className="w-3.5 h-3.5 text-rose-400" />
+              <span>Suppressed / Filtered</span>
+            </div>
+            <div className="text-lg font-bold text-rose-400 font-mono">
+              {intelligence?.suppressedCount ?? 0}
+            </div>
+            <div className="text-[10px] text-rose-400/90 font-mono">
+              {intelligence?.suppressedRate ?? 0}% filtered
+            </div>
+          </div>
+        </div>
+
+        {/* Smart Protection Impact */}
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-purple-950/20 p-3.5 rounded-xl border border-purple-900/30 text-xs">
+          <div className="space-y-0.5">
+            <div className="text-[10px] uppercase font-mono text-purple-300/70">Anti-Spam Spacing</div>
+            <div className="font-semibold text-purple-200 font-mono text-sm">
+              {intelligence?.savedByCooldowns ?? 0}
+            </div>
+            <div className="text-[10px] text-purple-300/80">Spaced by cooldown rules</div>
+          </div>
+
+          <div className="space-y-0.5">
+            <div className="text-[10px] uppercase font-mono text-purple-300/70">Quiet Hours Guard</div>
+            <div className="font-semibold text-indigo-300 font-mono text-sm">
+              {intelligence?.delayedByQuietHours ?? 0}
+            </div>
+            <div className="text-[10px] text-purple-300/80">Protected recipient sleep</div>
+          </div>
+
+          <div className="space-y-0.5">
+            <div className="text-[10px] uppercase font-mono text-purple-300/70">Window Optimization</div>
+            <div className="font-semibold text-emerald-300 font-mono text-sm">
+              {intelligence?.delayedBySmartWindow ?? 0}
+            </div>
+            <div className="text-[10px] text-purple-300/80">Shifted to peak read hour</div>
+          </div>
+
+          <div className="space-y-0.5">
+            <div className="text-[10px] uppercase font-mono text-purple-300/70">Average Deferral</div>
+            <div className="font-semibold text-amber-300 font-mono text-sm">
+              {intelligence?.avgDelayMinutes ?? 0} min
+            </div>
+            <div className="text-[10px] text-purple-300/80">Mean shift for timing delay</div>
+          </div>
+        </div>
+
+        {/* Priority & Reason Breakdown Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-1">
+          {/* Decision Reason Audit Distribution */}
+          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800/90 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-200">Decision Outcome Reasons</span>
+              <span className="text-[10px] font-mono text-slate-400">Explainable Audit Trail</span>
+            </div>
+
+            {intelligence?.byReason && intelligence.byReason.length > 0 ? (
+              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                {intelligence.byReason.map((r) => (
+                  <div key={r.reason} className="space-y-1 text-xs">
+                    <div className="flex justify-between items-center text-[11px]">
+                      <span className="text-slate-300 font-medium truncate max-w-[200px]">
+                        {r.label}
+                      </span>
+                      <span className="font-mono text-slate-400">
+                        {r.count} ({r.percentage}%)
+                      </span>
+                    </div>
+                    <div className="h-1.5 bg-slate-900 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${
+                          r.reason.startsWith('ALLOWED')
+                            ? 'bg-emerald-500'
+                            : r.reason === 'QUIET_HOURS' || r.reason === 'SMART_DELAY' || r.reason === 'SCHEDULED_FOR_LATER'
+                            ? 'bg-amber-500'
+                            : 'bg-rose-500'
+                        }`}
+                        style={{ width: `${Math.max(r.percentage, 2)}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs text-slate-500 py-4 text-center">
+                No decision reason telemetry recorded yet in this time range.
+              </div>
+            )}
+          </div>
+
+          {/* Decision Priority Distribution */}
+          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800/90 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-200">Delivery Priority Distribution</span>
+              <span className="text-[10px] font-mono text-slate-400">Tier Allocation</span>
+            </div>
+
+            <div className="space-y-2.5">
+              {intelligence?.byPriority?.map((p) => {
+                const badgeColor =
+                  p.priority === 'URGENT'
+                    ? 'text-rose-400 bg-rose-500/10 border-rose-500/30'
+                    : p.priority === 'HIGH'
+                    ? 'text-amber-400 bg-amber-500/10 border-amber-500/30'
+                    : p.priority === 'NORMAL'
+                    ? 'text-indigo-400 bg-indigo-500/10 border-indigo-500/30'
+                    : 'text-slate-400 bg-slate-800 border-slate-700';
+
+                const barColor =
+                  p.priority === 'URGENT'
+                    ? 'bg-rose-500'
+                    : p.priority === 'HIGH'
+                    ? 'bg-amber-500'
+                    : p.priority === 'NORMAL'
+                    ? 'bg-indigo-500'
+                    : 'bg-slate-600';
+
+                return (
+                  <div key={p.priority} className="space-y-1">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${badgeColor}`}>
+                        {p.priority}
+                      </span>
+                      <span className="font-mono text-slate-300 text-xs">
+                        {p.count} events ({p.percentage}%)
+                      </span>
+                    </div>
+                    <div className="h-1.5 bg-slate-900 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${barColor}`}
+                        style={{ width: `${Math.max(p.percentage, 2)}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

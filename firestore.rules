@@ -54,9 +54,10 @@ service cloud.firestore {
       allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
     }
 
-    // Admin metadata & read states (Admin only)
+    // Admin metadata & read states (Admin only write, signed-in read for global flags)
     match /adminMeta/{document=**} {
-      allow read, write: if isAdmin();
+      allow read: if isSignedIn() || isAdmin();
+      allow write: if isAdmin();
     }
 
     // Notification Analytics Aggregates (Phase 6 Admin Analytics & Control Center)
@@ -70,7 +71,7 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
-    // Notification Events queue (Phase 2 & Phase 4 Event Engine & Scheduler, Phase 7 Engagement Tracking)
+    // Notification Events queue (Phase 2 & Phase 4 Event Engine & Scheduler, Phase 7 Engagement Tracking, Phase 8 Smart Intelligence)
     match /notificationEvents/{eventId} {
       allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
       allow create: if isSignedIn() && (
@@ -80,7 +81,7 @@ service cloud.firestore {
         && request.resource.data.type is string && request.resource.data.type.size() <= 64
         && request.resource.data.title is string && request.resource.data.title.size() <= 200
         && request.resource.data.body is string && request.resource.data.body.size() <= 1000
-        && (request.resource.data.status == 'pending' || request.resource.data.status == 'scheduled')
+        && (request.resource.data.status == 'pending' || request.resource.data.status == 'scheduled' || request.resource.data.status == 'failed')
         && request.resource.data.createdAt == request.time;
       allow update: if isAdmin() || (
         isSignedIn() && resource.data.userId == request.auth.uid

@@ -32,6 +32,7 @@ import {
   CreateNotificationEventParams,
   TemplateVariables,
   NotificationTemplate,
+  NotificationGlobalControl,
 } from '../types';
 import {
   renderNotificationContent,
@@ -39,6 +40,7 @@ import {
   DEFAULT_NOTIFICATION_TEMPLATES,
 } from './notificationTemplateService';
 import { getNotificationGlobalControl } from './notificationAnalyticsService';
+import { evaluateNotificationDecision } from './notificationIntelligenceService';
 
 const TOKEN_STORAGE_KEY = 'starlit_fcm_token';
 const TOKEN_SYNCED_UID_KEY = 'starlit_fcm_uid';
@@ -823,16 +825,10 @@ export async function createNotificationEvent(
 
   try {
     // 0. Check Global Emergency Switch
+    let globalControl: NotificationGlobalControl = { globalEnabled: true, reason: '' };
     if (rawData?.isTest !== 'true') {
       try {
-        const globalControl = await getNotificationGlobalControl();
-        if (globalControl.globalEnabled === false) {
-          return {
-            success: false,
-            skipped: true,
-            reason: `Notification creation paused by administrator emergency stop (${globalControl.reason || 'All notifications paused'}).`,
-          };
-        }
+        globalControl = await getNotificationGlobalControl();
       } catch (gErr) {
         console.warn('[NotificationEngine] Notice verifying global notification control state:', gErr);
       }
@@ -886,37 +882,27 @@ export async function createNotificationEvent(
       };
     }
 
-    // 1. Check user notification preferences
+    // 1. Fetch user notification preferences
     const userPrefs = await getNotificationPreferences(userId);
-    if (!bypassPreferences) {
-      const isEligible = await shouldCreateNotification({ userId, type, preferences: userPrefs });
-      if (!isEligible) {
-        return {
-          success: true,
-          skipped: true,
-          reason: 'User preferences have disabled this notification type.',
-        };
+    const resolvedTimezone = requestedTimezone || userPrefs.timezone || getDetectedTimezone();
+
+    // 2. Parse explicitly requested scheduled date if any
+    let resolvedScheduledDate: Date | null = null;
+    if (rawScheduledAt) {
+      if (rawScheduledAt instanceof Date) {
+        resolvedScheduledDate = rawScheduledAt;
+      } else if (typeof rawScheduledAt === 'string' || typeof rawScheduledAt === 'number') {
+        resolvedScheduledDate = new Date(rawScheduledAt);
       }
     }
 
-    // 2. Anti-spam cooldown check (for repetitive events)
-    const categoryKey = cooldownCategory || type;
-    const cooldownKey = `${userId}_${categoryKey}`;
-    const lastTrigger = cooldownTracker.get(cooldownKey);
-    const now = Date.now();
-    if (!eventKey && lastTrigger && now - lastTrigger < COOLDOWN_WINDOW_MS && type !== 'BIRTHDAY') {
-      return {
-        success: true,
-        skipped: true,
-        reason: `Anti-spam cooldown active for category '${categoryKey}'. Next allowed in ${Math.ceil((COOLDOWN_WINDOW_MS - (now - lastTrigger)) / 60000)}m.`,
-      };
-    }
+    const isExplicitlyScheduled = requestedDeliveryMode === 'scheduled' || Boolean(resolvedScheduledDate);
 
-    // 3. Compute deterministic event ID if eventKey provided
+    // 3. Compute deterministic event ID
     const eventId = generateDeterministicEventId(userId, type, eventKey);
     const eventRef = doc(db, 'notificationEvents', eventId);
 
-    // 4. Deduplication check: if event with this deterministic ID already exists, do not duplicate
+    // 4. Deduplication check
     if (eventKey) {
       try {
         const existingSnap = await getDoc(eventRef);
@@ -933,36 +919,21 @@ export async function createNotificationEvent(
       }
     }
 
-    // 5. Timezone & Quiet Hours Resolution
-    const resolvedTimezone = requestedTimezone || userPrefs.timezone || getDetectedTimezone();
-    let isScheduled = requestedDeliveryMode === 'scheduled' || Boolean(rawScheduledAt);
-    let resolvedScheduledDate: Date | null = null;
-
-    if (rawScheduledAt) {
-      if (rawScheduledAt instanceof Date) {
-        resolvedScheduledDate = rawScheduledAt;
-      } else if (typeof rawScheduledAt === 'string' || typeof rawScheduledAt === 'number') {
-        resolvedScheduledDate = new Date(rawScheduledAt);
-      }
-    }
-
-    // If scheduled for a future time
-    if (resolvedScheduledDate && resolvedScheduledDate.getTime() > now) {
-      isScheduled = true;
-    }
-
-    // Apply quiet hours adjustment if applicable
-    if (isScheduled && resolvedScheduledDate && !bypassQuietHours) {
-      const quietHours = {
-        enabled: userPrefs.quietHoursEnabled,
-        start: userPrefs.quietHoursStart,
-        end: userPrefs.quietHoursEnd,
-      };
-      resolvedScheduledDate = adjustForQuietHours(resolvedScheduledDate, resolvedTimezone, quietHours);
-    }
-
-    const deliveryMode: NotificationDeliveryMode = isScheduled ? 'scheduled' : 'immediate';
-    const status: NotificationEventStatus = isScheduled ? 'scheduled' : 'pending';
+    // 5. Centralized Smart Notification Decision Evaluation (Phase 8)
+    const decisionResult = await evaluateNotificationDecision({
+      userId,
+      type,
+      userPrefs,
+      explicitScheduledDate: resolvedScheduledDate,
+      isExplicitlyScheduled,
+      timezone: resolvedTimezone,
+      isTest: rawData?.isTest === 'true' || rawData?.isTest === true,
+      globalEnabled: globalControl.globalEnabled,
+      globalPauseReason: globalControl.reason,
+      cooldownCategory,
+      bypassPreferences,
+      bypassQuietHours,
+    });
 
     // 6. Deep link route sanitization
     const finalData = { ...(rawData || {}) };
@@ -970,7 +941,35 @@ export async function createNotificationEvent(
       finalData.url = defaultActionRoute;
     }
 
-    // 7. Create event payload for Firestore (Store immutable rendered title & body)
+    // Determine final delivery attributes based on smart decision
+    let finalStatus: NotificationEventStatus = 'pending';
+    let finalDeliveryMode: NotificationDeliveryMode = 'immediate';
+    let finalScheduledAt: string | null = null;
+
+    if (decisionResult.decision === 'SUPPRESS') {
+      finalStatus = 'failed';
+      finalDeliveryMode = isExplicitlyScheduled ? 'scheduled' : 'immediate';
+    } else if (decisionResult.decision === 'DELAY') {
+      finalStatus = 'scheduled';
+      finalDeliveryMode = 'scheduled';
+      finalScheduledAt = decisionResult.recommendedDeliveryAt || (resolvedScheduledDate ? resolvedScheduledDate.toISOString() : null);
+    } else {
+      // ALLOW
+      if (decisionResult.recommendedDeliveryAt) {
+        finalStatus = 'scheduled';
+        finalDeliveryMode = 'scheduled';
+        finalScheduledAt = decisionResult.recommendedDeliveryAt;
+      } else if (isExplicitlyScheduled && resolvedScheduledDate) {
+        finalStatus = 'scheduled';
+        finalDeliveryMode = 'scheduled';
+        finalScheduledAt = resolvedScheduledDate.toISOString();
+      } else {
+        finalStatus = 'pending';
+        finalDeliveryMode = 'immediate';
+      }
+    }
+
+    // 7. Assemble immutable audit payload
     const eventPayload: Record<string, any> = {
       userId,
       type,
@@ -979,33 +978,58 @@ export async function createNotificationEvent(
       templateId: finalTemplateId,
       templateVersion: finalTemplateVersion,
       data: finalData,
-      status,
-      deliveryMode,
+      status: finalStatus,
+      deliveryMode: finalDeliveryMode,
       timezone: resolvedTimezone,
       attemptCount: 0,
       createdAt: serverTimestamp(),
+
+      // Phase 8: Smart Decision Audit Trail
+      decision: decisionResult.decision,
+      decisionReason: decisionResult.reason,
+      decisionReasonExplanation: decisionResult.reasonExplanation,
+      decisionPriority: decisionResult.priority,
+      decisionAt: serverTimestamp(),
+      decisionSource: decisionResult.source,
+      signalsUsed: decisionResult.signalsUsed || [],
     };
 
-    if (isScheduled && resolvedScheduledDate) {
-      eventPayload.scheduledAt = resolvedScheduledDate.toISOString();
+    if (finalScheduledAt) {
+      eventPayload.scheduledAt = finalScheduledAt;
+      eventPayload.recommendedDeliveryAt = finalScheduledAt;
     }
     if (cooldownCategory) {
       eventPayload.cooldownCategory = cooldownCategory;
     }
+    if (decisionResult.decision === 'SUPPRESS') {
+      eventPayload.failureReason = decisionResult.reasonExplanation;
+    }
 
     await setDoc(eventRef, eventPayload);
-    cooldownTracker.set(cooldownKey, now);
 
-    console.log('[NotificationEngine] Event queued successfully:', {
+    // Update client cooldown tracker
+    const categoryKey = cooldownCategory || type;
+    const cooldownKey = `${userId}_${categoryKey}`;
+    cooldownTracker.set(cooldownKey, Date.now());
+
+    console.log('[NotificationEngine] Event evaluated & recorded:', {
       eventId,
       type,
-      templateId: finalTemplateId,
-      templateVersion: finalTemplateVersion,
-      status,
-      deliveryMode,
-      scheduledAt: eventPayload.scheduledAt,
-      userId,
+      decision: decisionResult.decision,
+      reason: decisionResult.reason,
+      priority: decisionResult.priority,
+      status: finalStatus,
+      scheduledAt: finalScheduledAt,
     });
+
+    if (decisionResult.decision === 'SUPPRESS') {
+      return {
+        success: true,
+        eventId,
+        skipped: true,
+        reason: decisionResult.reasonExplanation,
+      };
+    }
 
     return {
       success: true,

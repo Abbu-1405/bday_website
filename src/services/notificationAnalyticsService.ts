@@ -29,6 +29,7 @@ import {
   NotificationEngagementSummary,
   NotificationCategoryEngagement,
   NotificationTemplateEngagement,
+  NotificationIntelligenceAnalyticsSummary,
 } from '../types';
 import { getVapidKey, isPushSupported } from './notificationService';
 
@@ -140,6 +141,7 @@ export async function fetchNotificationAnalytics(
   failureGroups: NotificationFailureGroup[];
   rawEventsCount: number;
   engagement: NotificationEngagementSummary;
+  intelligence: NotificationIntelligenceAnalyticsSummary;
 }> {
   if (!isFirebaseConfigured) {
     return createFallbackAnalytics();
@@ -227,6 +229,18 @@ export async function fetchNotificationAnalytics(
     const timeSeriesMap: Map<string, NotificationTimeSeriesPoint> = new Map();
     const failureItems: NotificationFailureItem[] = [];
 
+    // Phase 8: Smart Intelligence Counters
+    let intAllowed = 0;
+    let intDelayed = 0;
+    let intSuppressed = 0;
+    let savedByCooldowns = 0;
+    let delayedByQuietHours = 0;
+    let delayedBySmartWindow = 0;
+    let totalDelayMinutes = 0;
+    let delayCalculatedCount = 0;
+    const reasonCounts: Record<string, number> = {};
+    const priorityCounts: Record<string, number> = { URGENT: 0, HIGH: 0, NORMAL: 0, LOW: 0 };
+
     snapshot.forEach((docSnap) => {
       const data = docSnap.data();
       const createdDate = parseFirestoreTimestamp(data.createdAt);
@@ -251,6 +265,39 @@ export async function fetchNotificationAnalytics(
         scheduledCount++;
       } else {
         immediateCount++;
+      }
+
+      // Phase 8: Record Smart Intelligence Decision
+      const decision = data.decision || (status === 'failed' ? 'SUPPRESS' : status === 'scheduled' ? 'DELAY' : 'ALLOW');
+      const reason = data.decisionReason || (status === 'failed' ? 'SUPPRESSION_RULE' : status === 'scheduled' ? 'SCHEDULED_FOR_LATER' : 'ALLOWED_IMMEDIATE');
+      const priority = (data.decisionPriority as 'URGENT' | 'HIGH' | 'NORMAL' | 'LOW') || (type === 'LETTER_AVAILABLE' || type === 'SECRET_UNLOCKED' ? 'HIGH' : type === 'GENERAL' ? 'LOW' : 'NORMAL');
+
+      if (decision === 'ALLOW') intAllowed++;
+      else if (decision === 'DELAY') intDelayed++;
+      else if (decision === 'SUPPRESS') intSuppressed++;
+
+      if (priorityCounts[priority] !== undefined) priorityCounts[priority]++;
+      else priorityCounts.NORMAL++;
+
+      reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
+
+      if (reason === 'COOLDOWN' || reason === 'HOURLY_LIMIT' || reason === 'DAILY_LIMIT' || reason === 'CATEGORY_DAILY_LIMIT') {
+        savedByCooldowns++;
+      }
+      if (reason === 'QUIET_HOURS') {
+        delayedByQuietHours++;
+      }
+      if (reason === 'ALLOWED_PREFERRED_WINDOW' || reason === 'SMART_DELAY') {
+        delayedBySmartWindow++;
+      }
+
+      const scheduledDateForDelay = parseFirestoreTimestamp(data.scheduledAt);
+      if (decision === 'DELAY' && createdDate && scheduledDateForDelay) {
+        const diffMin = Math.round((scheduledDateForDelay.getTime() - createdDate.getTime()) / 60000);
+        if (diffMin > 0 && diffMin < 10080) {
+          totalDelayMinutes += diffMin;
+          delayCalculatedCount++;
+        }
       }
 
       // Check quiet-hours delay indicator (e.g. attemptCount > 0 while scheduled)
@@ -619,6 +666,62 @@ export async function fetchNotificationAnalytics(
       byDeliveryMode,
     };
 
+    // Build Phase 8 Intelligence summary
+    const totalDecisions = total;
+    const allowedRate = totalDecisions > 0 ? Math.round((intAllowed / totalDecisions) * 1000) / 10 : 0;
+    const delayedRate = totalDecisions > 0 ? Math.round((intDelayed / totalDecisions) * 1000) / 10 : 0;
+    const suppressedRate = totalDecisions > 0 ? Math.round((intSuppressed / totalDecisions) * 1000) / 10 : 0;
+    const avgDelayMinutes = delayCalculatedCount > 0 ? Math.round(totalDelayMinutes / delayCalculatedCount) : 0;
+
+    const REASON_LABELS: Record<string, string> = {
+      ALLOWED_IMMEDIATE: 'Immediate Delivery Allowed',
+      ALLOWED_SCHEDULED: 'Scheduled Delivery Allowed',
+      ALLOWED_PREFERRED_WINDOW: 'Preferred Window Optimization',
+      QUIET_HOURS: 'Quiet Hours Deferral',
+      COOLDOWN: 'Anti-Spam Spacing Cooldown',
+      HOURLY_LIMIT: 'Hourly Frequency Limit',
+      DAILY_LIMIT: 'Daily Global Limit',
+      CATEGORY_DAILY_LIMIT: 'Category Frequency Limit',
+      USER_DISABLED: 'User Notification Opt-Out',
+      CATEGORY_DISABLED: 'Category Preference Opt-Out',
+      EMERGENCY_STOP: 'Emergency System Pause',
+      TEST_PUSH_BYPASS: 'Admin Test Push Bypass',
+      FALLBACK_ALLOWED: 'System Fallback Delivery',
+      SMART_DELAY: 'Smart Window Timing Delay',
+      SCHEDULED_FOR_LATER: 'Scheduled For Later',
+    };
+
+    const byReason = Object.entries(reasonCounts)
+      .map(([rCode, count]) => ({
+        reason: rCode,
+        label: REASON_LABELS[rCode] || rCode.replace(/_/g, ' ').toLowerCase().replace(/^\w/, (c) => c.toUpperCase()),
+        count,
+        percentage: totalDecisions > 0 ? Math.round((count / totalDecisions) * 1000) / 10 : 0,
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    const byPriority = (['URGENT', 'HIGH', 'NORMAL', 'LOW'] as const).map((p) => ({
+      priority: p,
+      count: priorityCounts[p] || 0,
+      percentage: totalDecisions > 0 ? Math.round(((priorityCounts[p] || 0) / totalDecisions) * 1000) / 10 : 0,
+    }));
+
+    const intelligence: NotificationIntelligenceAnalyticsSummary = {
+      totalDecisions,
+      allowedCount: intAllowed,
+      delayedCount: intDelayed,
+      suppressedCount: intSuppressed,
+      allowedRate,
+      delayedRate,
+      suppressedRate,
+      byReason,
+      byPriority,
+      savedByCooldowns,
+      delayedByQuietHours,
+      delayedBySmartWindow,
+      avgDelayMinutes,
+    };
+
     return {
       summary,
       categoryStats,
@@ -626,6 +729,7 @@ export async function fetchNotificationAnalytics(
       failureGroups,
       rawEventsCount: total,
       engagement,
+      intelligence,
     };
   } catch (err) {
     console.error('Error computing notification analytics:', err);
@@ -964,6 +1068,16 @@ export async function fetchNotificationHistoryPaginated(params: {
         openedCount: typeof data.openedCount === 'number' ? data.openedCount : data.clickedAt ? 1 : 0,
         targetOpenedAt: parseFirestoreTimestamp(data.targetOpenedAt)?.toISOString() || null,
         interactionSource: data.interactionSource || null,
+
+        // Phase 8: Smart Decision Audit Trail
+        decision: data.decision || null,
+        decisionReason: data.decisionReason || null,
+        decisionReasonExplanation: data.decisionReasonExplanation || null,
+        decisionPriority: data.decisionPriority || null,
+        decisionAt: parseFirestoreTimestamp(data.decisionAt)?.toISOString() || null,
+        decisionSource: data.decisionSource || null,
+        recommendedDeliveryAt: parseFirestoreTimestamp(data.recommendedDeliveryAt)?.toISOString() || (typeof data.recommendedDeliveryAt === 'string' ? data.recommendedDeliveryAt : null),
+        signalsUsed: Array.isArray(data.signalsUsed) ? data.signalsUsed : null,
       });
     });
 
@@ -1035,6 +1149,26 @@ function createFallbackAnalytics() {
         immediate: { sent: 0, clicked: 0, ctr: 0, targetOpened: 0, contentOpenRate: 0 },
         scheduled: { sent: 0, clicked: 0, ctr: 0, targetOpened: 0, contentOpenRate: 0 },
       },
+    },
+    intelligence: {
+      totalDecisions: 0,
+      allowedCount: 0,
+      delayedCount: 0,
+      suppressedCount: 0,
+      allowedRate: 0,
+      delayedRate: 0,
+      suppressedRate: 0,
+      byReason: [],
+      byPriority: [
+        { priority: 'URGENT' as const, count: 0, percentage: 0 },
+        { priority: 'HIGH' as const, count: 0, percentage: 0 },
+        { priority: 'NORMAL' as const, count: 0, percentage: 0 },
+        { priority: 'LOW' as const, count: 0, percentage: 0 },
+      ],
+      savedByCooldowns: 0,
+      delayedByQuietHours: 0,
+      delayedBySmartWindow: 0,
+      avgDelayMinutes: 0,
     },
   };
 }

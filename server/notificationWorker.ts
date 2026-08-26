@@ -326,6 +326,37 @@ export async function processNotificationEvent(eventId: string): Promise<Process
 }
 
 /**
+ * Scans and moves due scheduled events from 'scheduled' to 'pending'
+ */
+export async function processDueScheduledEvents(maxBatchSize: number = 30): Promise<number> {
+  try {
+    const nowIso = new Date().toISOString();
+    const snapshot = await adminDb
+      .collection('notificationEvents')
+      .where('status', '==', 'scheduled')
+      .where('scheduledAt', '<=', nowIso)
+      .limit(maxBatchSize)
+      .get();
+
+    if (snapshot.empty) {
+      return 0;
+    }
+
+    let processedCount = 0;
+    for (const docSnap of snapshot.docs) {
+      await docSnap.ref.update({
+        status: 'pending',
+      });
+      processedCount++;
+    }
+    return processedCount;
+  } catch (err: any) {
+    console.warn('[NotificationWorker] Notice during scheduled events sweep:', err?.message || err);
+    return 0;
+  }
+}
+
+/**
  * Scans and processes all pending notification events in Firestore
  */
 export async function processAllPendingEvents(maxBatchSize: number = 20): Promise<ProcessEventResult[]> {

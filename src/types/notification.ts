@@ -65,6 +65,16 @@ export interface NotificationEvent {
   openedCount?: number;
   targetOpenedAt?: any | string | null;
   interactionSource?: 'push_notification' | 'in_app' | 'history_click' | string | null;
+
+  // Phase 8: Smart Notification Intelligence & Audit Trail
+  decision?: 'ALLOW' | 'DELAY' | 'SUPPRESS' | string | null;
+  decisionReason?: string | null;
+  decisionReasonExplanation?: string | null;
+  decisionPriority?: 'URGENT' | 'HIGH' | 'NORMAL' | 'LOW' | string | null;
+  decisionAt?: any | string | null;
+  decisionSource?: string | null;
+  recommendedDeliveryAt?: any | string | null;
+  signalsUsed?: string[] | null;
 }
 
 export interface NotificationTemplate {
@@ -297,4 +307,6 @@ export interface NotificationEngagementSummary {
     scheduled: { sent: number; clicked: number; ctr: number; targetOpened: number; contentOpenRate: number };
   };
 }
+
+export * from './notificationIntelligence';
 
