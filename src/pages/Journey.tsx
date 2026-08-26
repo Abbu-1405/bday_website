@@ -470,7 +470,7 @@ export default function Journey() {
                       {/* Content Card (Memory Fragment) */}
                       <div className="w-full md:w-[calc(50%-2.5rem)] pl-4 md:pl-0">
                         <Surface
-                          variant="interactive"
+                          variant="elevated"
                           padding="md"
                           onClick={() => handleStageNavigation(stage.route)}
                           className={cn(
@@ -624,7 +624,7 @@ export default function Journey() {
             </div>
 
             <Surface
-              variant="card"
+              variant="elevated"
               padding="md"
               className={cn(
                 "space-y-4 shadow-xs rounded-xl",
@@ -792,7 +792,7 @@ export default function Journey() {
             </div>
 
             <Surface
-              variant="card"
+              variant="elevated"
               padding="md"
               className={cn(
                 "space-y-4 shadow-xs rounded-xl",

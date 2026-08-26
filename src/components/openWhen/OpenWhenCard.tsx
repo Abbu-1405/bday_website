@@ -247,7 +247,7 @@ const getThemedEnvelopeStyle = (
   };
 };
 
-export interface OpenWhenCardProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface OpenWhenCardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onSelect'> {
   letter: OpenWhenLetter;
   onSelect: (letter: OpenWhenLetter) => void;
 }

@@ -149,7 +149,7 @@ const getPersonality = (letter: OpenWhenLetter): PersonalityStyle => {
   };
 };
 
-export interface VintageOpenWhenCardProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface VintageOpenWhenCardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onSelect'> {
   letter: OpenWhenLetter;
   onSelect: (letter: OpenWhenLetter) => void;
 }

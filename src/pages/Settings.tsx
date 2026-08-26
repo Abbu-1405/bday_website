@@ -516,7 +516,7 @@ export default function Settings() {
 
                 <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-center">
                   {isAdmin && (
-                    <Badge variant="accent" size="md" className="font-serif flex items-center gap-1">
+                    <Badge variant="primary" size="md" className="font-serif flex items-center gap-1">
                       <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
                       <span>Admin Role</span>
                     </Badge>
@@ -611,7 +611,7 @@ export default function Settings() {
                   Unsupported Browser
                 </Badge>
               ) : permissionState === 'denied' ? (
-                <Badge variant="destructive" size="md" className="font-serif">
+                <Badge variant="error" size="md" className="font-serif">
                   Permission Blocked
                 </Badge>
               ) : permissionState === 'granted' && activeToken ? (

@@ -1,3 +1,4 @@
+export * from './ErrorBoundary';
 export * from './ProtectedRoute';
 export * from './Button';
 export * from './Surface';

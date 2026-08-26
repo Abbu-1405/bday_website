@@ -14,7 +14,7 @@ export const StreakPresentation: React.FC<StreakPresentationProps> = ({
 }) => {
   return (
     <Surface
-      variant="card"
+      variant="elevated"
       padding="md"
       className={`border border-[var(--color-border-light)] bg-[var(--color-card)] space-y-3 shadow-xs ${className || ''}`}
     >

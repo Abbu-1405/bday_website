@@ -4,7 +4,7 @@ import { AdoreItem } from '../../types';
 import { cn } from '../../utils';
 import { useTheme } from '../../hooks';
 
-export interface AdoreCardProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface AdoreCardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onSelect'> {
   item: AdoreItem;
   onSelect: (item: AdoreItem) => void;
 }

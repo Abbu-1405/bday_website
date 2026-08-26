@@ -4,7 +4,7 @@ import { Moment } from '../../types';
 import { cn } from '../../utils';
 import { useTheme } from '../../hooks';
 
-export interface MomentCardProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface MomentCardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onSelect'> {
   moment: Moment;
   onSelect: (moment: Moment) => void;
   aspectRatio?: 'square' | 'video' | 'portrait';

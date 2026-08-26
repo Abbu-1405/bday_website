@@ -37,7 +37,7 @@ export const AchievementsSection: React.FC<AchievementsSectionProps> = ({ classN
     <div className={`space-y-8 ${className || ''}`}>
       {/* 1. Progress Summary Ribbon */}
       <Surface
-        variant="card"
+        variant="elevated"
         padding="md"
         className="border border-[var(--color-border-light)] bg-[var(--color-card)] space-y-4 shadow-xs"
       >

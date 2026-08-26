@@ -136,7 +136,7 @@ export const BadgeGrid: React.FC<BadgeGridProps> = ({ badges, className }) => {
           return (
             <Surface
               key={badge.id}
-              variant="interactive"
+              variant="elevated"
               padding="md"
               onClick={() => setSelectedBadge(badge)}
               tabIndex={0}
