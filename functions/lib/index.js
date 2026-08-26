@@ -44,6 +44,24 @@ function isInvalidTokenErrorCode(errorCode) {
     ];
     return invalidCodes.includes(errorCode);
 }
+async function isGlobalNotificationPaused() {
+    try {
+        const metaSnap = await db.collection('adminMeta').doc('notifications').get();
+        if (metaSnap.exists) {
+            const data = metaSnap.data();
+            if (data && data.globalEnabled === false) {
+                return {
+                    paused: true,
+                    reason: data.reason || 'Global notifications paused by administrator emergency stop',
+                };
+            }
+        }
+    }
+    catch (err) {
+        // Non-blocking on read error
+    }
+    return { paused: false };
+}
 /**
  * Checks if a given time falls within the user's configured quiet hours in their timezone
  */
@@ -157,6 +175,18 @@ async function processEvent(eventId) {
     if (!claimResult.shouldProcess || !eventData) {
         logger.info(`[NotificationEngine] [Claim Skipped] eventId: ${eventId}, reason: ${claimResult.reason}`);
         return { skipped: true, reason: claimResult.reason };
+    }
+    // 1.5 Check global emergency stop for non-test events
+    if (eventData.data?.isTest !== 'true') {
+        const globalState = await isGlobalNotificationPaused();
+        if (globalState.paused) {
+            logger.info(`[NotificationEngine] [Emergency Stop Active] Global notifications paused. Reverting event ${eventId} to pending. Reason: ${globalState.reason}`);
+            await eventRef.update({
+                status: eventData.deliveryMode === 'scheduled' ? 'scheduled' : 'pending',
+                processedAt: null,
+            });
+            return { skipped: true, reason: globalState.reason };
+        }
     }
     logger.info(`[NotificationEngine] [Event Claimed] eventId: ${eventId}, type: ${eventData.type}, recipient: ${eventData.userId}`);
     const userId = eventData.userId;
@@ -285,6 +315,16 @@ async function processEvent(eventId) {
 async function processScheduledEvents() {
     const now = new Date();
     logger.info(`[NotificationScheduler] Running scheduled notification check at ${now.toISOString()}`);
+    const globalState = await isGlobalNotificationPaused();
+    if (globalState.paused) {
+        logger.info(`[NotificationScheduler] Scheduled check paused: Emergency stop active (${globalState.reason}).`);
+        return {
+            processedCount: 0,
+            delayedCount: 0,
+            skippedCount: 0,
+            details: [{ status: 'paused', reason: globalState.reason }],
+        };
+    }
     const snapshot = await db
         .collection('notificationEvents')
         .where('status', '==', 'scheduled')
