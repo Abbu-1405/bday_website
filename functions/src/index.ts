@@ -1,16 +1,32 @@
-import { initializeApp, getApps } from 'firebase-admin/app';
+import { initializeApp, getApps, getApp } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { getMessaging, MulticastMessage } from 'firebase-admin/messaging';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { onRequest } from 'firebase-functions/v2/https';
+import * as logger from 'firebase-functions/logger';
 
-// Initialize Firebase Admin SDK
-if (getApps().length === 0) {
-  initializeApp();
+// Target Firebase Project and Database configuration
+const PROJECT_ID = process.env.GCLOUD_PROJECT || 'gen-lang-client-0057157522';
+const DATABASE_ID = process.env.FIRESTORE_DATABASE_ID || 'ai-studio-remixstarlitlett-45632027-0698-4661-bfb7-6fea5b923b2b';
+
+// Initialize Firebase Admin SDK using Application Default Credentials
+const adminApp = getApps().length === 0
+  ? initializeApp({ projectId: PROJECT_ID })
+  : getApp();
+
+let db: ReturnType<typeof getFirestore>;
+try {
+  if (DATABASE_ID && DATABASE_ID !== '(default)') {
+    db = getFirestore(adminApp, DATABASE_ID);
+  } else {
+    db = getFirestore(adminApp);
+  }
+} catch (err) {
+  logger.warn('[NotificationEngine] Falling back to default database instance:', err);
+  db = getFirestore(adminApp);
 }
 
-const db = getFirestore();
-const messaging = getMessaging();
+const messaging = getMessaging(adminApp);
 
 function isInvalidTokenErrorCode(errorCode?: string): boolean {
   if (!errorCode) return false;
@@ -24,13 +40,16 @@ function isInvalidTokenErrorCode(errorCode?: string): boolean {
 }
 
 /**
- * Core event delivery function executed by Cloud Functions
+ * Core event delivery function executed by Firebase Cloud Functions.
+ * Implements atomic claim, device token lookup, FCM multicast delivery,
+ * invalid token deactivation, and status finalization.
  */
-async function processEvent(eventId: string) {
+export async function processEvent(eventId: string) {
+  logger.info(`[NotificationEngine] [Event Created/Detected] Processing eventId: ${eventId}`);
   const eventRef = db.collection('notificationEvents').doc(eventId);
   let eventData: any = null;
 
-  // 1. Atomic claim in transaction
+  // 1. Atomic claim in transaction (prevents race conditions & duplicate sends)
   const claimResult = await db.runTransaction(async (transaction) => {
     const docSnap = await transaction.get(eventRef);
     if (!docSnap.exists) {
@@ -41,14 +60,15 @@ async function processEvent(eventId: string) {
     if (!data || data.status !== 'pending') {
       return {
         shouldProcess: false,
-        reason: `Status is '${data?.status}', skipping duplicate execution.`,
+        reason: `Status is already '${data?.status}', skipping duplicate execution.`,
       };
     }
 
     if (!data.userId || !data.title || !data.body) {
-      return { shouldProcess: false, reason: 'Missing required event fields' };
+      return { shouldProcess: false, reason: 'Missing required event fields (userId, title, body)' };
     }
 
+    // Atomically transition from pending -> processing
     transaction.update(eventRef, {
       status: 'processing',
       processedAt: FieldValue.serverTimestamp(),
@@ -59,8 +79,11 @@ async function processEvent(eventId: string) {
   });
 
   if (!claimResult.shouldProcess || !eventData) {
+    logger.info(`[NotificationEngine] [Claim Skipped] eventId: ${eventId}, reason: ${claimResult.reason}`);
     return { skipped: true, reason: claimResult.reason };
   }
+
+  logger.info(`[NotificationEngine] [Event Claimed] eventId: ${eventId}, type: ${eventData.type}, recipient: ${eventData.userId}`);
 
   const userId = eventData.userId;
   const tokensSnapshot = await db
@@ -78,8 +101,11 @@ async function processEvent(eventId: string) {
     }
   });
 
+  logger.info(`[NotificationEngine] [Token Count] Found ${tokens.length} enabled token(s) for user: ${userId}`);
+
   if (tokens.length === 0) {
     const reason = 'No enabled notification tokens registered for recipient user.';
+    logger.warn(`[NotificationEngine] [Final Status: FAILED] eventId: ${eventId} - ${reason}`);
     await eventRef.update({
       status: 'failed',
       failureReason: reason,
@@ -90,7 +116,7 @@ async function processEvent(eventId: string) {
     return { success: false, reason };
   }
 
-  // Format data payload
+  // Format payload for FCM data
   const stringifiedData: Record<string, string> = {};
   if (eventData.data && typeof eventData.data === 'object') {
     for (const [k, v] of Object.entries(eventData.data)) {
@@ -127,10 +153,13 @@ async function processEvent(eventId: string) {
     },
   };
 
+  logger.info(`[NotificationEngine] Dispatching FCM multicast to ${tokens.length} token(s) for event: ${eventId}`);
   const response = await messaging.sendEachForMulticast(multicastMessage);
-  let successfulCount = response.successCount;
-  let failedCount = response.failureCount;
+  const successfulCount = response.successCount;
+  const failedCount = response.failureCount;
   const failureReasons: string[] = [];
+
+  logger.info(`[NotificationEngine] [FCM Results] eventId: ${eventId} -> Success: ${successfulCount}, Failure: ${failedCount}`);
 
   if (response.failureCount > 0) {
     const updatePromises: Promise<any>[] = [];
@@ -139,9 +168,10 @@ async function processEvent(eventId: string) {
         const error = resp.error;
         const errorCode = error?.code;
         const tokenObj = tokens[index];
-        failureReasons.push(errorCode || error?.message || 'Error');
+        failureReasons.push(errorCode || error?.message || 'Unknown error');
 
         if (tokenObj && isInvalidTokenErrorCode(errorCode)) {
+          logger.info(`[NotificationEngine] [Invalid Token Cleanup] Disabling stale token docId: ${tokenObj.id}, code: ${errorCode}`);
           const tokenDocRef = db
             .collection('users')
             .doc(userId)
@@ -153,7 +183,9 @@ async function processEvent(eventId: string) {
               enabled: false,
               invalidReason: errorCode || 'Token unregistered',
               invalidatedAt: FieldValue.serverTimestamp(),
-            }).catch(() => {})
+            }).catch((err) => {
+              logger.warn(`[NotificationEngine] Token deactivation notice:`, err);
+            })
           );
         }
       }
@@ -162,6 +194,7 @@ async function processEvent(eventId: string) {
   }
 
   if (successfulCount > 0) {
+    logger.info(`[NotificationEngine] [Final Status: SENT] eventId: ${eventId}, deliveredTo: ${successfulCount} device(s)`);
     await eventRef.update({
       status: 'sent',
       sentAt: FieldValue.serverTimestamp(),
@@ -169,9 +202,10 @@ async function processEvent(eventId: string) {
       failedTokenCount: failedCount,
       failureReason: failureReasons.length > 0 ? failureReasons.slice(0, 3).join('; ') : null,
     });
-    return { success: true, successfulTokenCount: successfulCount };
+    return { success: true, successfulTokenCount: successfulCount, failedTokenCount: failedCount };
   } else {
-    const failureReason = failureReasons.join('; ') || 'Delivery failed';
+    const failureReason = failureReasons.join('; ') || 'All FCM deliveries failed';
+    logger.error(`[NotificationEngine] [Final Status: FAILED] eventId: ${eventId}, reason: ${failureReason}`);
     await eventRef.update({
       status: 'failed',
       failureReason,
@@ -183,15 +217,24 @@ async function processEvent(eventId: string) {
 }
 
 /**
- * Cloud Function Trigger: onDocumentCreated in notificationEvents collection
+ * Cloud Function Trigger: onNotificationEventCreated
+ * Listens to document creation on notificationEvents/{eventId}.
+ * Automatically runs on event creation in Firestore.
  */
 export const onNotificationEventCreated = onDocumentCreated(
-  'notificationEvents/{eventId}',
+  {
+    document: 'notificationEvents/{eventId}',
+    ...(DATABASE_ID && DATABASE_ID !== '(default)' ? { database: DATABASE_ID } : {}),
+  },
   async (event) => {
     const snap = event.data;
-    if (!snap) return null;
+    if (!snap) {
+      logger.warn('[NotificationEngine] Document snapshot is empty in onDocumentCreated trigger');
+      return null;
+    }
     const eventId = event.params.eventId;
     const data = snap.data();
+    logger.info(`[NotificationEngine] onDocumentCreated triggered for eventId: ${eventId}, status: ${data?.status}`);
     if (data && data.status === 'pending') {
       return processEvent(eventId);
     }
@@ -200,10 +243,12 @@ export const onNotificationEventCreated = onDocumentCreated(
 );
 
 /**
- * Cloud Function HTTPS: Process all pending notification events
+ * Cloud Function HTTPS endpoint: processPendingNotificationEvents
+ * Allows manual or scheduled triggering of any pending events with CORS support.
  */
-export const processPendingNotificationEvents = onRequest(async (req, res) => {
+export const processPendingNotificationEvents = onRequest({ cors: true }, async (req, res) => {
   try {
+    logger.info('[NotificationEngine] processPendingNotificationEvents HTTPS function called');
     const snapshot = await db
       .collection('notificationEvents')
       .where('status', '==', 'pending')
@@ -211,18 +256,26 @@ export const processPendingNotificationEvents = onRequest(async (req, res) => {
       .get();
 
     if (snapshot.empty) {
-      res.json({ message: 'No pending notification events found', processed: 0 });
+      logger.info('[NotificationEngine] No pending notification events in queue');
+      res.json({ success: true, message: 'No pending notification events found', processedCount: 0 });
       return;
     }
 
+    logger.info(`[NotificationEngine] Found ${snapshot.size} pending notification event(s) to process`);
     const results = [];
     for (const docSnap of snapshot.docs) {
       const resVal = await processEvent(docSnap.id);
       results.push({ id: docSnap.id, result: resVal });
     }
 
-    res.json({ message: 'Processed pending events', count: results.length, details: results });
+    res.json({
+      success: true,
+      message: `Processed ${results.length} pending events`,
+      processedCount: results.length,
+      details: results,
+    });
   } catch (err: any) {
-    res.status(500).json({ error: err?.message });
+    logger.error('[NotificationEngine] Error in processPendingNotificationEvents:', err);
+    res.status(500).json({ success: false, error: err?.message });
   }
 });

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import {
   fetchAdminNotificationEvents,
+  subscribeAdminNotificationEvents,
   triggerServerTestNotification,
   triggerServerQueueProcessing,
 } from '../../services/notificationService';
@@ -47,7 +48,18 @@ export function AdminNotificationQueue() {
   };
 
   useEffect(() => {
+    // Initial fetch
     loadEvents();
+
+    // Setup live real-time subscription
+    const unsubscribe = subscribeAdminNotificationEvents((liveEvents) => {
+      setEvents(liveEvents);
+      setLoading(false);
+    }, 100);
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const handleProcessQueue = async () => {
@@ -56,11 +68,10 @@ export function AdminNotificationQueue() {
     try {
       const res = await triggerServerQueueProcessing();
       if (res.success) {
-        setActionFeedback(`Processed ${res.processedCount ?? 0} queue event(s).`);
+        setActionFeedback(res.message || `Queue verified: ${res.processedCount ?? 0} pending events.`);
       } else {
-        setActionFeedback(`Processing notice: ${res.error}`);
+        setActionFeedback(`Queue notice: ${res.error}`);
       }
-      await loadEvents();
     } catch (err: any) {
       setActionFeedback(`Failed: ${err?.message}`);
     } finally {
@@ -80,11 +91,10 @@ export function AdminNotificationQueue() {
         url: '/settings',
       });
       if (res.success) {
-        setActionFeedback('Test event queued and dispatched via server worker!');
+        setActionFeedback(`Test event queued (ID: ${res.eventId?.slice(-8)}). Cloud Function Firestore trigger will claim and deliver.`);
       } else {
         setActionFeedback(`Test push notice: ${res.error}`);
       }
-      await loadEvents();
     } catch (err: any) {
       setActionFeedback(`Test failed: ${err?.message}`);
     } finally {

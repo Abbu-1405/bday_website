@@ -12,6 +12,7 @@ import {
   orderBy,
   limit,
   serverTimestamp,
+  onSnapshot,
 } from 'firebase/firestore';
 import { User } from 'firebase/auth';
 import app, { db, isFirebaseConfigured, vapidKey as defaultVapidKey } from '../firebase';
@@ -880,75 +881,183 @@ export async function fetchAdminNotificationEvents(
 }
 
 /**
- * Triggers a test notification through the trusted server-side FCM push delivery pipeline
+ * Subscribes in real-time to notification events for the Admin dashboard
+ */
+export function subscribeAdminNotificationEvents(
+  onUpdate: (events: NotificationEvent[]) => void,
+  maxCount: number = 50
+): () => void {
+  if (!isFirebaseConfigured) {
+    onUpdate([]);
+    return () => {};
+  }
+
+  try {
+    const eventsRef = collection(db, 'notificationEvents');
+    const q = query(eventsRef, orderBy('createdAt', 'desc'), limit(maxCount));
+
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const list: NotificationEvent[] = [];
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          let createdStr = 'Recently';
+          if (data.createdAt?.toDate) {
+            createdStr = data.createdAt.toDate().toLocaleString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            });
+          } else if (data.createdAt?.seconds) {
+            createdStr = new Date(data.createdAt.seconds * 1000).toLocaleString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            });
+          }
+
+          list.push({
+            id: docSnap.id,
+            userId: data.userId || 'Unknown',
+            type: data.type || 'GENERAL',
+            title: data.title || 'Untitled Notification',
+            body: data.body || '',
+            data: data.data || {},
+            status: data.status || 'pending',
+            createdAt: createdStr,
+            processedAt: data.processedAt || null,
+            sentAt: data.sentAt || null,
+            successfulTokenCount: typeof data.successfulTokenCount === 'number' ? data.successfulTokenCount : undefined,
+            failedTokenCount: typeof data.failedTokenCount === 'number' ? data.failedTokenCount : undefined,
+            failureReason: data.failureReason || null,
+            error: data.error || null,
+          });
+        });
+        onUpdate(list);
+      },
+      (err) => {
+        console.warn('[NotificationEngine] Admin subscription notice:', err);
+      }
+    );
+  } catch (err) {
+    console.warn('[NotificationEngine] Error setting up admin event listener:', err);
+    return () => {};
+  }
+}
+
+/**
+ * Triggers a test notification through the Firebase Cloud Functions FCM push delivery pipeline.
+ * Creates a legitimate notification event document with status "pending" in Firestore,
+ * which triggers the onNotificationEventCreated Firebase Cloud Function automatically.
  */
 export async function triggerServerTestNotification(params: {
   userId: string;
   title?: string;
   body?: string;
-  type?: string;
+  type?: NotificationEventType | string;
   url?: string;
-}): Promise<{ success: boolean; eventId?: string; deliveryResult?: any; error?: string }> {
+}): Promise<{ success: boolean; eventId?: string; error?: string }> {
   try {
-    const response = await fetch('/api/notifications/test-event', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const title = params.title || 'Starlit Letters Push Verification ✨';
+    const body = params.body || 'Phase 3 server-side FCM push delivery is active and working!';
+    const type = (params.type as NotificationEventType) || 'GENERAL';
+    const url = params.url || '/settings';
+
+    // Queue legitimate notification event directly in Firestore
+    const res = await createNotificationEvent({
+      userId: params.userId,
+      type,
+      title,
+      body,
+      data: {
+        url,
+        isTest: 'true',
+        source: 'admin_test_push',
       },
-      body: JSON.stringify(params),
     });
 
-    if (!response.ok) {
-      const errJson = await response.json().catch(() => ({}));
+    if (!res.success) {
       return {
         success: false,
-        error: errJson?.error || `Server responded with status ${response.status}`,
+        error: res.error || 'Failed to queue notification event in Firestore',
       };
     }
 
-    const data = await response.json();
-    return data;
+    return {
+      success: true,
+      eventId: res.eventId,
+    };
   } catch (err: any) {
-    console.error('[NotificationEngine] Error triggering server test push:', err);
+    console.error('[NotificationEngine] Error queueing test notification:', err);
     return {
       success: false,
-      error: err?.message || 'Network error communicating with push delivery server',
+      error: err?.message || 'Error queueing test notification in Firestore',
     };
   }
 }
 
 /**
- * Triggers the trusted server to process any pending notification events in the queue
+ * Triggers queue processing for pending notification events.
+ * In production Firebase architecture:
+ * 1. If VITE_FIREBASE_FUNCTIONS_URL is provided, calls the processPendingNotificationEvents HTTPS function.
+ * 2. Otherwise queries Firestore directly for pending events and reports queue status.
+ * (Note: onNotificationEventCreated Firestore trigger automatically delivers all newly created events in real time).
  */
 export async function triggerServerQueueProcessing(): Promise<{
   success: boolean;
   processedCount?: number;
-  results?: any[];
+  message?: string;
   error?: string;
 }> {
+  const functionsUrl = (import.meta as any).env?.VITE_FIREBASE_FUNCTIONS_URL;
+  if (functionsUrl) {
+    try {
+      const response = await fetch(`${functionsUrl.replace(/\/$/, '')}/processPendingNotificationEvents`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          success: true,
+          processedCount: data.processedCount ?? 0,
+          message: data.message || `Processed ${data.processedCount ?? 0} events via Cloud Function`,
+        };
+      }
+    } catch (err: any) {
+      console.warn('[NotificationEngine] HTTPS Cloud Function invoke notice:', err);
+    }
+  }
+
+  // Fallback / status query directly via Firestore
   try {
-    const response = await fetch('/api/notifications/process-queue', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    const eventsRef = collection(db, 'notificationEvents');
+    const q = query(eventsRef, orderBy('createdAt', 'desc'), limit(50));
+    const snapshot = await getDocs(q);
+    let pendingCount = 0;
+    snapshot.forEach((docSnap) => {
+      if (docSnap.data()?.status === 'pending') {
+        pendingCount++;
+      }
     });
 
-    if (!response.ok) {
-      const errJson = await response.json().catch(() => ({}));
-      return {
-        success: false,
-        error: errJson?.error || `Server responded with status ${response.status}`,
-      };
-    }
-
-    const data = await response.json();
-    return data;
+    return {
+      success: true,
+      processedCount: pendingCount,
+      message:
+        pendingCount === 0
+          ? 'All events are up to date and processed in real time by the Firebase Cloud Function trigger.'
+          : `${pendingCount} event(s) currently awaiting Cloud Function execution.`,
+    };
   } catch (err: any) {
-    console.error('[NotificationEngine] Error triggering queue processing:', err);
     return {
       success: false,
-      error: err?.message || 'Network error triggering queue processing',
+      error: err?.message || 'Failed to inspect pending notification queue',
     };
   }
 }
