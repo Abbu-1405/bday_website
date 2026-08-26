@@ -27,282 +27,266 @@
   }
 }
 
-/* Organic Sky Lantern Continuous Flight Animations with gentle wind drift & subtle tilt */
-@keyframes lanternFlight1 {
-  0% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
-  }
-  16% {
-    transform: translate3d(8px, -14px, 0) rotate(0.9deg);
-  }
-  33% {
-    transform: translate3d(18px, -32px, 0) rotate(1.5deg);
-  }
-  48% {
-    transform: translate3d(12px, -52px, 0) rotate(0.6deg);
-  }
-  62% {
-    transform: translate3d(-4px, -66px, 0) rotate(-1.2deg);
-  }
-  76% {
-    transform: translate3d(-14px, -46px, 0) rotate(-1.7deg);
-  }
-  88% {
-    transform: translate3d(-6px, -20px, 0) rotate(-0.7deg);
-  }
-  100% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
-  }
-}
+/* =========================================================================
+   CONTINUOUS BOTTOM-TO-TOP SKY LANTERN FLIGHT ANIMATIONS
+   GPU-accelerated translate3d + opacity + subtle natural wind drifting & tilt
+   ========================================================================= */
 
-@keyframes lanternFlight2 {
+/* Trajectory 1: Gentle Rightward Drift & Sway */
+@keyframes lanternSkyAscent1 {
   0% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
+    transform: translate3d(0, 108%, 0) rotate(0deg);
+    opacity: 0;
   }
-  18% {
-    transform: translate3d(-10px, -18px, 0) rotate(-1.3deg);
+  3% {
+    opacity: 0.95;
   }
-  35% {
-    transform: translate3d(-20px, -38px, 0) rotate(-1.9deg);
+  20% {
+    transform: translate3d(8px, 82%, 0) rotate(0.8deg);
   }
-  50% {
-    transform: translate3d(-10px, -58px, 0) rotate(-0.5deg);
-  }
-  65% {
-    transform: translate3d(6px, -70px, 0) rotate(1.1deg);
-  }
-  80% {
-    transform: translate3d(16px, -48px, 0) rotate(1.6deg);
-  }
-  92% {
-    transform: translate3d(8px, -22px, 0) rotate(0.8deg);
-  }
-  100% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
-  }
-}
-
-@keyframes lanternFlight3 {
-  0% {
-    transform: translate3d(0, 0, 0) rotate(-0.5deg);
-  }
-  15% {
-    transform: translate3d(9px, -12px, 0) rotate(1.2deg);
-  }
-  30% {
-    transform: translate3d(15px, -28px, 0) rotate(0.7deg);
-  }
-  45% {
-    transform: translate3d(4px, -46px, 0) rotate(-0.8deg);
+  40% {
+    transform: translate3d(20px, 56%, 0) rotate(1.6deg);
   }
   60% {
-    transform: translate3d(-12px, -60px, 0) rotate(-1.8deg);
+    transform: translate3d(14px, 30%, 0) rotate(0.6deg);
   }
-  75% {
-    transform: translate3d(-16px, -42px, 0) rotate(-1.0deg);
+  80% {
+    transform: translate3d(24px, 5%, 0) rotate(1.8deg);
   }
-  88% {
-    transform: translate3d(-5px, -18px, 0) rotate(0.2deg);
+  95% {
+    opacity: 0.95;
   }
   100% {
-    transform: translate3d(0, 0, 0) rotate(-0.5deg);
+    transform: translate3d(18px, -20%, 0) rotate(1.0deg);
+    opacity: 0;
   }
 }
 
-@keyframes lanternFlight4 {
+/* Trajectory 2: Gentle Leftward Drift & Sway */
+@keyframes lanternSkyAscent2 {
   0% {
-    transform: translate3d(0, 0, 0) rotate(0.4deg);
+    transform: translate3d(0, 108%, 0) rotate(0deg);
+    opacity: 0;
   }
-  20% {
-    transform: translate3d(-7px, -20px, 0) rotate(-1.1deg);
+  3% {
+    opacity: 0.95;
   }
-  38% {
-    transform: translate3d(8px, -40px, 0) rotate(1.3deg);
-  }
-  55% {
-    transform: translate3d(22px, -62px, 0) rotate(1.8deg);
-  }
-  70% {
-    transform: translate3d(14px, -74px, 0) rotate(0.5deg);
-  }
-  84% {
-    transform: translate3d(-4px, -50px, 0) rotate(-1.4deg);
-  }
-  94% {
-    transform: translate3d(-6px, -22px, 0) rotate(-0.6deg);
-  }
-  100% {
-    transform: translate3d(0, 0, 0) rotate(0.4deg);
-  }
-}
-
-@keyframes lanternFlight5 {
-  0% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
-  }
-  14% {
-    transform: translate3d(12px, -16px, 0) rotate(1.4deg);
-  }
-  29% {
-    transform: translate3d(20px, -35px, 0) rotate(1.7deg);
-  }
-  44% {
-    transform: translate3d(14px, -54px, 0) rotate(0.7deg);
-  }
-  58% {
-    transform: translate3d(0px, -68px, 0) rotate(-0.8deg);
-  }
-  73% {
-    transform: translate3d(-15px, -52px, 0) rotate(-1.6deg);
-  }
-  87% {
-    transform: translate3d(-12px, -28px, 0) rotate(-1.0deg);
-  }
-  100% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
-  }
-}
-
-@keyframes lanternFlight6 {
-  0% {
-    transform: translate3d(0, 0, 0) rotate(-0.6deg);
-  }
-  17% {
-    transform: translate3d(-8px, -15px, 0) rotate(-1.4deg);
-  }
-  33% {
-    transform: translate3d(-3px, -34px, 0) rotate(-0.3deg);
-  }
-  49% {
-    transform: translate3d(14px, -52px, 0) rotate(1.6deg);
-  }
-  64% {
-    transform: translate3d(19px, -65px, 0) rotate(1.9deg);
-  }
-  79% {
-    transform: translate3d(7px, -45px, 0) rotate(0.8deg);
-  }
-  90% {
-    transform: translate3d(-4px, -24px, 0) rotate(-0.9deg);
-  }
-  100% {
-    transform: translate3d(0, 0, 0) rotate(-0.6deg);
-  }
-}
-
-/* Mobile-adapted flight keyframes (reduced horizontal offset to prevent canvas edge clipping) */
-@keyframes lanternFlightMobile1 {
-  0% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
-  }
-  20% {
-    transform: translate3d(4px, -8px, 0) rotate(0.8deg);
+  22% {
+    transform: translate3d(-10px, 80%, 0) rotate(-1.1deg);
   }
   42% {
-    transform: translate3d(7px, -20px, 0) rotate(1.2deg);
+    transform: translate3d(-22px, 53%, 0) rotate(-1.8deg);
   }
-  64% {
-    transform: translate3d(1px, -28px, 0) rotate(-0.4deg);
+  62% {
+    transform: translate3d(-12px, 27%, 0) rotate(-0.5deg);
   }
   82% {
-    transform: translate3d(-4px, -16px, 0) rotate(-1.0deg);
+    transform: translate3d(-25px, 2%, 0) rotate(-1.9deg);
+  }
+  95% {
+    opacity: 0.95;
   }
   100% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
+    transform: translate3d(-16px, -20%, 0) rotate(-0.9deg);
+    opacity: 0;
   }
 }
 
-@keyframes lanternFlightMobile2 {
+/* Trajectory 3: S-Curve (Right then Left) */
+@keyframes lanternSkyAscent3 {
   0% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
+    transform: translate3d(0, 108%, 0) rotate(-0.4deg);
+    opacity: 0;
   }
-  22% {
-    transform: translate3d(-5px, -10px, 0) rotate(-1.0deg);
+  3% {
+    opacity: 0.95;
   }
-  44% {
-    transform: translate3d(-8px, -22px, 0) rotate(-1.3deg);
+  20% {
+    transform: translate3d(14px, 83%, 0) rotate(1.3deg);
   }
-  66% {
-    transform: translate3d(-1px, -30px, 0) rotate(0.5deg);
+  40% {
+    transform: translate3d(22px, 58%, 0) rotate(1.7deg);
   }
-  85% {
-    transform: translate3d(4px, -14px, 0) rotate(0.9deg);
+  60% {
+    transform: translate3d(2px, 32%, 0) rotate(-0.3deg);
+  }
+  80% {
+    transform: translate3d(-16px, 7%, 0) rotate(-1.6deg);
+  }
+  95% {
+    opacity: 0.95;
   }
   100% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
+    transform: translate3d(-10px, -20%, 0) rotate(-0.8deg);
+    opacity: 0;
   }
 }
 
-@keyframes lanternFlightMobile3 {
+/* Trajectory 4: S-Curve (Left then Right) */
+@keyframes lanternSkyAscent4 {
   0% {
-    transform: translate3d(0, 0, 0) rotate(-0.5deg);
+    transform: translate3d(0, 108%, 0) rotate(0.4deg);
+    opacity: 0;
+  }
+  3% {
+    opacity: 0.95;
+  }
+  18% {
+    transform: translate3d(-12px, 84%, 0) rotate(-1.2deg);
+  }
+  38% {
+    transform: translate3d(-20px, 60%, 0) rotate(-1.7deg);
+  }
+  58% {
+    transform: translate3d(-2px, 34%, 0) rotate(0.2deg);
+  }
+  78% {
+    transform: translate3d(18px, 9%, 0) rotate(1.8deg);
+  }
+  95% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate3d(12px, -20%, 0) rotate(0.9deg);
+    opacity: 0;
+  }
+}
+
+/* Trajectory 5: Soft Meandering Wave */
+@keyframes lanternSkyAscent5 {
+  0% {
+    transform: translate3d(0, 108%, 0) rotate(0deg);
+    opacity: 0;
+  }
+  3% {
+    opacity: 0.95;
+  }
+  20% {
+    transform: translate3d(9px, 82%, 0) rotate(0.9deg);
+  }
+  38% {
+    transform: translate3d(-8px, 57%, 0) rotate(-0.8deg);
+  }
+  58% {
+    transform: translate3d(12px, 31%, 0) rotate(1.2deg);
+  }
+  78% {
+    transform: translate3d(-6px, 6%, 0) rotate(-0.7deg);
+  }
+  95% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate3d(4px, -20%, 0) rotate(0.3deg);
+    opacity: 0;
+  }
+}
+
+/* Trajectory 6: Gradual Wide Right Arc */
+@keyframes lanternSkyAscent6 {
+  0% {
+    transform: translate3d(0, 108%, 0) rotate(0.2deg);
+    opacity: 0;
+  }
+  3% {
+    opacity: 0.95;
   }
   25% {
-    transform: translate3d(5px, -12px, 0) rotate(1.0deg);
+    transform: translate3d(10px, 78%, 0) rotate(1.0deg);
   }
   50% {
-    transform: translate3d(-3px, -24px, 0) rotate(-0.8deg);
+    transform: translate3d(24px, 49%, 0) rotate(2.0deg);
   }
   75% {
-    transform: translate3d(-6px, -16px, 0) rotate(-1.2deg);
+    transform: translate3d(32px, 19%, 0) rotate(2.4deg);
+  }
+  95% {
+    opacity: 0.95;
   }
   100% {
-    transform: translate3d(0, 0, 0) rotate(-0.5deg);
+    transform: translate3d(28px, -20%, 0) rotate(1.5deg);
+    opacity: 0;
   }
 }
 
-@keyframes lanternFlightMobile4 {
+/* Trajectory 7: Gradual Wide Left Arc */
+@keyframes lanternSkyAscent7 {
   0% {
-    transform: translate3d(0, 0, 0) rotate(0.5deg);
+    transform: translate3d(0, 108%, 0) rotate(-0.3deg);
+    opacity: 0;
   }
-  22% {
-    transform: translate3d(-4px, -9px, 0) rotate(-0.8deg);
+  3% {
+    opacity: 0.95;
   }
-  46% {
-    transform: translate3d(5px, -22px, 0) rotate(1.2deg);
+  25% {
+    transform: translate3d(-12px, 77%, 0) rotate(-1.1deg);
+  }
+  50% {
+    transform: translate3d(-26px, 48%, 0) rotate(-2.1deg);
+  }
+  75% {
+    transform: translate3d(-34px, 18%, 0) rotate(-2.5deg);
+  }
+  95% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate3d(-28px, -20%, 0) rotate(-1.6deg);
+    opacity: 0;
+  }
+}
+
+/* Trajectory 8: Near-Vertical Gentle Wander */
+@keyframes lanternSkyAscent8 {
+  0% {
+    transform: translate3d(0, 108%, 0) rotate(0deg);
+    opacity: 0;
+  }
+  3% {
+    opacity: 0.95;
+  }
+  24% {
+    transform: translate3d(-5px, 79%, 0) rotate(-0.5deg);
+  }
+  48% {
+    transform: translate3d(6px, 50%, 0) rotate(0.6deg);
   }
   72% {
-    transform: translate3d(7px, -28px, 0) rotate(0.9deg);
+    transform: translate3d(-4px, 21%, 0) rotate(-0.4deg);
   }
-  88% {
-    transform: translate3d(1px, -14px, 0) rotate(-0.3deg);
+  95% {
+    opacity: 0.95;
   }
   100% {
-    transform: translate3d(0, 0, 0) rotate(0.5deg);
+    transform: translate3d(3px, -20%, 0) rotate(0.2deg);
+    opacity: 0;
   }
 }
 
-/* Lantern Flight Animation Utility Classes */
-.lantern-flight-1 {
-  animation: lanternFlight1 var(--flight-dur, 22s) ease-in-out infinite;
+/* Lantern Ascent Animation Utility Classes */
+.lantern-ascent-1 {
+  animation: lanternSkyAscent1 var(--flight-dur, 22s) linear infinite;
 }
-.lantern-flight-2 {
-  animation: lanternFlight2 var(--flight-dur, 26s) ease-in-out infinite;
+.lantern-ascent-2 {
+  animation: lanternSkyAscent2 var(--flight-dur, 25s) linear infinite;
 }
-.lantern-flight-3 {
-  animation: lanternFlight3 var(--flight-dur, 20s) ease-in-out infinite;
+.lantern-ascent-3 {
+  animation: lanternSkyAscent3 var(--flight-dur, 20s) linear infinite;
 }
-.lantern-flight-4 {
-  animation: lanternFlight4 var(--flight-dur, 28s) ease-in-out infinite;
+.lantern-ascent-4 {
+  animation: lanternSkyAscent4 var(--flight-dur, 24s) linear infinite;
 }
-.lantern-flight-5 {
-  animation: lanternFlight5 var(--flight-dur, 24s) ease-in-out infinite;
+.lantern-ascent-5 {
+  animation: lanternSkyAscent5 var(--flight-dur, 19s) linear infinite;
 }
-.lantern-flight-6 {
-  animation: lanternFlight6 var(--flight-dur, 27s) ease-in-out infinite;
+.lantern-ascent-6 {
+  animation: lanternSkyAscent6 var(--flight-dur, 26s) linear infinite;
 }
-
-.lantern-flight-mobile-1 {
-  animation: lanternFlightMobile1 var(--flight-dur, 20s) ease-in-out infinite;
+.lantern-ascent-7 {
+  animation: lanternSkyAscent7 var(--flight-dur, 23s) linear infinite;
 }
-.lantern-flight-mobile-2 {
-  animation: lanternFlightMobile2 var(--flight-dur, 24s) ease-in-out infinite;
-}
-.lantern-flight-mobile-3 {
-  animation: lanternFlightMobile3 var(--flight-dur, 22s) ease-in-out infinite;
-}
-.lantern-flight-mobile-4 {
-  animation: lanternFlightMobile4 var(--flight-dur, 26s) ease-in-out infinite;
+.lantern-ascent-8 {
+  animation: lanternSkyAscent8 var(--flight-dur, 21s) linear infinite;
 }
 
 /* Distant Star Twinkle */
@@ -436,16 +420,14 @@
   .animate-parchment-reveal,
   .animate-caught-lantern,
   .animate-golden-aura,
-  .lantern-flight-1,
-  .lantern-flight-2,
-  .lantern-flight-3,
-  .lantern-flight-4,
-  .lantern-flight-5,
-  .lantern-flight-6,
-  .lantern-flight-mobile-1,
-  .lantern-flight-mobile-2,
-  .lantern-flight-mobile-3,
-  .lantern-flight-mobile-4 {
+  .lantern-ascent-1,
+  .lantern-ascent-2,
+  .lantern-ascent-3,
+  .lantern-ascent-4,
+  .lantern-ascent-5,
+  .lantern-ascent-6,
+  .lantern-ascent-7,
+  .lantern-ascent-8 {
     animation: none !important;
     transform: none !important;
   }

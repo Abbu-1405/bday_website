@@ -7,17 +7,24 @@
 importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js');
 
-// Initialize Firebase in the service worker
+// Initialize Firebase in the service worker with dynamic query param support or new project defaults
+const urlParams = new URLSearchParams(self.location.search);
 const firebaseConfig = {
-  apiKey: "AIzaSyCtzVnx-qX_0aXA4B0QB7dYtwz7AKLJZ5s",
-  authDomain: "quadratic-harmony-5h7sp.firebaseapp.com",
-  projectId: "quadratic-harmony-5h7sp",
-  storageBucket: "quadratic-harmony-5h7sp.firebasestorage.app",
-  messagingSenderId: "710835329405",
-  appId: "1:710835329405:web:00e29f18d568e0684b5414"
+  apiKey: urlParams.get('apiKey') || '',
+  authDomain: urlParams.get('authDomain') || 'gen-lang-client-0057157522.firebaseapp.com',
+  projectId: urlParams.get('projectId') || 'gen-lang-client-0057157522',
+  storageBucket: urlParams.get('storageBucket') || 'gen-lang-client-0057157522.firebasestorage.app',
+  messagingSenderId: urlParams.get('messagingSenderId') || '',
+  appId: urlParams.get('appId') || '',
 };
 
-firebase.initializeApp(firebaseConfig);
+if (firebaseConfig.projectId) {
+  try {
+    firebase.initializeApp(firebaseConfig);
+  } catch (initErr) {
+    console.warn('[firebase-messaging-sw.js] App init notice:', initErr);
+  }
+}
 
 let messaging = null;
 try {

@@ -300,7 +300,7 @@ export const WishDetailModal: React.FC<WishDetailModalProps> = ({
               {/* Wish Title in Personal Handwritten/Literary Serif */}
               <h2
                 id="wish-detail-title"
-                className={`text-xl sm:text-3xl font-serif ${themeParchment.titleText} tracking-tight leading-snug font-medium`}
+                className={`text-xl sm:text-3xl font-serif ${themeParchment.titleText} tracking-tight leading-snug font-medium break-words`}
               >
                 {wish.title}
               </h2>
@@ -308,7 +308,7 @@ export const WishDetailModal: React.FC<WishDetailModalProps> = ({
 
             {/* Inscribed Wish Body - Directly on Illuminated Parchment Surface */}
             <div className="relative py-2 px-1 sm:px-2">
-              <p className={`relative z-10 ${themeParchment.bodyText} font-serif text-[15px] sm:text-[17px] leading-[1.75] sm:leading-[1.8] whitespace-pre-line text-left italic`}>
+              <p className={`relative z-10 ${themeParchment.bodyText} font-serif text-[15px] sm:text-[17px] leading-[1.75] sm:leading-[1.8] whitespace-pre-line text-left italic break-words [overflow-wrap:anywhere]`}>
                 {wish.content}
               </p>
             </div>

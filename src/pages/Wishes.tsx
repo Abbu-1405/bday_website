@@ -11,52 +11,60 @@ import { getManagedWishes } from '../services/contentService';
 import { getCollectedWishIds, collectWish, resetCollectedWishes } from '../utils';
 import '../components/wishes/wishes.css';
 
-// Organic positioning, depth scale & continuous sky flight parameters for all 20 lanterns
-interface LanternLayoutConfig {
+// Organic positioning, depth scale & continuous sky ascent parameters for all 20 lanterns
+interface LanternFlightConfig {
   left: number; // percentage (0 - 100)
-  top: number;  // percentage (0 - 100)
   scale: number;
   animClass: string;
   dur: number; // seconds
-  delay: number; // seconds
+  delay: number; // seconds (negative for instant sky population)
 }
 
-// 20 Deterministically spaced organic sky coordinates across natural depth tiers with distinct flight trajectories
-const DESKTOP_LANTERN_CONFIGS: LanternLayoutConfig[] = [
-  // Upper Canopy (Distant & mid-distant lanterns floating high in the night breeze)
-  { left: 6,  top: 7,  scale: 0.90, animClass: 'lantern-flight-1', dur: 22, delay: -4.2 },
-  { left: 24, top: 13, scale: 1.06, animClass: 'lantern-flight-2', dur: 26, delay: -9.8 },
-  { left: 47, top: 6,  scale: 0.88, animClass: 'lantern-flight-3', dur: 19, delay: -15.3 },
-  { left: 70, top: 12, scale: 1.02, animClass: 'lantern-flight-4', dur: 28, delay: -7.1 },
-  { left: 89, top: 7,  scale: 0.86, animClass: 'lantern-flight-5', dur: 24, delay: -18.4 },
+// 20 Deterministically spaced organic sky lanes across natural depth tiers with distinct ascent trajectories
+const LANTERN_FLIGHT_CONFIGS: LanternFlightConfig[] = [
+  // 1. A Smile Every Day
+  { left: 7,  scale: 0.94, animClass: 'lantern-ascent-1', dur: 21.5, delay: -4.8 },
+  // 2. The Right People
+  { left: 23, scale: 1.05, animClass: 'lantern-ascent-2', dur: 25.0, delay: -16.2 },
+  // 3. Always Be Yourself
+  { left: 45, scale: 0.88, animClass: 'lantern-ascent-3', dur: 18.0, delay: -8.4 },
+  // 4. Strong Lady
+  { left: 68, scale: 1.02, animClass: 'lantern-ascent-4', dur: 23.5, delay: -19.7 },
+  // 5. Courage for Yourself
+  { left: 88, scale: 0.90, animClass: 'lantern-ascent-5', dur: 26.0, delay: -11.3 },
 
-  // Mid-Upper Sky
-  { left: 14, top: 28, scale: 1.08, animClass: 'lantern-flight-6', dur: 27, delay: -12.6 },
-  { left: 36, top: 24, scale: 0.94, animClass: 'lantern-flight-1', dur: 25, delay: -5.0 },
-  { left: 58, top: 30, scale: 1.10, animClass: 'lantern-flight-2', dur: 21, delay: -16.2 },
-  { left: 81, top: 25, scale: 0.90, animClass: 'lantern-flight-4', dur: 29, delay: -10.5 },
+  // 6. Beautiful Memories
+  { left: 16, scale: 1.08, animClass: 'lantern-ascent-6', dur: 20.0, delay: -14.5 },
+  // 7. Eat Without Worry
+  { left: 35, scale: 0.96, animClass: 'lantern-ascent-7', dur: 24.5, delay: -2.1 },
+  // 8. People Who Match You
+  { left: 56, scale: 1.04, animClass: 'lantern-ascent-8', dur: 17.5, delay: -12.8 },
+  // 9. Unexpected Happiness
+  { left: 78, scale: 0.92, animClass: 'lantern-ascent-1', dur: 22.0, delay: -7.6 },
+  // 10. Someone to Listen
+  { left: 93, scale: 0.98, animClass: 'lantern-ascent-2', dur: 25.5, delay: -21.0 },
 
-  // Mid-Lower Sky
-  { left: 5,  top: 51, scale: 0.96, animClass: 'lantern-flight-3', dur: 23, delay: -14.1 },
-  { left: 26, top: 47, scale: 0.90, animClass: 'lantern-flight-5', dur: 30, delay: -3.3 },
-  { left: 48, top: 53, scale: 1.06, animClass: 'lantern-flight-6', dur: 22, delay: -19.7 },
-  { left: 69, top: 48, scale: 0.95, animClass: 'lantern-flight-1', dur: 27, delay: -8.4 },
-  { left: 91, top: 50, scale: 1.04, animClass: 'lantern-flight-2', dur: 24, delay: -13.9 },
+  // 11. Places You've Dreamed Of
+  { left: 10, scale: 1.00, animClass: 'lantern-ascent-3', dur: 19.5, delay: -17.4 },
+  // 12. Never Lose Your Silly Side
+  { left: 29, scale: 0.86, animClass: 'lantern-ascent-4', dur: 24.0, delay: -5.5 },
+  // 13. Choose Your Peace
+  { left: 50, scale: 1.10, animClass: 'lantern-ascent-5', dur: 21.0, delay: -13.6 },
+  // 14. Secret Wishes Come True
+  { left: 72, scale: 0.94, animClass: 'lantern-ascent-6', dur: 26.5, delay: -1.2 },
+  // 15. Things Going Your Way
+  { left: 85, scale: 1.06, animClass: 'lantern-ascent-7', dur: 18.5, delay: -15.9 },
 
-  // Lower Horizon (Warm ascending lanterns rising from the ground)
-  { left: 15, top: 73, scale: 1.02, animClass: 'lantern-flight-4', dur: 20, delay: -6.5 },
-  { left: 35, top: 70, scale: 0.88, animClass: 'lantern-flight-3', dur: 28, delay: -16.8 },
-  { left: 56, top: 76, scale: 1.08, animClass: 'lantern-flight-5', dur: 23, delay: -2.1 },
-  { left: 78, top: 71, scale: 0.92, animClass: 'lantern-flight-6', dur: 26, delay: -11.4 },
-  { left: 43, top: 89, scale: 1.00, animClass: 'lantern-flight-1', dur: 21, delay: -20.2 },
-  { left: 86, top: 87, scale: 0.94, animClass: 'lantern-flight-4', dur: 29, delay: -9.1 },
-];
-
-const MOBILE_LANTERN_ANIM_CLASSES = [
-  'lantern-flight-mobile-1',
-  'lantern-flight-mobile-2',
-  'lantern-flight-mobile-3',
-  'lantern-flight-mobile-4',
+  // 16. "Life Baagundhi"
+  { left: 19, scale: 0.96, animClass: 'lantern-ascent-8', dur: 23.0, delay: -9.3 },
+  // 17. Little Things, Big Happiness
+  { left: 40, scale: 1.03, animClass: 'lantern-ascent-1', dur: 19.0, delay: -22.4 },
+  // 18. Never Forget How Far You've Come
+  { left: 62, scale: 0.89, animClass: 'lantern-ascent-2', dur: 25.0, delay: -6.7 },
+  // 19. Be Proud of Yourself
+  { left: 81, scale: 1.07, animClass: 'lantern-ascent-3', dur: 22.5, delay: -18.1 },
+  // 20. Life Be Kind to You
+  { left: 95, scale: 0.93, animClass: 'lantern-ascent-4', dur: 20.5, delay: -10.0 },
 ];
 
 export default function Wishes() {
@@ -200,89 +208,68 @@ export default function Wishes() {
           </div>
         )}
 
-        {/* --- DESKTOP & TABLET ORGANIC SKY VIEW (sm and larger) --- */}
-        <div className="hidden sm:block absolute inset-0">
+        {/* Continuous Bottom-to-Top Flying Sky Lanterns Layer */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
           {wishes.map((wish, index) => {
             const isCollected = collectedIds.includes(wish.id);
-            const config = DESKTOP_LANTERN_CONFIGS[index % DESKTOP_LANTERN_CONFIGS.length];
+            const config = LANTERN_FLIGHT_CONFIGS[index % LANTERN_FLIGHT_CONFIGS.length];
+
+            // Static constellation positioning when prefers-reduced-motion is active
+            const staticRow = Math.floor(index / 5);
+            const staticCol = index % 5;
+            const staticTop = prefersReducedMotion ? `${12 + staticRow * 22}%` : undefined;
+            const staticLeft = prefersReducedMotion ? `${7 + staticCol * 21}%` : `${config.left}%`;
 
             return (
               <div
                 key={wish.id}
-                id={`wish-lantern-wrapper-${wish.id}`}
-                className="absolute z-10"
+                id={`wish-lantern-lane-${wish.id}`}
+                className="absolute pointer-events-none"
                 style={
-                  {
-                    left: `${config.left}%`,
-                    top: `${config.top}%`,
-                    transform: `scale(${config.scale})`,
-                  } as React.CSSProperties
+                  prefersReducedMotion
+                    ? {
+                        top: staticTop,
+                        left: staticLeft,
+                        transform: 'translateX(-50%)',
+                        pointerEvents: 'auto',
+                      }
+                    : {
+                        top: 0,
+                        bottom: 0,
+                        left: `${config.left}%`,
+                        width: '88px',
+                        transform: 'translateX(-50%)',
+                        pointerEvents: 'none',
+                      }
                 }
               >
                 <div
                   className={prefersReducedMotion ? '' : config.animClass}
                   style={
-                    {
-                      '--flight-dur': `${config.dur}s`,
-                      animationDuration: `${config.dur}s`,
-                      animationDelay: `${config.delay}s`,
-                      willChange: prefersReducedMotion ? 'auto' : 'transform',
-                    } as React.CSSProperties
+                    prefersReducedMotion
+                      ? undefined
+                      : ({
+                          height: '100%',
+                          width: '100%',
+                          '--flight-dur': `${config.dur}s`,
+                          animationDuration: `${config.dur}s`,
+                          animationDelay: `${config.delay}s`,
+                          willChange: 'transform, opacity',
+                        } as React.CSSProperties)
                   }
                 >
-                  <Lantern
-                    wish={wish}
-                    isCollected={isCollected}
-                    onClick={handleOpenWish}
-                    index={index}
-                    prefersReducedMotion={prefersReducedMotion}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* --- MOBILE RECOMPOSED SKY VIEW (< 640px) --- */}
-        {/* Fluid, organic multi-column layout with comfortable touch spacing to avoid overlaps */}
-        <div className="sm:hidden relative z-10 p-3 py-6 grid grid-cols-2 gap-x-2 gap-y-7 place-items-center">
-          {wishes.map((wish, index) => {
-            const isCollected = collectedIds.includes(wish.id);
-            const isEven = index % 2 === 0;
-            const staggerOffset = isEven ? -6 : 6;
-            const animVariant = MOBILE_LANTERN_ANIM_CLASSES[index % MOBILE_LANTERN_ANIM_CLASSES.length];
-            const dur = 18 + (index % 5) * 2.5; // 18s - 28s
-            const delay = -((index * 3.1) % 20);
-
-            return (
-              <div
-                key={`mobile-${wish.id}`}
-                id={`mobile-lantern-wrapper-${wish.id}`}
-                className="flex items-center justify-center p-1"
-                style={
-                  {
-                    transform: `translateY(${staggerOffset}px) scale(0.92)`,
-                  } as React.CSSProperties
-                }
-              >
-                <div
-                  className={prefersReducedMotion ? '' : animVariant}
-                  style={
-                    {
-                      '--flight-dur': `${dur}s`,
-                      animationDuration: `${dur}s`,
-                      animationDelay: `${delay}s`,
-                      willChange: prefersReducedMotion ? 'auto' : 'transform',
-                    } as React.CSSProperties
-                  }
-                >
-                  <Lantern
-                    wish={wish}
-                    isCollected={isCollected}
-                    onClick={handleOpenWish}
-                    index={index}
-                    prefersReducedMotion={prefersReducedMotion}
-                  />
+                  <div
+                    className="pointer-events-auto inline-block origin-top"
+                    style={{ transform: `scale(${config.scale})` }}
+                  >
+                    <Lantern
+                      wish={wish}
+                      isCollected={isCollected}
+                      onClick={handleOpenWish}
+                      index={index}
+                      prefersReducedMotion={prefersReducedMotion}
+                    />
+                  </div>
                 </div>
               </div>
             );
