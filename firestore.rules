@@ -70,7 +70,7 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
-    // Notification Events queue (Phase 2 & Phase 4 Event Engine & Scheduler)
+    // Notification Events queue (Phase 2 & Phase 4 Event Engine & Scheduler, Phase 7 Engagement Tracking)
     match /notificationEvents/{eventId} {
       allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
       allow create: if isSignedIn() && (
@@ -82,7 +82,16 @@ service cloud.firestore {
         && request.resource.data.body is string && request.resource.data.body.size() <= 1000
         && (request.resource.data.status == 'pending' || request.resource.data.status == 'scheduled')
         && request.resource.data.createdAt == request.time;
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        isSignedIn() && resource.data.userId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clickedAt', 'lastClickedAt', 'openedCount', 'targetOpenedAt', 'interactionSource'])
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.status == resource.data.status
+        && request.resource.data.type == resource.data.type
+        && request.resource.data.title == resource.data.title
+        && request.resource.data.body == resource.data.body
+      );
+      allow delete: if isAdmin();
     }
 
     // Public Content & Admin Content Management (365 Notes, Wishes, Open When, Secrets, Adore, Moments)

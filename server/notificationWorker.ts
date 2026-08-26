@@ -27,6 +27,24 @@ function isInvalidTokenErrorCode(errorCode?: string): boolean {
   return invalidCodes.includes(errorCode);
 }
 
+async function isGlobalNotificationPaused(): Promise<{ paused: boolean; reason?: string }> {
+  try {
+    const metaSnap = await adminDb.collection('adminMeta').doc('notifications').get();
+    if (metaSnap.exists) {
+      const data = metaSnap.data();
+      if (data && data.globalEnabled === false) {
+        return {
+          paused: true,
+          reason: data.reason || 'Global notifications paused by administrator emergency stop',
+        };
+      }
+    }
+  } catch (err) {
+    // Non-blocking on read error
+  }
+  return { paused: false };
+}
+
 /**
  * Atomically claims and processes a single notification event by event ID
  */
@@ -87,6 +105,24 @@ export async function processNotificationEvent(eventId: string): Promise<Process
         skipped: true,
         reason: claimResult.reason,
       };
+    }
+
+    // Check emergency stop for non-test events
+    if (eventData.data?.isTest !== 'true') {
+      const globalState = await isGlobalNotificationPaused();
+      if (globalState.paused) {
+        console.log(`[NotificationWorker] Global notifications paused by emergency stop. Reverting event ${eventId} to pending.`);
+        await eventRef.update({
+          status: eventData.deliveryMode === 'scheduled' ? 'scheduled' : 'pending',
+          processedAt: null,
+        });
+        return {
+          success: true,
+          eventId,
+          skipped: true,
+          reason: globalState.reason,
+        };
+      }
     }
   } catch (txErr: any) {
     console.error(`[NotificationWorker] Transaction claim error on event ${eventId}:`, txErr);

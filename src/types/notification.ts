@@ -58,6 +58,13 @@ export interface NotificationEvent {
   failedTokenCount?: number;
   failureReason?: string | null;
   error?: string | null;
+
+  // Phase 7: Engagement & Interaction Tracking (sentAt ≠ clickedAt ≠ targetOpenedAt)
+  clickedAt?: any | string | null;
+  lastClickedAt?: any | string | null;
+  openedCount?: number;
+  targetOpenedAt?: any | string | null;
+  interactionSource?: 'push_notification' | 'in_app' | 'history_click' | string | null;
 }
 
 export interface NotificationTemplate {
@@ -250,3 +257,44 @@ export interface NotificationHistoryFilterState {
   templateId: string;
   hasFailureOnly: boolean;
 }
+
+// Phase 7: Engagement & Interaction Analytics
+export interface NotificationCategoryEngagement {
+  category: NotificationEventType;
+  label: string;
+  sent: number;
+  clicked: number;
+  ctr: number; // Click-through rate (%)
+  targetOpened: number;
+  contentOpenRate: number; // Content open rate (%)
+}
+
+export interface NotificationTemplateEngagement {
+  templateId: string;
+  templateVersion: number;
+  title: string;
+  category: NotificationEventType | string;
+  sent: number;
+  clicked: number;
+  ctr: number; // Click-through rate (%)
+  targetOpened: number;
+  contentOpenRate: number;
+}
+
+export interface NotificationEngagementSummary {
+  totalSent: number;
+  totalClicked: number;
+  uniqueClickedEvents: number;
+  clickThroughRate: number; // uniqueClicked / totalSent (%)
+  totalTargetOpened: number;
+  contentOpenRate: number; // targetOpened / uniqueClicked (%)
+  avgTimeToClickMs: number;
+  avgTimeToContentOpenMs: number;
+  byCategory: NotificationCategoryEngagement[];
+  byTemplate: NotificationTemplateEngagement[];
+  byDeliveryMode: {
+    immediate: { sent: number; clicked: number; ctr: number; targetOpened: number; contentOpenRate: number };
+    scheduled: { sent: number; clicked: number; ctr: number; targetOpened: number; contentOpenRate: number };
+  };
+}
+

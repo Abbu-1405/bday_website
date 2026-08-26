@@ -19,12 +19,13 @@ import {
   ArrowLeft,
   LogIn,
   Settings as SettingsIcon,
+  MousePointerClick,
 } from 'lucide-react';
 import { Container, Surface, Button, Badge } from '../components';
 import { useAuth } from '../hooks';
 import { ROUTES } from '../constants';
 import { NotificationEvent, NotificationEventType } from '../types';
-import { subscribeUserNotifications } from '../services';
+import { subscribeUserNotifications, recordNotificationClick } from '../services';
 
 type StatusFilter = 'ALL' | 'DELIVERED' | 'SCHEDULED' | 'PENDING' | 'FAILED';
 type CategoryFilter = 'ALL' | NotificationEventType;
@@ -93,9 +94,15 @@ export default function NotificationHistory() {
 
   // Safe navigation handler when an event target is clicked
   const handleEventClick = (event: NotificationEvent) => {
+    if (event.id) {
+      // Non-blocking interaction tracking
+      recordNotificationClick(event.id, 'history_click').catch(() => {});
+    }
     const rawUrl = event.data?.url;
-    if (typeof rawUrl === 'string' && rawUrl.startsWith('/')) {
-      navigate(rawUrl);
+    if (typeof rawUrl === 'string' && rawUrl.startsWith('/') && !rawUrl.startsWith('//')) {
+      const separator = rawUrl.includes('?') ? '&' : '?';
+      const targetUrl = event.id ? `${rawUrl}${separator}nid=${encodeURIComponent(event.id)}&src=history` : rawUrl;
+      navigate(targetUrl);
     }
   };
 
@@ -430,6 +437,20 @@ export default function NotificationHistory() {
               }
             }
 
+            // Parse clicked date if applicable
+            let clickedFormatted: string | null = null;
+            if (evt.clickedAt) {
+              const clickDate = typeof evt.clickedAt === 'string' ? new Date(evt.clickedAt) : evt.clickedAt?.toDate ? evt.clickedAt.toDate() : null;
+              if (clickDate && !isNaN(clickDate.getTime())) {
+                clickedFormatted = clickDate.toLocaleString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                });
+              }
+            }
+
             return (
               <Surface
                 key={evt.id}
@@ -476,6 +497,19 @@ export default function NotificationHistory() {
                         {sentFormatted && evt.status === 'sent' && (
                           <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                             <CheckCircle2 className="h-3 w-3" /> Delivered: {sentFormatted}
+                          </span>
+                        )}
+
+                        {clickedFormatted && (
+                          <span className="text-[var(--color-primary)] flex items-center gap-1">
+                            <MousePointerClick className="h-3 w-3" /> Clicked: {clickedFormatted}
+                            {evt.openedCount && evt.openedCount > 1 ? ` (${evt.openedCount}x)` : ''}
+                          </span>
+                        )}
+
+                        {evt.targetOpenedAt && (
+                          <span className="text-purple-600 dark:text-purple-400 flex items-center gap-1 font-medium">
+                            <Sparkles className="h-3 w-3" /> Opened Target Content
                           </span>
                         )}
                       </div>

@@ -14,6 +14,9 @@ import {
   FileCode,
   ShieldCheck,
   Smartphone,
+  MousePointerClick,
+  Eye,
+  Sparkles,
 } from 'lucide-react';
 import { NotificationEvent, NotificationEventType } from '../../../types';
 
@@ -200,6 +203,83 @@ export function AdminNotificationEventInspector({ event, onClose }: AdminNotific
               </div>
             </div>
           )}
+
+          {/* Phase 7: User Engagement & Interaction Status */}
+          <div>
+            <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider font-semibold mb-2 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <MousePointerClick className="w-3.5 h-3.5 text-purple-400" /> Engagement & Interaction Tracking
+              </span>
+              <span className="text-[10px] text-purple-400 font-mono">
+                {event.clickedAt ? 'INTERACTION RECORDED' : 'NO INTERACTION YET'}
+              </span>
+            </div>
+            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 space-y-0.5">
+                  <span className="text-slate-500 text-[10px] uppercase font-mono">Notification Clicked</span>
+                  <div className="font-semibold text-xs font-mono flex items-center gap-1">
+                    {event.clickedAt ? (
+                      <span className="text-emerald-400 flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" /> Yes
+                      </span>
+                    ) : (
+                      <span className="text-slate-400">No</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 space-y-0.5">
+                  <span className="text-slate-500 text-[10px] uppercase font-mono">Open Count</span>
+                  <div className="font-semibold text-xs font-mono text-slate-200">
+                    {event.openedCount ?? (event.clickedAt ? 1 : 0)}
+                  </div>
+                </div>
+
+                <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 space-y-0.5">
+                  <span className="text-slate-500 text-[10px] uppercase font-mono">Target Opened</span>
+                  <div className="font-semibold text-xs font-mono flex items-center gap-1">
+                    {event.targetOpenedAt ? (
+                      <span className="text-purple-400 flex items-center gap-1">
+                        <Sparkles className="w-3 h-3" /> Confirmed
+                      </span>
+                    ) : (
+                      <span className="text-slate-400">Not recorded</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {event.clickedAt && (
+                <div className="space-y-1.5 pt-1 text-[11px] border-t border-slate-900">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500">First Clicked At</span>
+                    <span className="font-mono text-slate-300">{formatDate(event.clickedAt)}</span>
+                  </div>
+                  {event.lastClickedAt && event.lastClickedAt !== event.clickedAt && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">Last Clicked At</span>
+                      <span className="font-mono text-slate-300">{formatDate(event.lastClickedAt)}</span>
+                    </div>
+                  )}
+                  {event.targetOpenedAt && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">Target Content Rendered</span>
+                      <span className="font-mono text-purple-300">{formatDate(event.targetOpenedAt)}</span>
+                    </div>
+                  )}
+                  {event.interactionSource && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">Interaction Source</span>
+                      <span className="font-mono text-indigo-400 uppercase text-[10px] bg-indigo-950/40 px-1.5 py-0.5 rounded border border-indigo-900/40">
+                        {event.interactionSource}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Template & Target User Metadata */}
           <div>

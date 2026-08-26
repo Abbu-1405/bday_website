@@ -15,6 +15,8 @@ import {
   Smartphone,
   Info,
   ShieldCheck,
+  MousePointerClick,
+  Sparkles,
 } from 'lucide-react';
 import {
   NotificationEvent,
@@ -254,6 +256,17 @@ export function AdminNotificationHistory() {
                       <span className="text-[10px] font-mono text-slate-500">
                         UID: {evt.userId ? `${evt.userId.slice(0, 6)}...` : 'N/A'}
                       </span>
+                      {evt.clickedAt && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20 flex items-center gap-1">
+                          <MousePointerClick className="w-2.5 h-2.5" /> CLICKED
+                          {evt.openedCount && evt.openedCount > 1 ? ` (${evt.openedCount}x)` : ''}
+                        </span>
+                      )}
+                      {evt.targetOpenedAt && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 flex items-center gap-1">
+                          <Sparkles className="w-2.5 h-2.5" /> TARGET OPENED
+                        </span>
+                      )}
                     </div>
 
                     <div className="font-medium text-slate-200 text-xs truncate">

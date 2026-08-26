@@ -13,6 +13,7 @@ import {
   orderBy,
   limit,
   serverTimestamp,
+  increment,
   onSnapshot,
 } from 'firebase/firestore';
 import { User } from 'firebase/auth';
@@ -1705,5 +1706,108 @@ export async function triggerServerQueueProcessing(): Promise<{
     };
   }
 }
+
+/**
+ * Validates whether a target URL is a safe internal same-origin relative route
+ */
+export function validateSafeDeepLink(url?: string | null): string {
+  if (!url || typeof url !== 'string') return '/';
+  const trimmed = url.trim();
+
+  // Must start with '/' and must not start with '//' (protocol-relative external attack)
+  if (!trimmed.startsWith('/') || trimmed.startsWith('//')) {
+    return '/';
+  }
+
+  // Prevent javascript:, data:, vbscript: protocols
+  if (trimmed.toLowerCase().includes('javascript:') || trimmed.toLowerCase().includes('data:') || trimmed.toLowerCase().includes('vbscript:')) {
+    return '/';
+  }
+
+  return trimmed;
+}
+
+/**
+ * Phase 7: Records a notification click event securely and idempotently.
+ * Updates clickedAt (if first time), lastClickedAt (every time), openedCount (atomic increment), and interactionSource.
+ */
+export async function recordNotificationClick(
+  eventId: string,
+  source: 'push_notification' | 'in_app' | 'history_click' | string = 'push_notification'
+): Promise<boolean> {
+  if (!eventId || typeof eventId !== 'string' || !eventId.trim()) {
+    return false;
+  }
+  if (!isFirebaseConfigured) {
+    return false;
+  }
+
+  try {
+    const eventRef = doc(db, 'notificationEvents', eventId.trim());
+    const eventSnap = await getDoc(eventRef);
+
+    if (!eventSnap.exists()) {
+      return false;
+    }
+
+    const currentData = eventSnap.data();
+
+    // Prepare update payload
+    const updatePayload: Record<string, any> = {
+      lastClickedAt: serverTimestamp(),
+      openedCount: increment(1),
+      interactionSource: source,
+    };
+
+    // First-click semantics: only set clickedAt if not already populated
+    if (!currentData.clickedAt) {
+      updatePayload.clickedAt = serverTimestamp();
+    }
+
+    await updateDoc(eventRef, updatePayload);
+    return true;
+  } catch (err: any) {
+    // Non-blocking fail-safe: engagement analytics must never block navigation or throw unhandled exceptions
+    console.warn('[NotificationTracking] Non-blocking click recording notice:', err?.message || err);
+    return false;
+  }
+}
+
+/**
+ * Phase 7: Records that target content was successfully rendered/opened.
+ * Distinguishes notification click from actual destination engagement (sentAt ≠ clickedAt ≠ targetOpenedAt).
+ */
+export async function recordNotificationTargetOpened(eventId: string): Promise<boolean> {
+  if (!eventId || typeof eventId !== 'string' || !eventId.trim()) {
+    return false;
+  }
+  if (!isFirebaseConfigured) {
+    return false;
+  }
+
+  try {
+    const eventRef = doc(db, 'notificationEvents', eventId.trim());
+    const eventSnap = await getDoc(eventRef);
+
+    if (!eventSnap.exists()) {
+      return false;
+    }
+
+    const currentData = eventSnap.data();
+
+    // Only set targetOpenedAt if not already populated to preserve the primary content open timestamp
+    if (!currentData.targetOpenedAt) {
+      await updateDoc(eventRef, {
+        targetOpenedAt: serverTimestamp(),
+      });
+    }
+    return true;
+  } catch (err: any) {
+    // Non-blocking fail-safe
+    console.warn('[NotificationTracking] Non-blocking target open recording notice:', err?.message || err);
+    return false;
+  }
+}
+
 
 

@@ -68,30 +68,57 @@ if (messaging) {
   });
 }
 
-// Handle notification click action (open or focus window)
+// Handle notification click action (open or focus window with engagement tracking)
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  const targetUrl = event.notification.data?.url || '/';
+  // Extract metadata safely without exposing credentials or sensitive user data
+  let rawUrl = event.notification.data?.url || '/';
+  const eventId = event.notification.data?.eventId || event.notification.data?.notificationEventId;
+
+  // Validate internal same-origin relative destination
+  let safeDestination = '/';
+  if (typeof rawUrl === 'string' && rawUrl.startsWith('/') && !rawUrl.startsWith('//')) {
+    safeDestination = rawUrl;
+  }
+
+  // Construct tracked deep-link URL with event identifier
+  let trackedUrl = safeDestination;
+  if (eventId && typeof eventId === 'string') {
+    const separator = trackedUrl.includes('?') ? '&' : '?';
+    trackedUrl = `${trackedUrl}${separator}nid=${encodeURIComponent(eventId)}&src=push`;
+  }
 
   event.waitUntil(
     clients
       .matchAll({ type: 'window', includeUncontrolled: true })
       .then((windowClients) => {
-        // If an existing Starlit Letters tab is open, focus it
+        // If an existing Starlit Letters tab is open, focus and navigate it
         for (let i = 0; i < windowClients.length; i++) {
           const client = windowClients[i];
-          if (client.url.includes(self.location.origin) && 'focus' in client) {
-            if ('navigate' in client && targetUrl !== '/') {
-              client.navigate(targetUrl);
+          if (client.url && client.url.includes(self.location.origin) && 'focus' in client) {
+            // Post message to client for real-time foreground handling
+            if ('postMessage' in client && eventId) {
+              client.postMessage({
+                type: 'STARLIT_NOTIFICATION_CLICK',
+                eventId,
+                url: safeDestination,
+                source: 'push_notification',
+              });
+            }
+            if ('navigate' in client && trackedUrl !== '/') {
+              client.navigate(trackedUrl);
             }
             return client.focus();
           }
         }
         // Otherwise, open a new window/tab
         if (clients.openWindow) {
-          return clients.openWindow(targetUrl);
+          return clients.openWindow(trackedUrl);
         }
+      })
+      .catch((err) => {
+        console.warn('[firebase-messaging-sw.js] Notification click handling notice:', err);
       })
   );
 });

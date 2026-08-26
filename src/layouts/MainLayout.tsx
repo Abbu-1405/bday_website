@@ -16,6 +16,8 @@ import {
   syncNotificationTokenOnAuth,
   setupForegroundMessageListener,
   shouldPromptNotificationPermission,
+  recordNotificationClick,
+  recordNotificationTargetOpened,
 } from '../services/notificationService';
 import { BadgeItem } from '../types/achievements';
 import { useTheme, useAuth } from '../hooks';
@@ -64,6 +66,46 @@ export const MainLayout: React.FC = () => {
     return () => {
       unsubscribe();
     };
+  }, []);
+
+  // Phase 7: Track notification clicks and target content opens via incoming URL parameters
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const nid = searchParams.get('nid');
+    const src = searchParams.get('src') || 'push_notification';
+
+    if (nid && typeof nid === 'string' && nid.trim()) {
+      const eventId = nid.trim();
+      // 1. Non-blocking click recording
+      recordNotificationClick(eventId, src).catch(() => {});
+
+      // 2. Once destination page content is mounted/rendered, record target content opened
+      const timer = setTimeout(() => {
+        recordNotificationTargetOpened(eventId).catch(() => {});
+      }, 400);
+
+      return () => clearTimeout(timer);
+    }
+  }, [location.pathname, location.search]);
+
+  // Phase 7: Listen for direct Service Worker click postMessage notifications
+  useEffect(() => {
+    if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+      const handleServiceWorkerMessage = (event: MessageEvent) => {
+        if (event.data?.type === 'STARLIT_NOTIFICATION_CLICK' && event.data.eventId) {
+          const { eventId, source } = event.data;
+          recordNotificationClick(eventId, source || 'push_notification').catch(() => {});
+          setTimeout(() => {
+            recordNotificationTargetOpened(eventId).catch(() => {});
+          }, 400);
+        }
+      };
+
+      navigator.serviceWorker.addEventListener('message', handleServiceWorkerMessage);
+      return () => {
+        navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
+      };
+    }
   }, []);
 
   return (

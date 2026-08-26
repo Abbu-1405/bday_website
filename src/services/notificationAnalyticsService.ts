@@ -26,6 +26,9 @@ import {
   NotificationGlobalControl,
   NotificationSystemHealth,
   NotificationHistoryFilterState,
+  NotificationEngagementSummary,
+  NotificationCategoryEngagement,
+  NotificationTemplateEngagement,
 } from '../types';
 import { getVapidKey, isPushSupported } from './notificationService';
 
@@ -136,6 +139,7 @@ export async function fetchNotificationAnalytics(
   timeSeries: NotificationTimeSeriesPoint[];
   failureGroups: NotificationFailureGroup[];
   rawEventsCount: number;
+  engagement: NotificationEngagementSummary;
 }> {
   if (!isFirebaseConfigured) {
     return createFallbackAnalytics();
@@ -167,6 +171,46 @@ export async function fetchNotificationAnalytics(
     let totalProcessingTimeMs = 0;
     let eventsWithLatencyCount = 0;
     let totalAttempts = 0;
+
+    // Phase 7: Engagement tracking counters
+    let totalSent = 0;
+    let totalClicked = 0;
+    let uniqueClickedEvents = 0;
+    let totalTargetOpened = 0;
+    let totalTimeToClickMs = 0;
+    let timeToClickCount = 0;
+    let totalTimeToContentOpenMs = 0;
+    let timeToContentOpenCount = 0;
+
+    const engagementCategoryMap: Record<
+      NotificationEventType,
+      { sent: number; clicked: number; targetOpened: number }
+    > = {
+      LETTER_AVAILABLE: { sent: 0, clicked: 0, targetOpened: 0 },
+      OPEN_WHEN_AVAILABLE: { sent: 0, clicked: 0, targetOpened: 0 },
+      SECRET_UNLOCKED: { sent: 0, clicked: 0, targetOpened: 0 },
+      MOMENT_AVAILABLE: { sent: 0, clicked: 0, targetOpened: 0 },
+      BIRTHDAY: { sent: 0, clicked: 0, targetOpened: 0 },
+      GENERAL: { sent: 0, clicked: 0, targetOpened: 0 },
+    };
+
+    const engagementDeliveryModeMap = {
+      immediate: { sent: 0, clicked: 0, targetOpened: 0 },
+      scheduled: { sent: 0, clicked: 0, targetOpened: 0 },
+    };
+
+    const templateEngagementMap: Map<
+      string,
+      {
+        templateId: string;
+        templateVersion: number;
+        title: string;
+        category: NotificationEventType | string;
+        sent: number;
+        clicked: number;
+        targetOpened: number;
+      }
+    > = new Map();
 
     const categoryMap: Record<
       NotificationEventType,
@@ -224,9 +268,21 @@ export async function fetchNotificationAnalytics(
       // Processing latency calculation
       const processedDate = parseFirestoreTimestamp(data.processedAt);
       const sentDate = parseFirestoreTimestamp(data.sentAt);
-      if (createdDate && (sentDate || processedDate)) {
-        const end = sentDate || processedDate;
-        const diff = end!.getTime() - createdDate.getTime();
+      const scheduledDate = parseFirestoreTimestamp(data.scheduledAt);
+
+      if (sentDate) {
+        // For immediate: latency is sentDate - createdDate
+        // For scheduled: latency is sentDate - scheduledDate (actual dispatch lag beyond scheduled time)
+        const baseline = deliveryMode === 'scheduled' && scheduledDate ? scheduledDate : createdDate;
+        if (baseline) {
+          const diff = sentDate.getTime() - baseline.getTime();
+          if (diff >= 0 && diff < 3600000) {
+            totalProcessingTimeMs += diff;
+            eventsWithLatencyCount++;
+          }
+        }
+      } else if (createdDate && processedDate) {
+        const diff = processedDate.getTime() - createdDate.getTime();
         if (diff >= 0 && diff < 3600000) {
           totalProcessingTimeMs += diff;
           eventsWithLatencyCount++;
@@ -245,6 +301,87 @@ export async function fetchNotificationAnalytics(
         else if (status === 'failed') categoryMap[catKey].failed++;
         else if (status === 'pending') categoryMap[catKey].pending++;
         else if (status === 'scheduled') categoryMap[catKey].scheduled++;
+      }
+
+      // Phase 7: Engagement calculations for this event
+      const isSent = status === 'sent' || Boolean(sentDate);
+      if (isSent) {
+        totalSent++;
+        engagementCategoryMap[catKey].sent++;
+        if (deliveryMode === 'scheduled') {
+          engagementDeliveryModeMap.scheduled.sent++;
+        } else {
+          engagementDeliveryModeMap.immediate.sent++;
+        }
+      }
+
+      const clickedDate = parseFirestoreTimestamp(data.clickedAt);
+      const targetOpenedDate = parseFirestoreTimestamp(data.targetOpenedAt);
+
+      const isClicked = Boolean(clickedDate);
+      const isTargetOpened = Boolean(targetOpenedDate);
+
+      if (isClicked) {
+        uniqueClickedEvents++;
+        const opCount = typeof data.openedCount === 'number' && data.openedCount > 0 ? data.openedCount : 1;
+        totalClicked += opCount;
+
+        engagementCategoryMap[catKey].clicked++;
+        if (deliveryMode === 'scheduled') {
+          engagementDeliveryModeMap.scheduled.clicked++;
+        } else {
+          engagementDeliveryModeMap.immediate.clicked++;
+        }
+
+        // Time to click: sent -> click
+        if (sentDate && clickedDate) {
+          const clickDiff = clickedDate.getTime() - sentDate.getTime();
+          if (clickDiff >= 0 && clickDiff < 30 * 24 * 60 * 60 * 1000) {
+            totalTimeToClickMs += clickDiff;
+            timeToClickCount++;
+          }
+        }
+      }
+
+      if (isTargetOpened) {
+        totalTargetOpened++;
+        engagementCategoryMap[catKey].targetOpened++;
+        if (deliveryMode === 'scheduled') {
+          engagementDeliveryModeMap.scheduled.targetOpened++;
+        } else {
+          engagementDeliveryModeMap.immediate.targetOpened++;
+        }
+
+        // Time to content open: click -> target opened
+        if (clickedDate && targetOpenedDate) {
+          const openDiff = targetOpenedDate.getTime() - clickedDate.getTime();
+          if (openDiff >= 0 && openDiff < 24 * 60 * 60 * 1000) {
+            totalTimeToContentOpenMs += openDiff;
+            timeToContentOpenCount++;
+          }
+        }
+      }
+
+      // Template Engagement aggregation
+      if (data.templateId) {
+        const tId = String(data.templateId);
+        const tVer = typeof data.templateVersion === 'number' ? data.templateVersion : 1;
+        const key = `${tId}_v${tVer}`;
+        if (!templateEngagementMap.has(key)) {
+          templateEngagementMap.set(key, {
+            templateId: tId,
+            templateVersion: tVer,
+            title: data.title || 'Template Notification',
+            category: type,
+            sent: 0,
+            clicked: 0,
+            targetOpened: 0,
+          });
+        }
+        const tStat = templateEngagementMap.get(key)!;
+        if (isSent) tStat.sent++;
+        if (isClicked) tStat.clicked++;
+        if (isTargetOpened) tStat.targetOpened++;
       }
 
       // Time series bucket
@@ -414,12 +551,81 @@ export async function fetchNotificationAnalytics(
       }))
       .sort((a, b) => b.count - a.count);
 
+    // Phase 7 Engagement Metrics summary compilation
+    const clickThroughRate = totalSent > 0 ? Math.round((uniqueClickedEvents / totalSent) * 1000) / 10 : 0;
+    const contentOpenRate = uniqueClickedEvents > 0 ? Math.round((totalTargetOpened / uniqueClickedEvents) * 1000) / 10 : 0;
+    const avgTimeToClickMs = timeToClickCount > 0 ? Math.round(totalTimeToClickMs / timeToClickCount) : 0;
+    const avgTimeToContentOpenMs = timeToContentOpenCount > 0 ? Math.round(totalTimeToContentOpenMs / timeToContentOpenCount) : 0;
+
+    const byCategory: NotificationCategoryEngagement[] = ALL_CATEGORIES.map((cat) => {
+      const cData = engagementCategoryMap[cat];
+      const ctr = cData.sent > 0 ? Math.round((cData.clicked / cData.sent) * 1000) / 10 : 0;
+      const cRate = cData.clicked > 0 ? Math.round((cData.targetOpened / cData.clicked) * 1000) / 10 : 0;
+      return {
+        category: cat,
+        label: CATEGORY_LABELS[cat],
+        sent: cData.sent,
+        clicked: cData.clicked,
+        ctr,
+        targetOpened: cData.targetOpened,
+        contentOpenRate: cRate,
+      };
+    });
+
+    const byTemplate: NotificationTemplateEngagement[] = Array.from(templateEngagementMap.values())
+      .map((t) => ({
+        ...t,
+        ctr: t.sent > 0 ? Math.round((t.clicked / t.sent) * 1000) / 10 : 0,
+        contentOpenRate: t.clicked > 0 ? Math.round((t.targetOpened / t.clicked) * 1000) / 10 : 0,
+      }))
+      .sort((a, b) => b.sent - a.sent);
+
+    const immSent = engagementDeliveryModeMap.immediate.sent;
+    const immClicked = engagementDeliveryModeMap.immediate.clicked;
+    const immTargetOpened = engagementDeliveryModeMap.immediate.targetOpened;
+
+    const schedSent = engagementDeliveryModeMap.scheduled.sent;
+    const schedClicked = engagementDeliveryModeMap.scheduled.clicked;
+    const schedTargetOpened = engagementDeliveryModeMap.scheduled.targetOpened;
+
+    const byDeliveryMode = {
+      immediate: {
+        sent: immSent,
+        clicked: immClicked,
+        ctr: immSent > 0 ? Math.round((immClicked / immSent) * 1000) / 10 : 0,
+        targetOpened: immTargetOpened,
+        contentOpenRate: immClicked > 0 ? Math.round((immTargetOpened / immClicked) * 1000) / 10 : 0,
+      },
+      scheduled: {
+        sent: schedSent,
+        clicked: schedClicked,
+        ctr: schedSent > 0 ? Math.round((schedClicked / schedSent) * 1000) / 10 : 0,
+        targetOpened: schedTargetOpened,
+        contentOpenRate: schedClicked > 0 ? Math.round((schedTargetOpened / schedClicked) * 1000) / 10 : 0,
+      },
+    };
+
+    const engagement: NotificationEngagementSummary = {
+      totalSent,
+      totalClicked,
+      uniqueClickedEvents,
+      clickThroughRate,
+      totalTargetOpened,
+      contentOpenRate,
+      avgTimeToClickMs,
+      avgTimeToContentOpenMs,
+      byCategory,
+      byTemplate,
+      byDeliveryMode,
+    };
+
     return {
       summary,
       categoryStats,
       timeSeries,
       failureGroups,
       rawEventsCount: total,
+      engagement,
     };
   } catch (err) {
     console.error('Error computing notification analytics:', err);
@@ -751,6 +957,13 @@ export async function fetchNotificationHistoryPaginated(params: {
         failureReason: data.failureReason || null,
         error: data.error || null,
         createdAt: createdDate ? createdDate.toISOString() : new Date().toISOString(),
+
+        // Phase 7: Engagement metadata
+        clickedAt: parseFirestoreTimestamp(data.clickedAt)?.toISOString() || null,
+        lastClickedAt: parseFirestoreTimestamp(data.lastClickedAt)?.toISOString() || null,
+        openedCount: typeof data.openedCount === 'number' ? data.openedCount : data.clickedAt ? 1 : 0,
+        targetOpenedAt: parseFirestoreTimestamp(data.targetOpenedAt)?.toISOString() || null,
+        interactionSource: data.interactionSource || null,
       });
     });
 
@@ -799,5 +1012,29 @@ function createFallbackAnalytics() {
     timeSeries: [],
     failureGroups: [],
     rawEventsCount: 0,
+    engagement: {
+      totalSent: 0,
+      totalClicked: 0,
+      uniqueClickedEvents: 0,
+      clickThroughRate: 0,
+      totalTargetOpened: 0,
+      contentOpenRate: 0,
+      avgTimeToClickMs: 0,
+      avgTimeToContentOpenMs: 0,
+      byCategory: ALL_CATEGORIES.map((cat) => ({
+        category: cat,
+        label: CATEGORY_LABELS[cat],
+        sent: 0,
+        clicked: 0,
+        ctr: 0,
+        targetOpened: 0,
+        contentOpenRate: 0,
+      })),
+      byTemplate: [],
+      byDeliveryMode: {
+        immediate: { sent: 0, clicked: 0, ctr: 0, targetOpened: 0, contentOpenRate: 0 },
+        scheduled: { sent: 0, clicked: 0, ctr: 0, targetOpened: 0, contentOpenRate: 0 },
+      },
+    },
   };
 }
