@@ -2,6 +2,7 @@ import { getMessaging, getToken, onMessage, isSupported, deleteToken, Messaging 
 import { doc, setDoc, getDoc, updateDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
 import { User } from 'firebase/auth';
 import app, { db, isFirebaseConfigured } from '../firebase';
+import firebaseAppletConfig from '../../firebase-applet-config.json';
 import { NotificationPermissionState, NotificationStatusInfo, NotificationToken } from '../types';
 
 const TOKEN_STORAGE_KEY = 'starlit_fcm_token';
@@ -33,12 +34,19 @@ export async function isPushSupported(): Promise<boolean> {
 }
 
 /**
- * Gets the current Web Push VAPID key from environment variables
+ * Gets the current Web Push VAPID public key from environment variables or project config
  */
 export function getVapidKey(): string | null {
   const envKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
   if (envKey && typeof envKey === 'string' && envKey.trim().length > 0) {
     return envKey.trim();
+  }
+  const fallbackKey =
+    (firebaseAppletConfig as any)?.vapidKey ||
+    (firebaseAppletConfig as any)?.vapidPublicKey ||
+    (firebaseAppletConfig as any)?.fcmVapidKey;
+  if (fallbackKey && typeof fallbackKey === 'string' && fallbackKey.trim().length > 0) {
+    return fallbackKey.trim();
   }
   return null;
 }
@@ -126,7 +134,10 @@ export async function getNotificationStatus(user?: User | null): Promise<Notific
     hasVapidKey: Boolean(vapidKey),
     token: storedToken,
     loading: false,
-    error: !vapidKey ? 'VAPID Web Push certificate key not configured.' : null,
+    error:
+      permission === 'denied'
+        ? 'Notification permission is blocked in browser settings.'
+        : null,
   };
 }
 
@@ -138,14 +149,19 @@ async function registerServiceWorker(): Promise<ServiceWorkerRegistration | unde
     return undefined;
   }
   try {
-    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+    const swUrl = `/firebase-messaging-sw.js?messagingSenderId=1040135494913&projectId=gen-lang-client-0057157522&appId=1:1040135494913:web:ee17e2c259d779bbe60f00`;
+    const registration = await navigator.serviceWorker.register(swUrl, {
       scope: '/',
     });
     await navigator.serviceWorker.ready;
     return registration;
   } catch (err) {
     console.warn('[FCM] Service worker registration notice:', err);
-    return undefined;
+    try {
+      return await navigator.serviceWorker.getRegistration('/');
+    } catch {
+      return undefined;
+    }
   }
 }
 
@@ -159,46 +175,55 @@ export async function requestAndRegisterNotification(
     return { success: false, error: 'User must be signed in to enable notifications.' };
   }
 
-  const supported = await isPushSupported();
-  if (!supported) {
+  // 1. Synchronous check for browser notification support
+  if (typeof window === 'undefined' || !('Notification' in window) || !('serviceWorker' in navigator)) {
     return {
       success: false,
-      error: 'Push notifications are not supported by this browser or in this environment.',
-    };
-  }
-
-  const vapidKey = getVapidKey();
-  if (!vapidKey) {
-    return {
-      success: false,
-      error:
-        'VAPID key is not configured. Please add VITE_FIREBASE_VAPID_KEY from Firebase Console (Project Settings > Cloud Messaging > Web Push certificates).',
+      error: 'Push notifications are not supported by this browser or device environment.',
     };
   }
 
   try {
-    // 1. Request browser permission
-    const permission = await Notification.requestPermission();
+    // 2. Request browser permission IMMEDIATELY inside the active user interaction context
+    let permission = Notification.permission;
+    if (permission === 'default') {
+      try {
+        permission = await Notification.requestPermission();
+      } catch (permErr) {
+        console.warn('[FCM] Error requesting notification permission:', permErr);
+      }
+    }
+
     if (permission !== 'granted') {
       return {
         success: false,
         error:
           permission === 'denied'
-            ? 'Notification permission was blocked in browser settings.'
+            ? 'Notification permission was blocked in browser settings. Please allow notifications in site settings.'
             : 'Notification permission was not granted.',
       };
     }
 
-    // 2. Initialize Messaging
+    // 3. Check VAPID key configuration
+    const vapidKey = getVapidKey();
+    if (!vapidKey) {
+      return {
+        success: false,
+        error:
+          'VAPID key is not configured. Please add VITE_FIREBASE_VAPID_KEY from Firebase Console (Project Settings > Cloud Messaging > Web Push certificates).',
+      };
+    }
+
+    // 4. Initialize Messaging instance
     const messaging = await getMessagingService();
     if (!messaging) {
       return { success: false, error: 'Failed to initialize Firebase Messaging service.' };
     }
 
-    // 3. Register service worker
+    // 5. Register service worker
     const swRegistration = await registerServiceWorker();
 
-    // 4. Retrieve FCM Token
+    // 6. Retrieve FCM Token from Firebase Cloud Messaging
     const token = await getToken(messaging, {
       vapidKey,
       serviceWorkerRegistration: swRegistration,
@@ -208,7 +233,7 @@ export async function requestAndRegisterNotification(
       return { success: false, error: 'No FCM registration token returned from Firebase.' };
     }
 
-    // 5. Store token securely in Firestore under users/{uid}/notificationTokens/{tokenId}
+    // 7. Store token securely in Firestore under users/{uid}/notificationTokens/{tokenId}
     const tokenId = generateTokenDocId(token);
     const { platform, browser, userAgent } = getPlatformInfo();
     const tokenRef = doc(db, 'users', user.uid, 'notificationTokens', tokenId);
@@ -237,6 +262,12 @@ export async function requestAndRegisterNotification(
     return { success: true, token };
   } catch (err: any) {
     console.error('[FCM] Error requesting / registering push token:', err);
+    if (err?.code === 'permission-denied' || err?.message?.includes('insufficient permissions')) {
+      return {
+        success: false,
+        error: 'Firestore permission denied while saving token. Please ensure you are signed in.',
+      };
+    }
     return {
       success: false,
       error: err?.message || 'Failed to complete push notification registration.',

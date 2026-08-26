@@ -7,15 +7,15 @@
 importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js');
 
-// Initialize Firebase in the service worker with dynamic query param support or new project defaults
+// Initialize Firebase in the service worker with dynamic query param support or canonical project defaults
 const urlParams = new URLSearchParams(self.location.search);
 const firebaseConfig = {
-  apiKey: urlParams.get('apiKey') || '',
+  apiKey: urlParams.get('apiKey') || 'AIzaSyCAj57KTHde1XwxXmg08zNlc4knIRmqumo',
   authDomain: urlParams.get('authDomain') || 'gen-lang-client-0057157522.firebaseapp.com',
   projectId: urlParams.get('projectId') || 'gen-lang-client-0057157522',
   storageBucket: urlParams.get('storageBucket') || 'gen-lang-client-0057157522.firebasestorage.app',
-  messagingSenderId: urlParams.get('messagingSenderId') || '',
-  appId: urlParams.get('appId') || '',
+  messagingSenderId: urlParams.get('messagingSenderId') || '1040135494913',
+  appId: urlParams.get('appId') || '1:1040135494913:web:ee17e2c259d779bbe60f00',
 };
 
 if (firebaseConfig.projectId) {
