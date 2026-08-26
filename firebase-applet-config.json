@@ -6,6 +6,7 @@
   "firestoreDatabaseId": "ai-studio-remixstarlitlett-45632027-0698-4661-bfb7-6fea5b923b2b",
   "storageBucket": "gen-lang-client-0057157522.firebasestorage.app",
   "messagingSenderId": "1040135494913",
+  "vapidKey": "BBwlsm_hZXcF8gcX4XxqTVWCQtQUtyHzCBjiicv0qkQP4qBK0lBCqqMt0GpZQMn95BAuPk14VnoSdJIwPY7VNfA",
   "measurementId": "",
   "recaptchaSiteKey": ""
 }

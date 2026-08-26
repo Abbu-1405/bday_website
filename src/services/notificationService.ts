@@ -1,7 +1,7 @@
 import { getMessaging, getToken, onMessage, isSupported, deleteToken, Messaging } from 'firebase/messaging';
 import { doc, setDoc, getDoc, updateDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
 import { User } from 'firebase/auth';
-import app, { db, isFirebaseConfigured } from '../firebase';
+import app, { db, isFirebaseConfigured, vapidKey as defaultVapidKey } from '../firebase';
 import firebaseAppletConfig from '../../firebase-applet-config.json';
 import { NotificationPermissionState, NotificationStatusInfo, NotificationToken } from '../types';
 
@@ -41,12 +41,15 @@ export function getVapidKey(): string | null {
   if (envKey && typeof envKey === 'string' && envKey.trim().length > 0) {
     return envKey.trim();
   }
-  const fallbackKey =
+  const fallbackConfigKey =
     (firebaseAppletConfig as any)?.vapidKey ||
     (firebaseAppletConfig as any)?.vapidPublicKey ||
     (firebaseAppletConfig as any)?.fcmVapidKey;
-  if (fallbackKey && typeof fallbackKey === 'string' && fallbackKey.trim().length > 0) {
-    return fallbackKey.trim();
+  if (fallbackConfigKey && typeof fallbackConfigKey === 'string' && fallbackConfigKey.trim().length > 0) {
+    return fallbackConfigKey.trim();
+  }
+  if (defaultVapidKey && typeof defaultVapidKey === 'string' && defaultVapidKey.trim().length > 0) {
+    return defaultVapidKey.trim();
   }
   return null;
 }

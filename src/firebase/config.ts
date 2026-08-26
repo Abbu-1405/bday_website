@@ -39,6 +39,12 @@ const firestoreDatabaseId =
   (firebaseAppletConfig as any)?.firestoreDatabaseId ||
   'ai-studio-remixstarlitlett-45632027-0698-4661-bfb7-6fea5b923b2b';
 
+export const vapidKey: string =
+  (import.meta.env.VITE_FIREBASE_VAPID_KEY && import.meta.env.VITE_FIREBASE_VAPID_KEY.trim()) ||
+  (firebaseAppletConfig as any)?.vapidKey ||
+  (firebaseAppletConfig as any)?.vapidPublicKey ||
+  'BBwlsm_hZXcF8gcX4XxqTVWCQtQUtyHzCBjiicv0qkQP4qBK0lBCqqMt0GpZQMn95BAuPk14VnoSdJIwPY7VNfA';
+
 const config = {
   apiKey: rawApiKey,
   authDomain,
