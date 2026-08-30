@@ -7,8 +7,18 @@ import {
   AudioButton,
   AchievementCelebrationModal,
   LetterArchiveBackground,
+  LetterArchiveAmbience,
+  MidnightAmbience,
+  WhimsicalAmbience,
   VintageInkPot,
   NotificationPermissionModal,
+  CatBackground,
+  CatThemeElement,
+  CatThemeTransition,
+  CatInteractionEngine,
+  CatAudioAutoplayPrompt,
+  CatEasterEggToast,
+  ScrollProgress,
 } from '../components';
 import { MagicalWandCursor } from '../components/whimsical/MagicalWandCursor';
 import { evaluateBadges } from '../services/badgeService';
@@ -21,7 +31,10 @@ import {
 } from '../services/notificationService';
 import { BadgeItem } from '../types/achievements';
 import { useTheme, useAuth } from '../hooks';
+import { StarlitCatEventBridge } from '../services/catInteraction/StarlitCatEventBridge';
+import { CatAudioService } from '../services/catInteraction/CatAudioService';
 import letterArchiveCursor from '../assets/icons/Letter-archive.cur';
+import midnightJournalCursor from '../assets/icons/Midnight-journal.cur';
 
 export const MainLayout: React.FC = () => {
   const location = useLocation();
@@ -30,10 +43,47 @@ export const MainLayout: React.FC = () => {
   const isWhimsical = theme === 'whimsical-scrapbook';
   const isMidnight = theme === 'midnight-journal';
   const isLetterArchive = theme === 'letter-archive';
+  const isCatMeme = theme === 'cat-meme';
   const isAdminRoute = location.pathname.startsWith('/admin');
   const [celebrationBadge, setCelebrationBadge] = useState<BadgeItem | null>(null);
   const [showNotificationPrompt, setShowNotificationPrompt] = useState<boolean>(false);
+  const [showCatTransition, setShowCatTransition] = useState<boolean>(false);
+  const prevThemeRef = useRef<string>(theme);
   const trackedUrlEventsRef = useRef<Set<string>>(new Set());
+
+  // Synchronize active Cat Meme theme with the centralized event bridge and audio service
+  useEffect(() => {
+    const isActive = isCatMeme && !isAdminRoute;
+    StarlitCatEventBridge.setThemeActive(isActive);
+    CatAudioService.getInstance().setThemeActive(isActive);
+    return () => {
+      if (!isCatMeme) {
+        StarlitCatEventBridge.cleanup();
+        CatAudioService.getInstance().setThemeActive(false);
+      }
+    };
+  }, [isCatMeme, isAdminRoute]);
+
+  // Trigger lightweight introductory transition when switching INTO One Brain Cell
+  useEffect(() => {
+    if (prevThemeRef.current !== 'cat-meme' && theme === 'cat-meme') {
+      setShowCatTransition(true);
+    }
+    prevThemeRef.current = theme;
+  }, [theme]);
+
+  // Phase 4: Route transition observer
+  useEffect(() => {
+    if (isCatMeme && !isAdminRoute) {
+      // Gentle page transition reaction attempt
+      const timer = setTimeout(() => {
+        StarlitCatEventBridge.emit('PAGE_TRANSITION', {
+          sourceRoute: location.pathname,
+        });
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [location.pathname, isCatMeme, isAdminRoute]);
 
   useEffect(() => {
     // Evaluate badges on mount and route change
@@ -133,75 +183,162 @@ export const MainLayout: React.FC = () => {
         `}</style>
       )}
 
+      {/* Midnight Journal Dedicated Scoped Cursor Style */}
+      {isMidnight && (
+        <style>{`
+          @media (pointer: fine) {
+            [data-theme="midnight-journal"],
+            .midnight-journal-theme,
+            [data-theme="midnight-journal"] body {
+              cursor: url('${midnightJournalCursor}'), auto;
+            }
+            [data-theme="midnight-journal"] a,
+            [data-theme="midnight-journal"] button,
+            [data-theme="midnight-journal"] [role="button"],
+            [data-theme="midnight-journal"] input[type="submit"],
+            [data-theme="midnight-journal"] input[type="button"],
+            [data-theme="midnight-journal"] input[type="checkbox"],
+            [data-theme="midnight-journal"] input[type="radio"],
+            [data-theme="midnight-journal"] .cursor-pointer,
+            .midnight-journal-theme a,
+            .midnight-journal-theme button,
+            .midnight-journal-theme [role="button"],
+            .midnight-journal-theme input[type="submit"],
+            .midnight-journal-theme input[type="button"],
+            .midnight-journal-theme input[type="checkbox"],
+            .midnight-journal-theme input[type="radio"],
+            .midnight-journal-theme .cursor-pointer {
+              cursor: url('${midnightJournalCursor}'), pointer;
+            }
+            [data-theme="midnight-journal"] input[type="text"],
+            [data-theme="midnight-journal"] input[type="email"],
+            [data-theme="midnight-journal"] input[type="password"],
+            [data-theme="midnight-journal"] input[type="search"],
+            [data-theme="midnight-journal"] input[type="number"],
+            [data-theme="midnight-journal"] input[type="tel"],
+            [data-theme="midnight-journal"] input[type="url"],
+            [data-theme="midnight-journal"] textarea,
+            [data-theme="midnight-journal"] [contenteditable="true"],
+            .midnight-journal-theme input[type="text"],
+            .midnight-journal-theme input[type="email"],
+            .midnight-journal-theme input[type="password"],
+            .midnight-journal-theme input[type="search"],
+            .midnight-journal-theme input[type="number"],
+            .midnight-journal-theme input[type="tel"],
+            .midnight-journal-theme input[type="url"],
+            .midnight-journal-theme textarea,
+            .midnight-journal-theme [contenteditable="true"] {
+              cursor: text;
+            }
+            [data-theme="midnight-journal"] select,
+            .midnight-journal-theme select {
+              cursor: pointer;
+            }
+            [data-theme="midnight-journal"] [disabled],
+            [data-theme="midnight-journal"] .cursor-not-allowed,
+            .midnight-journal-theme [disabled],
+            .midnight-journal-theme .cursor-not-allowed {
+              cursor: not-allowed;
+            }
+          }
+        `}</style>
+      )}
+
       {/* Letter Archive Dedicated Aged Parchment & Desk Atmosphere Background */}
-      {isLetterArchive && <LetterArchiveBackground />}
+      <div
+        className={`fixed inset-0 pointer-events-none select-none z-0 overflow-hidden transition-opacity duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${
+          isLetterArchive ? 'opacity-100' : 'opacity-0'
+        }`}
+        aria-hidden="true"
+      >
+        <LetterArchiveBackground />
+        <LetterArchiveAmbience />
+      </div>
 
       {/* Whimsical Theme Fixed Enchanted Forest SVG Background Artwork */}
-      {isWhimsical && (
+      <div
+        id="whimsical-fixed-artwork-background"
+        className={`fixed inset-0 pointer-events-none select-none z-0 overflow-hidden transition-opacity duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${
+          isWhimsical ? 'opacity-100' : 'opacity-0'
+        }`}
+        aria-hidden="true"
+      >
+        {/* Static SVG Artwork Layer */}
         <div
-          id="whimsical-fixed-artwork-background"
-          className="fixed inset-0 pointer-events-none select-none z-0 overflow-hidden"
-          aria-hidden="true"
-        >
-          {/* Static SVG Artwork Layer */}
-          <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat transform-gpu"
-            style={{
-              backgroundImage: `url('/swirl-wallpaper-green.svg')`,
-              backgroundAttachment: 'fixed',
-            }}
-          />
-          {/* Atmospheric dark-green gradient overlay - keeps stars & spiral visible while softening behind UI */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: 'linear-gradient(180deg, rgba(6, 14, 8, 0.52) 0%, rgba(8, 20, 11, 0.65) 45%, rgba(5, 11, 7, 0.82) 100%)',
-            }}
-          />
-          {/* Subtle edge vignette for cinematic journal framing */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: 'radial-gradient(ellipse at 50% 32%, transparent 15%, rgba(6, 14, 8, 0.35) 65%, rgba(3, 8, 4, 0.78) 100%)',
-            }}
-          />
-          {/* Faint warm starlight radial glow behind hero area */}
-          <div
-            className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[550px] pointer-events-none"
-            style={{
-              background: 'radial-gradient(circle at 50% 30%, rgba(216, 184, 106, 0.055) 0%, transparent 65%)',
-            }}
-          />
-        </div>
-      )}
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat transform-gpu"
+          style={{
+            backgroundImage: `url('/swirl-wallpaper-green.svg')`,
+            backgroundAttachment: 'fixed',
+          }}
+        />
+        {/* Atmospheric dark-green gradient overlay - keeps stars & spiral visible while softening behind UI */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(180deg, rgba(6, 14, 8, 0.52) 0%, rgba(8, 20, 11, 0.65) 45%, rgba(5, 11, 7, 0.82) 100%)',
+          }}
+        />
+        {/* Subtle edge vignette for cinematic journal framing */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(ellipse at 50% 32%, transparent 15%, rgba(6, 14, 8, 0.35) 65%, rgba(3, 8, 4, 0.78) 100%)',
+          }}
+        />
+        {/* Faint warm starlight radial glow behind hero area */}
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[550px] pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle at 50% 30%, rgba(216, 184, 106, 0.055) 0%, transparent 65%)',
+          }}
+        />
+        {/* Whimsical Scrapbook Ambient Atmospheric Layer */}
+        <WhimsicalAmbience />
+      </div>
 
       {/* Midnight Journal Theme Atmospheric Painted Starry Night Sky Background */}
-      {isMidnight && (
+      <div
+        id="midnight-journal-background"
+        className={`fixed inset-0 pointer-events-none select-none z-0 overflow-hidden transition-opacity duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${
+          isMidnight ? 'opacity-100' : 'opacity-0'
+        }`}
+        aria-hidden="true"
+      >
+        {/* Primary Full-Page Background: download (7).jpg */}
         <div
-          id="midnight-journal-background"
-          className="fixed inset-0 pointer-events-none select-none z-0 overflow-hidden"
-          aria-hidden="true"
-        >
-          {/* Primary Full-Page Background: download (7).jpg */}
-          <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{
-              backgroundImage: `url('/download (7).jpg'), url('/download-7.jpg'), url('/midnight-starry-bg.svg')`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-            }}
-          />
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url('/download (7).jpg'), url('/download-7.jpg'), url('/midnight-starry-bg.svg')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
 
-          {/* Subtle Dark Navy Overlay (rgba(3, 7, 18, 0.35)) - Keeps artwork clearly visible while preserving UI contrast */}
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundColor: 'rgba(3, 7, 18, 0.35)',
-            }}
-          />
-        </div>
-      )}
+        {/* Subtle Dark Navy Overlay (rgba(3, 7, 18, 0.35)) - Keeps artwork clearly visible while preserving UI contrast */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundColor: 'rgba(3, 7, 18, 0.35)',
+          }}
+        />
+
+        {/* Midnight Journal Ambient Atmospheric Layer */}
+        <MidnightAmbience />
+      </div>
+
+      {/* One Brain Cell Cat Meme Theme Foundation Background */}
+      <div
+        className={`fixed inset-0 pointer-events-none select-none z-0 overflow-hidden transition-opacity duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${
+          isCatMeme ? 'opacity-100' : 'opacity-0'
+        }`}
+        aria-hidden="true"
+      >
+        <CatBackground />
+      </div>
+
+      {/* One Brain Cell Cat Interaction Engine (Autonomous & Controlled Decorative Appearances) */}
+      <CatInteractionEngine enabled={isCatMeme && !isAdminRoute} />
 
       {/* Top-Right Floating Controls Bar (Public pages only - Admin has dedicated header layout) */}
       {!isAdminRoute && (
@@ -217,6 +354,30 @@ export const MainLayout: React.FC = () => {
       </main>
       {!isAdminRoute && <FloatingNavigation />}
       {!isAdminRoute && <VintageInkPot />}
+
+      {/* One Brain Cell Theme Placeholder Decorative Cat Element (Unobtrusive & Non-blocking) */}
+      {isCatMeme && !isAdminRoute && (
+        <CatThemeElement
+          size="sm"
+          position="bottom-left"
+          className="opacity-75 mb-16 sm:mb-4 ml-2"
+        />
+      )}
+
+      {/* One Brain Cell Lightweight Entry Transition */}
+      {showCatTransition && (
+        <CatThemeTransition onComplete={() => setShowCatTransition(false)} />
+      )}
+
+      {/* One Brain Cell Audio Autoplay Permission Prompt */}
+      <CatAudioAutoplayPrompt enabled={isCatMeme && !isAdminRoute} />
+
+      {/* One Brain Cell Easter Egg Discovery Notification Toast */}
+      <CatEasterEggToast enabled={isCatMeme && !isAdminRoute} />
+
+      {/* Subtle Integrated Scroll Progress Indicator */}
+      <ScrollProgress />
+
       <AchievementCelebrationModal
         badge={celebrationBadge}
         onClose={() => setCelebrationBadge(null)}

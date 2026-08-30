@@ -108,9 +108,10 @@ export const SecretDetailModal: React.FC<SecretDetailModalProps> = ({
             {/* Secret Title */}
             <h2
               id="secret-modal-title"
-              className="text-2xl sm:text-3xl font-serif font-semibold text-[#2B211B] leading-tight tracking-tight pt-1"
+              className="text-2xl sm:text-3xl font-serif font-semibold text-[#2B211B] leading-tight tracking-tight pt-1 flex items-center gap-2 flex-wrap"
             >
-              {secret.title}
+              <span>{secret.title}</span>
+              {secret.emoji && <span className="text-xl sm:text-2xl not-italic">{secret.emoji}</span>}
             </h2>
 
             {/* Description / Confidential Subtitle */}

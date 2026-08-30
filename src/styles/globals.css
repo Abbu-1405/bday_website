@@ -11,8 +11,78 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  transition: background-color var(--duration-normal) var(--ease-standard),
-              color var(--duration-normal) var(--ease-standard);
+  transition: background-color var(--theme-transition-duration, 400ms) var(--theme-transition-ease, cubic-bezier(0.4, 0.0, 0.2, 1)),
+              color var(--theme-transition-duration, 400ms) var(--theme-transition-ease, cubic-bezier(0.4, 0.0, 0.2, 1));
+}
+
+/* Global Theme Transition: Smooth visual property interpolation with ZERO layout shift */
+body,
+.bg-background,
+.bg-surface,
+.bg-surface-secondary,
+.bg-card,
+.bg-primary,
+.bg-secondary,
+.bg-accent,
+.surface-elevated,
+.surface-flat,
+.surface-outlined,
+.card,
+[class*="bg-[var(--color-"],
+[class*="border-[var(--color-"],
+[class*="text-[var(--color-"],
+nav[aria-label="Main Navigation"],
+nav[aria-label="Main Navigation"] a,
+nav[aria-label="Main Navigation"] button,
+button:not([class*="transition-none"]),
+input:not([class*="transition-none"]),
+textarea:not([class*="transition-none"]),
+select:not([class*="transition-none"]),
+[role="menu"],
+[role="radiogroup"],
+[role="region"],
+header,
+footer,
+aside,
+section {
+  transition-property: background-color, border-color, color, fill, stroke, box-shadow, text-shadow;
+  transition-duration: var(--theme-transition-duration, 400ms);
+  transition-timing-function: var(--theme-transition-ease, cubic-bezier(0.4, 0.0, 0.2, 1));
+}
+
+/* Reduced Motion Safety Override */
+@media (prefers-reduced-motion: reduce) {
+  body,
+  .bg-background,
+  .bg-surface,
+  .bg-surface-secondary,
+  .bg-card,
+  .bg-primary,
+  .bg-secondary,
+  .bg-accent,
+  .surface-elevated,
+  .surface-flat,
+  .surface-outlined,
+  .card,
+  [class*="bg-[var(--color-"],
+  [class*="border-[var(--color-"],
+  [class*="text-[var(--color-"],
+  nav[aria-label="Main Navigation"],
+  nav[aria-label="Main Navigation"] a,
+  nav[aria-label="Main Navigation"] button,
+  button,
+  input,
+  textarea,
+  select,
+  [role="menu"],
+  [role="radiogroup"],
+  [role="region"],
+  header,
+  footer,
+  aside,
+  section {
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Custom CSS variable helper classes */
@@ -30,3 +100,113 @@ body {
 .text-accent { color: var(--color-accent); }
 
 .border-theme { border-color: var(--color-border); }
+
+/* ==========================================================================
+   Themed Native Scrollbar
+   ========================================================================== */
+
+/* Standard modern CSS scrollbar (Firefox, etc.) */
+html,
+body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* WebKit / Chromium / Safari / Edge scrollbar */
+::-webkit-scrollbar {
+  width: var(--scrollbar-width, 8px);
+  height: var(--scrollbar-width, 8px);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track, transparent);
+  transition: background-color var(--theme-transition-duration, 400ms) var(--theme-transition-ease, cubic-bezier(0.4, 0.0, 0.2, 1));
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb, rgba(0, 0, 0, 0.2));
+  border-radius: 9999px;
+  border: 2px solid var(--scrollbar-track, transparent);
+  background-clip: padding-box;
+  transition: background-color 200ms ease, border-color var(--theme-transition-duration, 400ms) var(--theme-transition-ease, cubic-bezier(0.4, 0.0, 0.2, 1));
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover, rgba(0, 0, 0, 0.35));
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: var(--scrollbar-thumb-active, rgba(0, 0, 0, 0.45));
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--scrollbar-track, transparent);
+}
+
+@media (max-width: 640px) {
+  ::-webkit-scrollbar {
+    width: var(--scrollbar-width-mobile, 6px);
+    height: var(--scrollbar-width-mobile, 6px);
+  }
+  ::-webkit-scrollbar-thumb {
+    border-width: 1.5px;
+  }
+}
+
+/* ==========================================================================
+   Global Micro-Interactions
+   ========================================================================== */
+
+/* Smooth, responsive text link interactions */
+a:not([class*="no-transition"]):not(.no-micro) {
+  transition: color var(--micro-duration-fast, 180ms) var(--micro-ease-out, cubic-bezier(0.0, 0.0, 0.2, 1)),
+              opacity var(--micro-duration-fast, 180ms) var(--micro-ease-out, cubic-bezier(0.0, 0.0, 0.2, 1)),
+              text-decoration-color var(--micro-duration-fast, 180ms) var(--micro-ease-out, cubic-bezier(0.0, 0.0, 0.2, 1));
+}
+
+/* Form controls & search input micro-interactions */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  transition: border-color var(--micro-duration-fast, 180ms) var(--micro-ease-out, cubic-bezier(0.0, 0.0, 0.2, 1)),
+              box-shadow var(--micro-duration-fast, 180ms) var(--micro-ease-out, cubic-bezier(0.0, 0.0, 0.2, 1)),
+              background-color var(--micro-duration-fast, 180ms) var(--micro-ease-out, cubic-bezier(0.0, 0.0, 0.2, 1));
+}
+
+/* Checkbox & toggle switches */
+input[type="checkbox"],
+input[type="radio"] {
+  transition: background-color var(--micro-duration-fast, 180ms) var(--micro-ease-out, cubic-bezier(0.0, 0.0, 0.2, 1)),
+              border-color var(--micro-duration-fast, 180ms) var(--micro-ease-out, cubic-bezier(0.0, 0.0, 0.2, 1)),
+              transform 150ms var(--micro-ease-out, cubic-bezier(0.0, 0.0, 0.2, 1));
+}
+
+input[type="checkbox"]:active,
+input[type="radio"]:active {
+  transform: scale(0.92);
+}
+
+/* Directional action icon hover nudge */
+.action-arrow {
+  transition: transform var(--micro-duration-fast, 180ms) var(--micro-ease-out, cubic-bezier(0.0, 0.0, 0.2, 1));
+}
+
+*:hover > .action-arrow {
+  transform: translateX(2px);
+}
+
+/* Popover & menu micro-entry animation */
+.popover-enter {
+  animation: popoverFadeIn var(--micro-duration-fast, 180ms) var(--micro-ease-out, cubic-bezier(0.0, 0.0, 0.2, 1));
+}
+
+@keyframes popoverFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(3px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

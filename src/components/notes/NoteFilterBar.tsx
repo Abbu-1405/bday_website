@@ -126,7 +126,7 @@ export const NoteFilterBar: React.FC<NoteFilterBarProps> = ({
               type="button"
               onClick={() => onMonthScopeChange('current')}
               className={cn(
-                'px-2.5 py-1 rounded-[var(--radius-sm)] transition-all truncate max-w-[140px]',
+                'px-2.5 py-1 rounded-[var(--radius-sm)] transition-[transform,background-color,color,box-shadow] duration-150 ease-out active:scale-95 motion-reduce:transform-none cursor-pointer truncate max-w-[140px]',
                 monthScope === 'current'
                   ? isLetterArchive
                     ? 'bg-[#FAF5EC] text-[#7A2E3B] font-semibold font-serif shadow-xs'
@@ -142,7 +142,7 @@ export const NoteFilterBar: React.FC<NoteFilterBarProps> = ({
               type="button"
               onClick={() => onMonthScopeChange('all')}
               className={cn(
-                'px-2.5 py-1 rounded-[var(--radius-sm)] transition-all',
+                'px-2.5 py-1 rounded-[var(--radius-sm)] transition-[transform,background-color,color,box-shadow] duration-150 ease-out active:scale-95 motion-reduce:transform-none cursor-pointer',
                 monthScope === 'all'
                   ? isLetterArchive
                     ? 'bg-[#FAF5EC] text-[#7A2E3B] font-semibold font-serif shadow-xs'
@@ -169,7 +169,7 @@ export const NoteFilterBar: React.FC<NoteFilterBarProps> = ({
               type="button"
               onClick={() => onReadFilterChange('all')}
               className={cn(
-                'px-2 py-1 rounded-[var(--radius-sm)] transition-all flex items-center gap-1',
+                'px-2 py-1 rounded-[var(--radius-sm)] transition-[transform,background-color,color,box-shadow] duration-150 ease-out active:scale-95 motion-reduce:transform-none cursor-pointer flex items-center gap-1',
                 readFilter === 'all'
                   ? isLetterArchive
                     ? 'bg-[#FAF5EC] text-[#3B2A20] font-semibold font-serif shadow-xs'
@@ -186,7 +186,7 @@ export const NoteFilterBar: React.FC<NoteFilterBarProps> = ({
               type="button"
               onClick={() => onReadFilterChange('unread')}
               className={cn(
-                'px-2 py-1 rounded-[var(--radius-sm)] transition-all flex items-center gap-1',
+                'px-2 py-1 rounded-[var(--radius-sm)] transition-[transform,background-color,color,box-shadow] duration-150 ease-out active:scale-95 motion-reduce:transform-none cursor-pointer flex items-center gap-1',
                 readFilter === 'unread'
                   ? isLetterArchive
                     ? 'bg-[#FAF5EC] text-[#7A2E3B] font-semibold font-serif shadow-xs'
@@ -203,7 +203,7 @@ export const NoteFilterBar: React.FC<NoteFilterBarProps> = ({
               type="button"
               onClick={() => onReadFilterChange('read')}
               className={cn(
-                'px-2 py-1 rounded-[var(--radius-sm)] transition-all flex items-center gap-1',
+                'px-2 py-1 rounded-[var(--radius-sm)] transition-[transform,background-color,color,box-shadow] duration-150 ease-out active:scale-95 motion-reduce:transform-none cursor-pointer flex items-center gap-1',
                 readFilter === 'read'
                   ? isLetterArchive
                     ? 'bg-[#FAF5EC] text-[#4A6342] font-semibold font-serif shadow-xs'
@@ -223,7 +223,7 @@ export const NoteFilterBar: React.FC<NoteFilterBarProps> = ({
             type="button"
             onClick={() => onFavoriteOnlyChange(!favoriteOnly)}
             className={cn(
-              'px-3 py-1.5 rounded-[var(--radius-md)] border text-xs font-medium transition-all flex items-center gap-1.5',
+              'px-3 py-1.5 rounded-[var(--radius-md)] border text-xs font-medium transition-[transform,background-color,border-color,color,box-shadow] duration-150 ease-out active:scale-95 motion-reduce:transform-none cursor-pointer flex items-center gap-1.5 [@media(hover:hover)]:hover:-translate-y-0.5',
               isLetterArchive
                 ? favoriteOnly
                   ? 'bg-[#F4E9D8] border-[#B58A45] text-[#8A5B20] font-serif font-semibold shadow-xs'

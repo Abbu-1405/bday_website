@@ -59,7 +59,7 @@ export const Modal: React.FC<ModalProps> = ({
       {/* Modal Dialog */}
       <div
         className={cn(
-          'relative w-full rounded-[var(--radius-xl)] bg-[var(--color-card)] text-[var(--color-text)] border border-[var(--color-border)] shadow-[var(--shadow-lg)] z-10 overflow-hidden flex flex-col max-h-[90vh]',
+          'relative w-full rounded-[var(--radius-xl)] bg-[var(--color-card)] text-[var(--color-text)] border border-[var(--color-border)] shadow-[var(--shadow-lg)] z-10 overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200',
           sizes[size],
           className
         )}
@@ -75,7 +75,7 @@ export const Modal: React.FC<ModalProps> = ({
             </div>
             <button
               onClick={onClose}
-              className="text-[var(--color-muted)] hover:text-[var(--color-text)] p-1 rounded-[var(--radius-md)] transition-colors cursor-pointer"
+              className="text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface)] p-1 rounded-[var(--radius-md)] transition-[transform,background-color,color] duration-150 ease-out cursor-pointer active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/40 motion-reduce:transform-none"
               aria-label="Close"
             >
               <X className="h-5 w-5" />

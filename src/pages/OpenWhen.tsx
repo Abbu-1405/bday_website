@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Sparkles, HeartHandshake } from 'lucide-react';
-import { Container } from '../components';
+import { Container, ScrollFocusReveal } from '../components';
 import { OpenWhenCard, OpenWhenDetailModal } from '../components/openWhen';
 import { sampleOpenWhenLetters } from '../data';
 import { OpenWhenLetter } from '../types';
 import { recordDiscovery } from '../services/discoveryService';
 import { getManagedOpenWhenLetters } from '../services/contentService';
-import { useTheme } from '../hooks';
+import { useTheme, useStarlitCatBridge } from '../hooks';
 import { cn } from '../utils';
 import {
   VintageOrnamentalDivider,
@@ -15,10 +15,15 @@ import {
 
 export default function OpenWhen() {
   const { theme } = useTheme();
+  const { emitLetter } = useStarlitCatBridge();
   const isLetterArchive = theme === 'letter-archive';
 
   const [letters, setLetters] = useState<OpenWhenLetter[]>(sampleOpenWhenLetters);
   const [selectedLetter, setSelectedLetter] = useState<OpenWhenLetter | null>(null);
+
+  useEffect(() => {
+    emitLetter('opened');
+  }, [emitLetter]);
 
   useEffect(() => {
     let isMounted = true;
@@ -172,14 +177,15 @@ export default function OpenWhen() {
       {/* Grid Collection of Open When Letters */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
         {letters.map((letter) => (
-          <OpenWhenCard
-            key={letter.id}
-            letter={letter}
-            onSelect={(l) => {
-              setSelectedLetter(l);
-              if (l) recordDiscovery('openWhen', l.id);
-            }}
-          />
+          <ScrollFocusReveal key={letter.id} className="h-full">
+            <OpenWhenCard
+              letter={letter}
+              onSelect={(l) => {
+                setSelectedLetter(l);
+                if (l) recordDiscovery('openWhen', l.id);
+              }}
+            />
+          </ScrollFocusReveal>
         ))}
       </div>
 

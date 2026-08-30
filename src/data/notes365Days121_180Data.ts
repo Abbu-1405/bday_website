@@ -296,6 +296,22 @@ You don't need to fight every imaginary battle tonight, **SSSSSSSSSSSSTTTTTTTTTR
     ane temple ki nd class ki kudha pole nd as expected pilichaav rapido
     cheskoni ochaa nd temple lo darshanam cheskunaam tarvaata kaa sep
     temple lo koorchunaam maatladaaam sodhi kotaam iddram`,
+    mediaItems: [
+      {
+        id: 'day-136-photo-1',
+        type: 'image',
+        src: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1200&q=80',
+        title: 'Kapila Theertham Temple Courtyard',
+        description: 'Quiet moments after darshan on 02/02/2026.',
+      },
+      {
+        id: 'day-136-photo-2',
+        type: 'image',
+        src: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80',
+        title: 'Sitting & Talking by the Temple Steps',
+        description: 'Spontaneous meet and endless conversations.',
+      },
+    ],
   },
   {
     dayIndex: 137,
@@ -416,9 +432,9 @@ That's basically the entire explanation behind this universe.`,
     dayIndex: 145,
     category: 'Memory',
     title: 'The 8:30 PM Day',
-    memoryDate: '05/02/2026',
-    content: `Memory date: 05/02/2026
-05/02/2026 next day doctor checkup
+    memoryDate: '08/08/2026',
+    content: `Memory date: 08/08/2026
+08/08/2026 next day doctor checkup
     undhi ani nuv intiki eltunaav evng nen kudha vacha todu mee inti
     varku clg nunchi auto ekki bus stand varku elaam nd akad nunchi
     malli bus lo elaam mee inti varku akada nuv malli scooty veskoni

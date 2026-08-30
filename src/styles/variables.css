@@ -66,6 +66,31 @@
   --blur-small: 4px;
   --blur-medium: 8px;
 
+  /* Theme Transition Tokens (400ms duration, subtle atmospheric ease, zero layout shift) */
+  --theme-transition-duration: 400ms;
+  --theme-transition-ease: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --theme-transition: background-color var(--theme-transition-duration) var(--theme-transition-ease),
+                      color var(--theme-transition-duration) var(--theme-transition-ease),
+                      border-color var(--theme-transition-duration) var(--theme-transition-ease),
+                      box-shadow var(--theme-transition-duration) var(--theme-transition-ease);
+
+  /* Scrollbar Design Tokens */
+  --scrollbar-width: 8px;
+  --scrollbar-width-mobile: 6px;
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.35);
+  --scrollbar-thumb-active: rgba(0, 0, 0, 0.45);
+  --scroll-progress-color: var(--color-accent, #C2934D);
+  --scroll-progress-glow: rgba(194, 147, 77, 0.3);
+
+  /* Micro-Interaction Tokens */
+  --micro-duration-fast: 180ms;
+  --micro-duration-normal: 250ms;
+  --micro-duration-emphasis: 380ms;
+  --micro-ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --micro-ease-in-out: cubic-bezier(0.4, 0.0, 0.2, 1);
+
   /* Z-Index Layer Tokens */
   --z-background: 0;
   --z-content: 1;

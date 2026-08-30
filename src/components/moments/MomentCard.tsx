@@ -70,14 +70,36 @@ export const MomentCard: React.FC<MomentCardProps> = ({
               : 'p-1.5 bg-[rgba(12,22,38,0.8)] border border-[rgba(201,155,88,0.22)]'
           )}
         >
-          <img
-            src={moment.image}
-            alt={moment.title}
-            className="w-full h-full object-cover rounded-[6px] group-hover:scale-103 transition-transform duration-500 ease-out"
-            loading="lazy"
-            referrerPolicy="no-referrer"
-          />
-          <div className="absolute inset-0 rounded-[6px] bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover:opacity-30 transition-opacity pointer-events-none" />
+          {moment.image ? (
+            <img
+              src={moment.image}
+              alt={moment.title}
+              className="w-full h-full object-cover rounded-[6px] group-hover:scale-103 transition-transform duration-500 ease-out"
+              loading="lazy"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <div
+              className={cn(
+                'w-full h-full flex flex-col items-center justify-center p-4 text-center rounded-[6px]',
+                isLetterArchive
+                  ? 'bg-[#EDE2D2]/50 text-[#7A2E3B]'
+                  : isScrapbook
+                  ? 'bg-[rgba(16,28,19,0.95)] text-[#D8B86A]'
+                  : 'bg-[rgba(12,22,38,0.95)] text-[#E2BD78]'
+              )}
+            >
+              <Sparkles className="h-6 w-6 opacity-40 mb-1" />
+              {moment.momentStrength && (
+                <span className="text-[11px] font-serif opacity-80">
+                  Strength {moment.momentStrength}
+                </span>
+              )}
+            </div>
+          )}
+          {moment.image && (
+            <div className="absolute inset-0 rounded-[6px] bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover:opacity-30 transition-opacity pointer-events-none" />
+          )}
 
           {/* Number Stamp */}
           <span
@@ -122,11 +144,33 @@ export const MomentCard: React.FC<MomentCardProps> = ({
               <Calendar className="h-3 w-3" />
               {moment.date}
             </span>
-            <span className="opacity-40">•</span>
-            <span className="inline-flex items-center gap-1">
-              <MapPin className="h-3 w-3 opacity-80" />
-              {moment.location}
-            </span>
+            {moment.location && (
+              <>
+                <span className="opacity-40">•</span>
+                <span className="inline-flex items-center gap-1">
+                  <MapPin className="h-3 w-3 opacity-80" />
+                  {moment.location}
+                </span>
+              </>
+            )}
+            {moment.momentStrength && (
+              <>
+                <span className="opacity-40">•</span>
+                <span
+                  className={cn(
+                    'inline-flex items-center gap-1 font-medium',
+                    isLetterArchive
+                      ? 'text-[#7A2E3B]'
+                      : isScrapbook
+                      ? 'text-[#D8B86A]'
+                      : 'text-[#E2BD78]'
+                  )}
+                >
+                  <Sparkles className="h-2.5 w-2.5" />
+                  {moment.momentStrength}
+                </span>
+              </>
+            )}
           </div>
 
           {/* Title */}

@@ -20,7 +20,10 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     if (variant === 'flat') mappedVariant = 'flat';
     if (variant === 'bordered' || variant === 'outlined') mappedVariant = 'outlined';
 
-    const hoverClass = variant === 'hoverable' ? 'hover:shadow-[var(--shadow-lg)] hover:-translate-y-0.5' : '';
+    const hoverClass =
+      variant === 'hoverable'
+        ? 'transition-[transform,box-shadow,background-color,border-color] duration-250 ease-out will-change-transform [@media(hover:hover)]:hover:shadow-[var(--shadow-lg)] [@media(hover:hover)]:hover:-translate-y-1 active:translate-y-0 active:scale-[0.99] motion-reduce:transform-none'
+        : '';
 
     return (
       <Surface

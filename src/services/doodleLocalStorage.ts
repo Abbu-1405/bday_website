@@ -6,26 +6,55 @@ const STORE_NAME = 'doodles';
 const LOCAL_STORAGE_FALLBACK_KEY = 'starlit_letters_doodles_local';
 
 /**
+ * Fallback helpers for LocalStorage
+ */
+function getFromLocalStorage(): DoodleItem[] {
+  try {
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_FALLBACK_KEY) : null;
+    return raw ? JSON.parse(raw) : [];
+  } catch (err) {
+    console.warn('LocalStorage fallback read error:', err);
+    return [];
+  }
+}
+
+function saveToLocalStorage(items: DoodleItem[]): void {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(LOCAL_STORAGE_FALLBACK_KEY, JSON.stringify(items));
+    }
+  } catch (err) {
+    console.warn('LocalStorage fallback write error:', err);
+  }
+}
+
+/**
+ * Check if IndexedDB is currently usable and the document is active/visible.
+ */
+function isIndexedDbUsable(): boolean {
+  if (typeof window === 'undefined' || !window.indexedDB) return false;
+  if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return false;
+  return true;
+}
+
+/**
  * Executes an operation with a cleanly managed IndexedDB connection.
- * Automatically closes connections and gracefully handles hidden/closing states.
+ * Automatically handles closing connections and gracefully falls back on error.
  */
 function withDB<T>(
   mode: IDBTransactionMode,
   action: (store: IDBObjectStore, resolve: (val: T) => void, reject: (err: unknown) => void) => void
-): Promise<T> {
-  return new Promise((resolve, reject) => {
-    if (typeof window === 'undefined' || !window.indexedDB) {
-      return reject(new Error('IndexedDB is not available'));
-    }
-    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
-      return reject(new Error('Database is closing/hidden'));
+): Promise<T | null> {
+  return new Promise((resolve) => {
+    if (!isIndexedDbUsable()) {
+      return resolve(null);
     }
 
     let request: IDBOpenDBRequest;
     try {
       request = window.indexedDB.open(DB_NAME, DB_VERSION);
-    } catch (err) {
-      return reject(err);
+    } catch {
+      return resolve(null);
     }
 
     request.onupgradeneeded = (event) => {
@@ -37,18 +66,18 @@ function withDB<T>(
           store.createIndex('userId', 'userId', { unique: false });
           store.createIndex('createdAt', 'createdAt', { unique: false });
         }
-      } catch (err) {
-        reject(err);
+      } catch {
+        resolve(null);
       }
     };
 
     request.onsuccess = () => {
       const db = request.result;
-      let isClosed = false;
+      let isCleanedUp = false;
 
       const safeClose = () => {
-        if (!isClosed) {
-          isClosed = true;
+        if (!isCleanedUp) {
+          isCleanedUp = true;
           try {
             db.close();
           } catch {
@@ -61,7 +90,7 @@ function withDB<T>(
         safeClose();
       };
       db.onclose = () => {
-        isClosed = true;
+        isCleanedUp = true;
       };
 
       try {
@@ -73,10 +102,11 @@ function withDB<T>(
         };
         transaction.onabort = () => {
           safeClose();
+          resolve(null);
         };
-        transaction.onerror = (e) => {
+        transaction.onerror = () => {
           safeClose();
-          reject(transaction.error || e);
+          resolve(null);
         };
 
         action(
@@ -84,59 +114,31 @@ function withDB<T>(
           (val) => {
             resolve(val);
           },
-          (err) => {
+          () => {
             safeClose();
-            reject(err);
+            resolve(null);
           }
         );
-      } catch (txErr) {
+      } catch {
         safeClose();
-        reject(txErr);
+        resolve(null);
       }
     };
 
     request.onerror = () => {
-      reject(request.error || new Error('Failed to open IndexedDB'));
+      resolve(null);
     };
     request.onblocked = () => {
-      reject(new Error('IndexedDB blocked'));
+      resolve(null);
     };
   });
-}
-
-/**
- * Fallback helpers for LocalStorage
- */
-function getFromLocalStorage(): DoodleItem[] {
-  try {
-    const raw = localStorage.getItem(LOCAL_STORAGE_FALLBACK_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (err) {
-    console.warn('LocalStorage fallback read error:', err);
-    return [];
-  }
-}
-
-function saveToLocalStorage(items: DoodleItem[]): void {
-  try {
-    localStorage.setItem(LOCAL_STORAGE_FALLBACK_KEY, JSON.stringify(items));
-  } catch (err) {
-    console.warn('LocalStorage fallback write error:', err);
-  }
 }
 
 /**
  * Save or update a doodle in local storage (IndexedDB with LocalStorage fallback).
  */
 export async function saveDoodleLocally(doodle: DoodleItem): Promise<void> {
-  try {
-    await withDB<void>('readwrite', (store, resolve, reject) => {
-      const req = store.put(doodle);
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-    });
-  } catch (err) {
-    // Graceful fallback to LocalStorage on closing, hidden or unavailable IndexedDB
+  const saveToLocal = () => {
     const existing = getFromLocalStorage();
     const index = existing.findIndex((item) => item.id === doodle.id);
     if (index >= 0) {
@@ -145,6 +147,29 @@ export async function saveDoodleLocally(doodle: DoodleItem): Promise<void> {
       existing.unshift(doodle);
     }
     saveToLocalStorage(existing);
+  };
+
+  if (!isIndexedDbUsable()) {
+    saveToLocal();
+    return;
+  }
+
+  try {
+    const result = await withDB<boolean>('readwrite', (store, resolve, reject) => {
+      try {
+        const req = store.put(doodle);
+        req.onsuccess = () => resolve(true);
+        req.onerror = () => reject(req.error);
+      } catch (e) {
+        reject(e);
+      }
+    });
+
+    if (result === null) {
+      saveToLocal();
+    }
+  } catch {
+    saveToLocal();
   }
 }
 
@@ -155,22 +180,7 @@ export async function getLocalDoodles(
   section?: DoodleSection,
   userId?: string
 ): Promise<DoodleItem[]> {
-  try {
-    const allItems = await withDB<DoodleItem[]>('readonly', (store, resolve, reject) => {
-      const req = store.getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error);
-    });
-
-    return allItems
-      .filter((item) => {
-        if (section && item.section !== section) return false;
-        if (userId && item.userId !== userId && item.userId !== 'anonymous') return false;
-        return true;
-      })
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  } catch (err) {
-    // Graceful fallback to LocalStorage
+  const getFallback = () => {
     const items = getFromLocalStorage();
     return items
       .filter((item) => {
@@ -179,6 +189,36 @@ export async function getLocalDoodles(
         return true;
       })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  };
+
+  if (!isIndexedDbUsable()) {
+    return getFallback();
+  }
+
+  try {
+    const allItems = await withDB<DoodleItem[]>('readonly', (store, resolve, reject) => {
+      try {
+        const req = store.getAll();
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => reject(req.error);
+      } catch (e) {
+        reject(e);
+      }
+    });
+
+    if (!allItems) {
+      return getFallback();
+    }
+
+    return allItems
+      .filter((item) => {
+        if (section && item.section !== section) return false;
+        if (userId && item.userId !== userId && item.userId !== 'anonymous') return false;
+        return true;
+      })
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  } catch {
+    return getFallback();
   }
 }
 
@@ -186,16 +226,32 @@ export async function getLocalDoodles(
  * Fetch a single doodle by ID from local storage.
  */
 export async function getLocalDoodleById(id: string): Promise<DoodleItem | null> {
-  try {
-    return await withDB<DoodleItem | null>('readonly', (store, resolve, reject) => {
-      const req = store.get(id);
-      req.onsuccess = () => resolve(req.result || null);
-      req.onerror = () => reject(req.error);
-    });
-  } catch (err) {
-    // Graceful fallback to LocalStorage
+  const getFallback = () => {
     const items = getFromLocalStorage();
     return items.find((item) => item.id === id) || null;
+  };
+
+  if (!isIndexedDbUsable()) {
+    return getFallback();
+  }
+
+  try {
+    const item = await withDB<DoodleItem | null>('readonly', (store, resolve, reject) => {
+      try {
+        const req = store.get(id);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => reject(req.error);
+      } catch (e) {
+        reject(e);
+      }
+    });
+
+    if (item === undefined || item === null) {
+      return getFallback();
+    }
+    return item;
+  } catch {
+    return getFallback();
   }
 }
 
@@ -203,15 +259,31 @@ export async function getLocalDoodleById(id: string): Promise<DoodleItem | null>
  * Delete a doodle from local storage.
  */
 export async function deleteDoodleLocally(id: string): Promise<void> {
-  try {
-    await withDB<void>('readwrite', (store, resolve, reject) => {
-      const req = store.delete(id);
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-    });
-  } catch (err) {
-    // Graceful fallback to LocalStorage
+  const deleteFallback = () => {
     const items = getFromLocalStorage().filter((item) => item.id !== id);
     saveToLocalStorage(items);
+  };
+
+  if (!isIndexedDbUsable()) {
+    deleteFallback();
+    return;
+  }
+
+  try {
+    const res = await withDB<boolean>('readwrite', (store, resolve, reject) => {
+      try {
+        const req = store.delete(id);
+        req.onsuccess = () => resolve(true);
+        req.onerror = () => reject(req.error);
+      } catch (e) {
+        reject(e);
+      }
+    });
+
+    if (res === null) {
+      deleteFallback();
+    }
+  } catch {
+    deleteFallback();
   }
 }

@@ -56,6 +56,126 @@
   }
 }
 
+/* Scroll Focus Reveal */
+.scroll-focus-reveal {
+  transform-origin: center center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+/* ==========================================================================
+   Ambient Background Atmospheric Motion Tokens & Keyframes
+   Subtle, slow, GPU-friendly animations for theme backgrounds
+   ========================================================================== */
+
+@keyframes ambientGlowBreathe {
+  0%, 100% {
+    transform: scale(1) translate(0, 0);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(1.05) translate(10px, -6px);
+    opacity: 0.7;
+  }
+}
+
+@keyframes ambientDustDriftA {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.35;
+  }
+  75% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translate3d(24px, -45px, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes ambientDustDriftB {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.3;
+  }
+  75% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translate3d(-20px, -50px, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes ambientStarTwinkle {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale3d(0.85, 0.85, 1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale3d(1.15, 1.15, 1);
+  }
+}
+
+@keyframes ambientFiberSway {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(12px, -16px, 0) rotate(8deg);
+  }
+}
+
+.ambient-glow-breathe {
+  animation: ambientGlowBreathe 22s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.ambient-star-twinkle {
+  animation: ambientStarTwinkle var(--twinkle-duration, 5s) ease-in-out infinite var(--twinkle-delay, 0s);
+  will-change: transform, opacity;
+}
+
+.ambient-dust-drift-a {
+  animation: ambientDustDriftA var(--drift-duration, 18s) ease-in-out infinite var(--drift-delay, 0s);
+  will-change: transform, opacity;
+}
+
+.ambient-dust-drift-b {
+  animation: ambientDustDriftB var(--drift-duration, 20s) ease-in-out infinite var(--drift-delay, 0s);
+  will-change: transform, opacity;
+}
+
+.ambient-fiber-sway {
+  animation: ambientFiberSway var(--sway-duration, 16s) ease-in-out infinite var(--sway-delay, 0s);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-focus-reveal {
+    transform: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+  }
+
+  .ambient-glow-breathe,
+  .ambient-star-twinkle,
+  .ambient-dust-drift-a,
+  .ambient-dust-drift-b,
+  .ambient-fiber-sway {
+    animation: none !important;
+    will-change: auto !important;
+  }
+}
+
 /* Reduced Motion Safety */
 @media (prefers-reduced-motion: reduce) {
   *,

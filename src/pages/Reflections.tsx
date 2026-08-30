@@ -25,6 +25,7 @@ import {
   UserLetterRef,
 } from '../services/reflectionsService';
 import { ReflectionEntryCard } from '../components/reflections/ReflectionEntryCard';
+import { ScrollFocusReveal } from '../components';
 import { ReflectionWriter } from '../components/reflections/ReflectionWriter';
 import { DoodleCanvasModal, DoodlesDrawer } from '../components/doodle';
 import { DoodleItem } from '../types/doodle';
@@ -487,13 +488,14 @@ export default function Reflections() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
                 {filteredFeelings.map((feeling, idx) => (
-                  <ReflectionEntryCard
-                    key={feeling.id}
-                    type="feeling"
-                    item={feeling}
-                    index={idx}
-                    onSelect={() => setSelectedFeeling(feeling)}
-                  />
+                  <ScrollFocusReveal key={feeling.id} className="h-full">
+                    <ReflectionEntryCard
+                      type="feeling"
+                      item={feeling}
+                      index={idx}
+                      onSelect={() => setSelectedFeeling(feeling)}
+                    />
+                  </ScrollFocusReveal>
                 ))}
               </div>
             )}
@@ -583,13 +585,14 @@ export default function Reflections() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
                 {filteredLetters.map((letter, idx) => (
-                  <ReflectionEntryCard
-                    key={letter.id}
-                    type="letter"
-                    item={letter}
-                    index={idx}
-                    onSelect={() => setSelectedLetter(letter)}
-                  />
+                  <ScrollFocusReveal key={letter.id} className="h-full">
+                    <ReflectionEntryCard
+                      type="letter"
+                      item={letter}
+                      index={idx}
+                      onSelect={() => setSelectedLetter(letter)}
+                    />
+                  </ScrollFocusReveal>
                 ))}
               </div>
             )}

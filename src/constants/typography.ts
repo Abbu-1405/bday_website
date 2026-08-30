@@ -108,10 +108,10 @@ export const THEME_FONTS: Record<Theme, ThemeFontFamilyConfig> = {
     handwritten: "'Allura', 'Caveat', cursive",
   },
   'midnight-journal': {
-    display: "'DM Serif Display', Georgia, serif",
-    heading: "'DM Serif Display', Georgia, serif",
-    body: "'Inter', -apple-system, sans-serif",
-    quote: "'Instrument Serif', Georgia, serif",
+    display: "'Cormorant Garamond', 'Newsreader', Georgia, serif",
+    heading: "'Cormorant Garamond', 'Newsreader', Georgia, serif",
+    body: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    quote: "'Newsreader', 'Cormorant Garamond', Georgia, serif",
     handwritten: "'Caveat', cursive",
   },
   'whimsical-scrapbook': {
@@ -119,6 +119,13 @@ export const THEME_FONTS: Record<Theme, ThemeFontFamilyConfig> = {
     heading: "'Fraunces', Georgia, serif",
     body: "'Newsreader', Georgia, serif",
     quote: "'Newsreader', Georgia, serif",
+    handwritten: "'Caveat', cursive",
+  },
+  'cat-meme': {
+    display: "'Plus Jakarta Sans', -apple-system, sans-serif",
+    heading: "'Plus Jakarta Sans', -apple-system, sans-serif",
+    body: "'Plus Jakarta Sans', -apple-system, sans-serif",
+    quote: "'Caveat', cursive",
     handwritten: "'Caveat', cursive",
   },
 };

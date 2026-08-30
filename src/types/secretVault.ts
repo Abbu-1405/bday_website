@@ -5,6 +5,7 @@ export interface SecretItem {
   id: string;
   order: number;
   title: string;
+  emoji?: string;
   description: string;
   shortDescription?: string;
   content: string;

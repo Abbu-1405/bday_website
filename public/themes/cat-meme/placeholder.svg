@@ -1,0 +1,13 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Orange Cat Silhouette Placeholder for One Brain Cell Theme -->
+  <circle cx="60" cy="60" r="50" fill="#141720" stroke="#F97316" stroke-width="2"/>
+  <path d="M30 45L22 20L44 28C50 24 70 24 76 28L98 20L90 45C96 58 94 76 82 86C70 96 50 96 38 86C26 76 24 58 30 45Z" fill="#F97316" stroke="#EA580C" stroke-width="2"/>
+  <circle cx="46" cy="54" r="9" fill="#FFFFFF"/>
+  <circle cx="74" cy="54" r="9" fill="#FFFFFF"/>
+  <circle cx="49" cy="52" r="4" fill="#0F172A"/>
+  <circle cx="71" cy="56" r="4" fill="#0F172A"/>
+  <polygon points="60,66 55,60 65,60" fill="#FDA4AF"/>
+  <path d="M54 68C56 72 59 72 60 68C61 72 64 72 66 68" stroke="#431407" stroke-width="2" stroke-linecap="round"/>
+  <path d="M60 22V10M56 14L64 14" stroke="#FBBF24" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="60" cy="8" r="3" fill="#FDE047"/>
+</svg>

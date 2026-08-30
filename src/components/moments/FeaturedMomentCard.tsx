@@ -66,15 +66,40 @@ export const FeaturedMomentCard: React.FC<FeaturedMomentCardProps> = ({
                 : 'p-1.5 sm:p-2 bg-[rgba(12,22,38,0.8)] border border-[rgba(201,155,88,0.25)]'
             )}
           >
-            <img
-              src={moment.image}
-              alt={moment.title}
-              className="w-full h-full object-cover rounded-[8px] group-hover:scale-103 transition-transform duration-700 ease-out"
-              loading="lazy"
-              referrerPolicy="no-referrer"
-            />
+            {moment.image ? (
+              <img
+                src={moment.image}
+                alt={moment.title}
+                className="w-full h-full object-cover rounded-[8px] group-hover:scale-103 transition-transform duration-700 ease-out"
+                loading="lazy"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div
+                className={cn(
+                  'w-full h-full min-h-[200px] flex flex-col items-center justify-center p-6 text-center rounded-[8px]',
+                  isLetterArchive
+                    ? 'bg-[#EDE2D2]/50 text-[#7A2E3B]'
+                    : isScrapbook
+                    ? 'bg-[rgba(16,28,19,0.95)] text-[#D8B86A]'
+                    : 'bg-[rgba(12,22,38,0.95)] text-[#E2BD78]'
+                )}
+              >
+                <Camera className="h-10 w-10 opacity-40 mb-2" />
+                <span className="text-xs font-serif italic opacity-70">
+                  Memory № {String(moment.order).padStart(2, '0')}
+                </span>
+                {moment.momentStrength && (
+                  <span className="text-[11px] font-serif font-medium mt-1 opacity-85">
+                    Strength {moment.momentStrength}
+                  </span>
+                )}
+              </div>
+            )}
             {/* Subtle soft gradient over image */}
-            <div className="absolute inset-0 rounded-[8px] bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+            {moment.image && (
+              <div className="absolute inset-0 rounded-[8px] bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+            )}
 
             {/* Vintage Photo Corner Accents for Letter Archive */}
             {isLetterArchive && (
@@ -132,11 +157,33 @@ export const FeaturedMomentCard: React.FC<FeaturedMomentCardProps> = ({
                 <Calendar className="h-3.5 w-3.5" />
                 {moment.date}
               </span>
-              <span className="opacity-40">•</span>
-              <span className="inline-flex items-center gap-1">
-                <MapPin className="h-3.5 w-3.5 opacity-80" />
-                {moment.location}
-              </span>
+              {moment.location && (
+                <>
+                  <span className="opacity-40">•</span>
+                  <span className="inline-flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5 opacity-80" />
+                    {moment.location}
+                  </span>
+                </>
+              )}
+              {moment.momentStrength && (
+                <>
+                  <span className="opacity-40">•</span>
+                  <span
+                    className={cn(
+                      'inline-flex items-center gap-1 font-medium',
+                      isLetterArchive
+                        ? 'text-[#7A2E3B]'
+                        : isScrapbook
+                        ? 'text-[#D8B86A]'
+                        : 'text-[#E2BD78]'
+                    )}
+                  >
+                    <Sparkles className="h-3 w-3" />
+                    Strength {moment.momentStrength}
+                  </span>
+                </>
+              )}
             </div>
 
             {/* Title */}

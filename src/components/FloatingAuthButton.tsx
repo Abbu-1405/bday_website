@@ -73,7 +73,7 @@ export const FloatingAuthButton: React.FC<FloatingAuthButtonProps> = ({ classNam
         aria-expanded={isOpen}
         aria-label={currentUser ? 'User Account' : 'Sign In with Google'}
         title={currentUser ? `Signed in as ${currentUser.displayName || currentUser.email}` : 'Sign In'}
-        className="flex items-center justify-center h-10 w-10 rounded-full bg-[var(--color-card)]/90 backdrop-blur-md border border-[var(--color-border)] text-[var(--color-text)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)] shadow-[var(--shadow-soft)] transition-all cursor-pointer relative overflow-hidden group"
+        className="flex items-center justify-center h-10 w-10 rounded-full bg-[var(--color-card)]/90 backdrop-blur-md border border-[var(--color-border)] text-[var(--color-text)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)] shadow-[var(--shadow-soft)] transition-[transform,background-color,border-color,box-shadow,color] duration-200 ease-out cursor-pointer relative overflow-hidden group [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-md active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/40 motion-reduce:transform-none"
       >
         {isLoggingIn || loading ? (
           <Loader2 className="h-4 w-4 animate-spin text-[var(--color-primary)] shrink-0" />
@@ -89,7 +89,7 @@ export const FloatingAuthButton: React.FC<FloatingAuthButtonProps> = ({ classNam
             {(currentUser.displayName || currentUser.email || 'U').charAt(0)}
           </div>
         ) : (
-          <UserIcon className="h-4 w-4 shrink-0 transition-transform group-hover:scale-110" />
+          <UserIcon className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-105" />
         )}
 
         {/* Status Dot */}
@@ -100,12 +100,12 @@ export const FloatingAuthButton: React.FC<FloatingAuthButtonProps> = ({ classNam
 
       {/* Unauthenticated Error Toast */}
       {errorMsg && !currentUser && (
-        <div className="absolute right-0 mt-2 w-64 p-2.5 rounded-[var(--radius-lg)] bg-[var(--color-card)] border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-serif shadow-lg z-50 animate-fade-in flex items-start justify-between gap-2">
+        <div className="absolute right-0 mt-2 w-64 p-2.5 rounded-[var(--radius-lg)] bg-[var(--color-card)] border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-serif shadow-lg z-50 animate-in fade-in duration-150 flex items-start justify-between gap-2">
           <span>{errorMsg}</span>
           <button
             type="button"
             onClick={() => setErrorMsg(null)}
-            className="text-rose-400 hover:text-rose-600 font-bold text-xs"
+            className="text-rose-400 hover:text-rose-600 font-bold text-xs p-1 cursor-pointer"
             aria-label="Dismiss error"
           >
             ×
@@ -116,7 +116,7 @@ export const FloatingAuthButton: React.FC<FloatingAuthButtonProps> = ({ classNam
       {/* Popover Menu */}
       {isOpen && currentUser && (
         <div
-          className="absolute -right-20 sm:right-0 mt-2 w-64 rounded-[var(--radius-xl)] bg-[var(--color-card)]/95 backdrop-blur-md border border-[var(--color-border)] p-3 shadow-[var(--shadow-lg)] z-50 space-y-3"
+          className="absolute -right-20 sm:right-0 mt-2 w-64 rounded-[var(--radius-xl)] bg-[var(--color-card)]/95 backdrop-blur-md border border-[var(--color-border)] p-3 shadow-[var(--shadow-lg)] z-50 space-y-3 animate-in fade-in zoom-in-95 duration-150"
           role="menu"
         >
           {/* User Profile Header */}
@@ -161,7 +161,7 @@ export const FloatingAuthButton: React.FC<FloatingAuthButtonProps> = ({ classNam
                 navigate(ROUTES.WHAT_AM_I_TO_YOU);
                 setIsOpen(false);
               }}
-              className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-[var(--radius-lg)] text-xs font-serif text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors text-left cursor-pointer"
+              className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-[var(--radius-lg)] text-xs font-serif text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-[background-color,color,transform] duration-150 ease-out text-left cursor-pointer active:scale-[0.985] motion-reduce:transform-none"
             >
               <Heart className="h-3.5 w-3.5 text-[var(--color-accent)] shrink-0" />
               <span>Write Your Feelings</span>
@@ -180,7 +180,7 @@ export const FloatingAuthButton: React.FC<FloatingAuthButtonProps> = ({ classNam
               type="button"
               role="menuitem"
               onClick={handleLogout}
-              className="flex items-center justify-center gap-1.5 w-full px-2.5 py-1.5 rounded-[var(--radius-lg)] text-xs font-serif text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+              className="flex items-center justify-center gap-1.5 w-full px-2.5 py-1.5 rounded-[var(--radius-lg)] text-xs font-serif text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-[background-color,color,transform] duration-150 ease-out cursor-pointer active:scale-[0.985] motion-reduce:transform-none"
             >
               <LogOut className="h-3.5 w-3.5 shrink-0" />
               <span>Sign Out</span>

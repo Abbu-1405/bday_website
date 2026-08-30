@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, Sparkles, BookOpen, Sparkle } from 'lucide-react';
-import { Container } from '../components';
+import { Container, ScrollFocusReveal } from '../components';
 import { AdoreCard, AdoreDetailModal } from '../components/adore';
 import { sampleAdoreItems } from '../data';
 import { AdoreItem } from '../types';
@@ -199,16 +199,17 @@ export default function Adore() {
       {/* Grid Collection of Adore Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
         {filteredItems.map((item) => (
-          <AdoreCard
-            key={item.id}
-            item={item}
-            onSelect={(selected) => {
-              setSelectedItem(selected);
-              if (selected) {
-                recordDiscovery('adore', selected.id);
-              }
-            }}
-          />
+          <ScrollFocusReveal key={item.id} className="h-full">
+            <AdoreCard
+              item={item}
+              onSelect={(selected) => {
+                setSelectedItem(selected);
+                if (selected) {
+                  recordDiscovery('adore', selected.id);
+                }
+              }}
+            />
+          </ScrollFocusReveal>
         ))}
       </div>
 

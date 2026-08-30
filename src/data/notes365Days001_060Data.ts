@@ -1,4 +1,4 @@
-import { Note365 } from '../types';
+import { Note365, NoteMediaItem } from '../types';
 
 export interface RawNoteDayData {
   dayIndex: number;
@@ -6,6 +6,8 @@ export interface RawNoteDayData {
   title: string;
   content: string;
   memoryDate?: string;
+  media?: NoteMediaItem;
+  mediaItems?: NoteMediaItem[];
 }
 
 export const DAYS_001_060_DATA: RawNoteDayData[] = [

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { motion, useReducedMotion } from 'motion/react';
 import {
   Home as HomeIcon,
   Compass,
@@ -30,8 +31,10 @@ export const FloatingNavigation: React.FC<FloatingNavigationProps> = ({ classNam
   const location = useLocation();
   const navRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
+  const shouldReduceMotion = useReducedMotion();
   const isLetterArchive = theme === 'letter-archive';
   const isScrapbook = theme === 'whimsical-scrapbook';
+  const isMidnight = theme === 'midnight-journal';
 
   const primaryNavItems = [
     { path: ROUTES.HOME, label: 'Home', icon: <HomeIcon className="h-3.5 w-3.5 shrink-0" /> },
@@ -87,11 +90,13 @@ export const FloatingNavigation: React.FC<FloatingNavigationProps> = ({ classNam
     <nav
       ref={navRef}
       className={cn(
-        'fixed bottom-4 left-1/2 -translate-x-1/2 z-40 max-w-[95vw] rounded-full p-1 shadow-lg transition-all',
+        'fixed bottom-4 left-1/2 -translate-x-1/2 z-40 max-w-[95vw] rounded-full p-1 shadow-lg transition-[background-color,border-color,box-shadow,color] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]',
         isLetterArchive
-          ? 'bg-[#FAF5EC]/95 backdrop-blur-md border border-[rgba(138,110,89,0.35)] shadow-[0_10px_30px_-6px_rgba(60,42,33,0.18)]'
+          ? 'bg-[#E8D7B8]/95 backdrop-blur-md border border-[rgba(100,75,52,0.18)] shadow-[0_8px_24px_-4px_rgba(51,38,29,0.14)]'
           : isScrapbook
           ? 'bg-[rgba(16,30,20,0.92)] backdrop-blur-md border border-[rgba(216,184,106,0.3)] shadow-[0_10px_30px_rgba(0,0,0,0.6)]'
+          : isMidnight
+          ? 'bg-[#0B1428]/95 backdrop-blur-md border border-[rgba(243,213,138,0.20)] shadow-[0_10px_32px_rgba(2,6,18,0.7)]'
           : 'bg-[rgba(13,23,40,0.92)] backdrop-blur-md border border-[rgba(201,155,88,0.3)] shadow-[0_10px_30px_rgba(0,0,0,0.7)]',
         className
       )}
@@ -104,23 +109,57 @@ export const FloatingNavigation: React.FC<FloatingNavigationProps> = ({ classNam
               to={item.path}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-serif font-medium transition-colors whitespace-nowrap cursor-pointer leading-tight focus-visible:outline-none focus-visible:ring-2',
+                  'relative flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-serif font-medium whitespace-nowrap cursor-pointer leading-tight focus-visible:outline-none focus-visible:ring-2 transition-[transform,color,background-color] duration-150 active:scale-[0.96] motion-reduce:transform-none',
                   isActive
                     ? isLetterArchive
-                      ? 'bg-[#7A2E3B] text-[#FFF9F0] font-semibold shadow-xs'
+                      ? 'text-[#6F3040] font-semibold focus-visible:ring-[#7A2E3B]/40'
                       : isScrapbook
-                      ? 'bg-[#D8B86A] text-[#0A160D] font-semibold shadow-xs'
-                      : 'bg-[#C99B58] text-[#070E1A] font-semibold shadow-xs'
+                      ? 'text-[#0A160D] font-semibold'
+                      : isMidnight
+                      ? 'text-[#F3D58A] font-semibold focus-visible:ring-[#F3D58A]/50 focus-visible:ring-offset-1 focus-visible:ring-offset-[#0B1428]'
+                      : 'text-[#070E1A] font-semibold'
                     : isLetterArchive
-                    ? 'text-[#6B5547] hover:text-[#3B2A20] hover:bg-[#F2E8DC]'
+                    ? 'text-[#705846] hover:text-[#4A3525] hover:bg-[rgba(100,75,52,0.08)] border border-transparent focus-visible:ring-[#7A2E3B]/40'
                     : isScrapbook
-                    ? 'text-[#B8C0AE] hover:text-[#F7F1DF] hover:bg-[rgba(79,107,72,0.3)]'
-                    : 'text-[#C2AF99] hover:text-[#F2E4CF] hover:bg-[rgba(201,155,88,0.15)]'
+                    ? 'text-[#B8C0AE] hover:text-[#F7F1DF] hover:bg-[rgba(79,107,72,0.3)] border border-transparent'
+                    : isMidnight
+                    ? 'text-[#B8C3D8] hover:text-[#E2EAF8] hover:bg-[rgba(220,230,255,0.08)] border border-transparent focus-visible:ring-[#F3D58A]/50 focus-visible:ring-offset-1 focus-visible:ring-offset-[#0B1428]'
+                    : 'text-[#C2AF99] hover:text-[#F2E4CF] hover:bg-[rgba(201,155,88,0.15)] border border-transparent'
                 )
               }
             >
-              {item.icon}
-              <span className="hidden sm:inline">{item.label}</span>
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <motion.div
+                      layoutId="floatingNavActiveIndicator"
+                      className={cn(
+                        'absolute inset-0 rounded-full pointer-events-none transition-[background-color,border-color,box-shadow] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]',
+                        isLetterArchive
+                          ? 'bg-[rgba(111,48,64,0.09)] border border-[rgba(181,138,80,0.30)] shadow-2xs after:content-[\'\'] after:absolute after:bottom-0.5 after:left-3 after:right-3 after:h-[1.5px] after:bg-[#7A2E3B] after:rounded-full after:opacity-85'
+                          : isScrapbook
+                          ? 'bg-[#D8B86A] shadow-xs'
+                          : isMidnight
+                          ? 'bg-[rgba(243,213,138,0.10)] border border-[rgba(243,213,138,0.28)] shadow-[0_0_12px_rgba(243,213,138,0.12)] after:content-[\'\'] after:absolute after:bottom-0.5 after:left-3 after:right-3 after:h-[1.5px] after:bg-[#D8B866] after:rounded-full after:opacity-90'
+                          : 'bg-[#C99B58] shadow-xs'
+                      )}
+                      transition={
+                        shouldReduceMotion
+                          ? { duration: 0 }
+                          : {
+                              type: 'tween',
+                              ease: [0.25, 0.1, 0.25, 1],
+                              duration: 0.32,
+                            }
+                      }
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-1.5">
+                    {item.icon}
+                    <span className="hidden sm:inline">{item.label}</span>
+                  </span>
+                </>
+              )}
             </NavLink>
           </li>
         ))}
@@ -134,45 +173,79 @@ export const FloatingNavigation: React.FC<FloatingNavigationProps> = ({ classNam
             aria-haspopup="true"
             aria-label="More navigation items"
             className={cn(
-              'flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-serif font-medium transition-colors whitespace-nowrap cursor-pointer leading-tight focus-visible:outline-none focus-visible:ring-2',
+              'relative flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-serif font-medium whitespace-nowrap cursor-pointer leading-tight focus-visible:outline-none focus-visible:ring-2 transition-[transform,color,background-color] duration-150 active:scale-[0.96] motion-reduce:transform-none',
               isMoreActive
                 ? isLetterArchive
-                  ? 'bg-[#7A2E3B] text-[#FFF9F0] font-semibold shadow-xs'
+                  ? 'text-[#6F3040] font-semibold focus-visible:ring-[#7A2E3B]/40'
                   : isScrapbook
-                  ? 'bg-[#D8B86A] text-[#0A160D] font-semibold shadow-xs'
-                  : 'bg-[#C99B58] text-[#070E1A] font-semibold shadow-xs'
+                  ? 'text-[#0A160D] font-semibold'
+                  : isMidnight
+                  ? 'text-[#F3D58A] font-semibold focus-visible:ring-[#F3D58A]/50 focus-visible:ring-offset-1 focus-visible:ring-offset-[#0B1428]'
+                  : 'text-[#070E1A] font-semibold'
                 : isMoreOpen
                 ? isLetterArchive
-                  ? 'bg-[#F2E8DC] text-[#3B2A20]'
+                  ? 'bg-[rgba(100,75,52,0.10)] text-[#4A3525] border border-transparent focus-visible:ring-[#7A2E3B]/40'
                   : isScrapbook
                   ? 'bg-[rgba(79,107,72,0.35)] text-[#F7F1DF]'
+                  : isMidnight
+                  ? 'bg-[rgba(220,230,255,0.09)] text-[#E2EAF8] border border-[rgba(243,213,138,0.18)] focus-visible:ring-[#F3D58A]/50 focus-visible:ring-offset-1 focus-visible:ring-offset-[#0B1428]'
                   : 'bg-[rgba(201,155,88,0.2)] text-[#F2E4CF]'
                 : isLetterArchive
-                ? 'text-[#6B5547] hover:text-[#3B2A20] hover:bg-[#F2E8DC]'
+                ? 'text-[#705846] hover:text-[#4A3525] hover:bg-[rgba(100,75,52,0.08)] border border-transparent focus-visible:ring-[#7A2E3B]/40'
                 : isScrapbook
                 ? 'text-[#B8C0AE] hover:text-[#F7F1DF] hover:bg-[rgba(79,107,72,0.3)]'
+                : isMidnight
+                ? 'text-[#B8C3D8] hover:text-[#E2EAF8] hover:bg-[rgba(220,230,255,0.08)] border border-transparent focus-visible:ring-[#F3D58A]/50 focus-visible:ring-offset-1 focus-visible:ring-offset-[#0B1428]'
                 : 'text-[#C2AF99] hover:text-[#F2E4CF] hover:bg-[rgba(201,155,88,0.15)]'
             )}
           >
-            <MoreHorizontal className="h-3.5 w-3.5 shrink-0" />
-            <span className="hidden sm:inline">More</span>
-            <ChevronUp
-              className={cn(
-                'h-3 w-3 transition-transform duration-200 hidden sm:inline',
-                isMoreOpen && 'rotate-180'
-              )}
-            />
+            {isMoreActive && (
+              <motion.div
+                layoutId="floatingNavActiveIndicator"
+                className={cn(
+                  'absolute inset-0 rounded-full pointer-events-none transition-[background-color,border-color,box-shadow] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]',
+                  isLetterArchive
+                    ? 'bg-[rgba(111,48,64,0.09)] border border-[rgba(181,138,80,0.30)] shadow-2xs after:content-[\'\'] after:absolute after:bottom-0.5 after:left-3 after:right-3 after:h-[1.5px] after:bg-[#7A2E3B] after:rounded-full after:opacity-85'
+                    : isScrapbook
+                    ? 'bg-[#D8B86A] shadow-xs'
+                    : isMidnight
+                    ? 'bg-[rgba(243,213,138,0.10)] border border-[rgba(243,213,138,0.28)] shadow-[0_0_12px_rgba(243,213,138,0.12)] after:content-[\'\'] after:absolute after:bottom-0.5 after:left-3 after:right-3 after:h-[1.5px] after:bg-[#D8B866] after:rounded-full after:opacity-90'
+                    : 'bg-[#C99B58] shadow-xs'
+                )}
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : {
+                        type: 'tween',
+                        ease: [0.25, 0.1, 0.25, 1],
+                        duration: 0.32,
+                      }
+                }
+              />
+            )}
+            <span className="relative z-10 flex items-center gap-1">
+              <MoreHorizontal className="h-3.5 w-3.5 shrink-0" />
+              <span className="hidden sm:inline">More</span>
+              <ChevronUp
+                className={cn(
+                  'h-3 w-3 transition-transform duration-200 hidden sm:inline',
+                  isMoreOpen && 'rotate-180'
+                )}
+              />
+            </span>
           </button>
 
           {/* Popover Menu */}
           {isMoreOpen && (
             <div
               className={cn(
-                'absolute bottom-full right-0 mb-2 w-52 rounded-[16px] p-1.5 shadow-2xl z-50 flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-150',
+                'absolute bottom-full right-0 mb-2 w-52 rounded-[16px] p-1.5 shadow-2xl z-50 flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-150 transition-[background-color,border-color,box-shadow,color] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]',
                 isLetterArchive
-                  ? 'bg-[#FAF5EC] border border-[rgba(138,110,89,0.35)] shadow-[0_12px_32px_rgba(60,42,33,0.2)]'
+                  ? 'bg-[#E8D7B8] border border-[rgba(100,75,52,0.22)] shadow-[0_12px_28px_rgba(51,38,29,0.18)]'
                   : isScrapbook
                   ? 'bg-[rgba(16,30,20,0.96)] border border-[rgba(216,184,106,0.3)] shadow-[0_12px_32px_rgba(0,0,0,0.7)]'
+                  : isMidnight
+                  ? 'bg-[#0B1428]/98 backdrop-blur-md border border-[rgba(243,213,138,0.22)] shadow-[0_16px_36px_rgba(2,6,18,0.85)]'
                   : 'bg-[rgba(13,23,40,0.96)] border border-[rgba(201,155,88,0.3)] shadow-[0_12px_32px_rgba(0,0,0,0.8)]'
               )}
               role="menu"
@@ -185,17 +258,21 @@ export const FloatingNavigation: React.FC<FloatingNavigationProps> = ({ classNam
                   onClick={() => setIsMoreOpen(false)}
                   className={({ isActive }) =>
                     cn(
-                      'flex items-center gap-2.5 px-3 py-2 rounded-[10px] text-xs font-serif font-medium transition-colors cursor-pointer',
+                      'flex items-center gap-2.5 px-3 py-2 rounded-[10px] text-xs font-serif font-medium transition-[background-color,border-color,box-shadow,color,transform] duration-150 ease-out cursor-pointer active:scale-[0.985] motion-reduce:transform-none',
                       isActive
                         ? isLetterArchive
-                          ? 'bg-[#7A2E3B] text-[#FFF9F0] font-semibold'
+                          ? 'bg-[rgba(111,48,64,0.09)] text-[#6F3040] font-semibold border-l-2 border-[#7A2E3B]'
                           : isScrapbook
                           ? 'bg-[#D8B86A] text-[#0A160D] font-semibold'
+                          : isMidnight
+                          ? 'bg-[rgba(243,213,138,0.10)] text-[#F3D58A] font-semibold border-l-2 border-[#D8B866]'
                           : 'bg-[#C99B58] text-[#070E1A] font-semibold'
                         : isLetterArchive
-                        ? 'text-[#5C4A42] hover:bg-[#F2E8DC] hover:text-[#7A2E3B]'
+                        ? 'text-[#705846] hover:bg-[rgba(100,75,52,0.08)] hover:text-[#4A3525]'
                         : isScrapbook
                         ? 'text-[#B8C0AE] hover:bg-[rgba(79,107,72,0.3)] hover:text-[#F7F1DF]'
+                        : isMidnight
+                        ? 'text-[#B8C3D8] hover:bg-[rgba(220,230,255,0.07)] hover:text-[#E2EAF8]'
                         : 'text-[#C2AF99] hover:bg-[rgba(201,155,88,0.18)] hover:text-[#F2E4CF]'
                     )
                   }

@@ -25,21 +25,21 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-button cursor-pointer';
+      'inline-flex items-center justify-center font-medium transition-[transform,background-color,border-color,box-shadow,color,opacity] duration-200 ease-out will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:transform-none disabled:shadow-none text-button cursor-pointer active:translate-y-0 active:scale-[0.985] motion-reduce:transform-none';
 
     const variants = {
       primary:
-        'bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:opacity-90 shadow-[var(--shadow-sm)] active:scale-[0.98]',
+        'bg-[var(--color-primary)] text-[var(--color-primary-foreground)] shadow-[var(--shadow-sm)] [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-[var(--shadow-md)] [@media(hover:hover)]:hover:brightness-105',
       secondary:
-        'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-card)] active:scale-[0.98]',
+        'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] [@media(hover:hover)]:hover:bg-[var(--color-card)] [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-[var(--shadow-sm)]',
       outline:
-        'border border-[var(--color-border)] bg-transparent text-[var(--color-text)] hover:bg-[var(--color-surface)] active:scale-[0.98]',
+        'border border-[var(--color-border)] bg-transparent text-[var(--color-text)] [@media(hover:hover)]:hover:bg-[var(--color-surface)] [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:border-[var(--color-primary)]/40',
       ghost:
-        'bg-transparent text-[var(--color-text)] hover:bg-[var(--color-surface)] active:scale-[0.98]',
+        'bg-transparent text-[var(--color-text)] [@media(hover:hover)]:hover:bg-[var(--color-surface)] [@media(hover:hover)]:hover:-translate-y-0.5',
       text:
-        'bg-transparent text-[var(--color-text)] hover:text-[var(--color-primary)] p-0 h-auto font-normal underline-offset-4 hover:underline border-none shadow-none',
+        'bg-transparent text-[var(--color-text)] hover:text-[var(--color-primary)] p-0 h-auto font-normal underline-offset-4 hover:underline border-none shadow-none hover:translate-y-0 active:scale-100',
       danger:
-        'bg-[var(--color-error)] text-white hover:opacity-90 shadow-[var(--shadow-sm)] active:scale-[0.98]',
+        'bg-[var(--color-error)] text-white shadow-[var(--shadow-sm)] [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-[var(--shadow-md)] [@media(hover:hover)]:hover:brightness-105',
     };
 
     const sizes = {

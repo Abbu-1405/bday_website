@@ -19,7 +19,7 @@ export const Surface = React.forwardRef<HTMLDivElement, SurfaceProps>(
     ref
   ) => {
     const baseStyles =
-      'text-[var(--color-text)] rounded-[var(--radius-card)] transition-all';
+      'text-[var(--color-text)] rounded-[var(--radius-card)] transition-[background-color,border-color,box-shadow,color] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]';
 
     const variants = {
       elevated: 'bg-[var(--color-card)] border border-[var(--color-border-light)] shadow-[var(--shadow-md)]',

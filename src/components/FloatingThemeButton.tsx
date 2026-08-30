@@ -74,14 +74,14 @@ export const FloatingThemeButton: React.FC<FloatingThemeButtonProps> = ({
         aria-expanded={isOpen}
         aria-label="Switch Theme"
         title="Switch Theme"
-        className="flex items-center justify-center h-10 w-10 rounded-full bg-[var(--color-card)]/90 backdrop-blur-md border border-[var(--color-border)] text-[var(--color-text)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)] shadow-[var(--shadow-soft)] transition-all cursor-pointer"
+        className="flex items-center justify-center h-10 w-10 rounded-full bg-[var(--color-card)]/90 backdrop-blur-md border border-[var(--color-border)] text-[var(--color-text)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)] shadow-[var(--shadow-soft)] transition-[transform,background-color,border-color,box-shadow,color] duration-200 ease-out cursor-pointer [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-md active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/40 motion-reduce:transform-none"
       >
         <Palette className="h-4 w-4 shrink-0" />
       </button>
 
       {isOpen && (
         <div
-          className="absolute right-0 mt-2 w-56 rounded-[var(--radius-xl)] bg-[var(--color-card)]/95 backdrop-blur-md border border-[var(--color-border)] p-2 shadow-[var(--shadow-lg)] z-50 flex flex-col gap-1"
+          className="absolute right-0 mt-2 w-56 rounded-[var(--radius-xl)] bg-[var(--color-card)]/95 backdrop-blur-md border border-[var(--color-border)] p-2 shadow-[var(--shadow-lg)] z-50 flex flex-col gap-1 animate-in fade-in zoom-in-95 duration-150 transition-[background-color,border-color,box-shadow,color] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
           role="menu"
         >
           <div className="px-2 py-1 text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider">
@@ -99,7 +99,7 @@ export const FloatingThemeButton: React.FC<FloatingThemeButtonProps> = ({
                   setIsOpen(false);
                 }}
                 className={cn(
-                  'flex items-center justify-between w-full px-2.5 py-2 rounded-[var(--radius-lg)] text-left text-xs transition-colors cursor-pointer',
+                  'flex items-center justify-between w-full px-2.5 py-2 rounded-[var(--radius-lg)] text-left text-xs transition-[background-color,color,transform] duration-150 ease-out cursor-pointer active:scale-[0.985] motion-reduce:transform-none',
                   isActive
                     ? 'bg-[var(--color-primary)] text-[var(--color-primary-foreground)] font-semibold'
                     : 'text-[var(--color-text)] hover:bg-[var(--color-surface)]'

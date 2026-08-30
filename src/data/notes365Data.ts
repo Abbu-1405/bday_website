@@ -26,106 +26,17 @@ export function formatCalendarDate(dateString: string): string {
 }
 
 /**
- * Custom overrides for specific initial & key milestone days
+ * Custom overrides for specific initial & key milestone days (e.g. read/favorite flags)
  */
 const SPECIAL_NOTES_MAP: Record<number, Partial<Note365>> = {
   1: {
-    title: 'The Beginning of Our Starlit Pages',
-    preview: 'A quiet moment under the starlight, captured in a gentle note...',
-    content:
-      'Welcome to the very first page of our starlit journey. On this day, 27 September 2026, we begin capturing daily reflections, quiet thoughts, and cherished memories. Every single day carries a small story worth keeping.',
     isRead: true,
     isFavorite: true,
-    mediaItems: [
-      {
-        id: 'm1-img',
-        type: 'image',
-        src: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80',
-        title: 'Starlit Mountain Horizon',
-        description: 'Captured under the quiet midnight sky on 27 September.',
-      },
-    ],
   },
   2: {
-    title: 'Midnight Whispers & Quiet Stars',
-    preview: 'Reflecting on how small moments make up the largest parts of life...',
-    content:
-      'As midnight approaches, the world softens. Today was filled with small unexpected smiles and warm conversations. Finding peace in the routine and joy in the quiet hours.',
     isRead: true,
-    mediaItems: [
-      {
-        id: 'm2-aud',
-        type: 'audio',
-        src: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=soft-rain-ambient-111154.mp3',
-        title: 'Midnight Soft Rain Ambient',
-        description: 'A 30-second soothing acoustic rain recording.',
-      },
-    ],
-  },
-  3: {
-    title: 'Coffee Conversations',
-    preview: 'A morning filled with warmth, steam rising from ceramic mugs...',
-    content:
-      'There is a subtle magic in early morning coffee. The world is still asleep, and time moves just a little slower. A reminder to stay present in every moment.',
-    mediaItems: [
-      {
-        id: 'm3-vid',
-        type: 'video',
-        src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-        title: 'Golden Hour Reflection Clip',
-        description: 'A short ambient clip recorded during golden hour.',
-      },
-    ],
-  },
-  4: {
-    title: 'Moments in Autumn Light',
-    preview: 'Golden hour leaves drifting across the quiet path...',
-    content:
-      'September draws to a close today. Looking back at the last four days, each note is becoming a stepping stone across time.',
-    mediaItems: [
-      {
-        id: 'm4-doc',
-        type: 'document',
-        src: '#',
-        title: 'Autumn Travels & Reflection Excerpt.pdf',
-        description: 'Formatted 3-page travel journal excerpt and reading notes.',
-      },
-    ],
-  },
-  5: {
-    title: 'A Letter to Tomorrow',
-    preview: 'A new month arrives with new hopes and quiet promises...',
-    content:
-      'Welcome to October. Today brings a crisp breeze and a fresh page. May this month be gentle and full of light.',
-    mediaItems: [
-      {
-        id: 'm5-img',
-        type: 'image',
-        src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
-        title: 'Sunset Over Calm Waters',
-        description: 'Twilight fading along the peaceful coast.',
-      },
-      {
-        id: 'm5-aud',
-        type: 'audio',
-        src: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=piano-moment-10331.mp3',
-        title: 'Twilight Piano Sketch',
-        description: 'A brief original piano theme.',
-      },
-      {
-        id: 'm5-doc',
-        type: 'document',
-        src: '#',
-        title: 'October Goals & Reflections.pdf',
-        description: 'Formatted checklist document.',
-      },
-    ],
   },
   365: {
-    title: '365 Days Under the Starlit Sky',
-    preview: 'Celebrating a full year of shared reflections, quiet memories, and bright hope...',
-    content:
-      'Three hundred and sixty-five days of starlit pages. From 27 September 2026 to 26 September 2027, every single day has added a unique thread to our shared tapestry. Thank you for walking through every page.',
     isFavorite: true,
   },
 };
@@ -309,9 +220,10 @@ export function generate365Notes(): Note365[] {
       content = special?.content ?? `${CONTENT_TEMPLATES[contentIndex]} (Note #${dayIndex} for ${displayDate})`;
     }
 
+    const rawDay = day001_060 || day061_120 || day121_180 || day181_240 || day241_300 || day301_365;
     const special = SPECIAL_NOTES_MAP[dayIndex];
-    const mediaItems = special?.mediaItems ?? [];
-    const media = special?.media ?? (mediaItems.length > 0 ? mediaItems[0] : { type: 'none' });
+    const mediaItems = rawDay?.mediaItems ?? special?.mediaItems ?? [];
+    const media = rawDay?.media ?? special?.media ?? (mediaItems.length > 0 ? mediaItems[0] : { type: 'none' });
 
     notes.push({
       id: `note-${dateStr}`,

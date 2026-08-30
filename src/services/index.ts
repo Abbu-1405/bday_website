@@ -14,3 +14,4 @@ export * from './doodleService';
 export * from './notificationService';
 export * from './notificationTemplateService';
 export * from './notificationIntelligenceService';
+export * from './catInteraction';

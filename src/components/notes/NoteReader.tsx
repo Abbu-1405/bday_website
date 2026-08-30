@@ -240,6 +240,7 @@ export const NoteReader: React.FC<NoteReaderProps> = ({
         media={note.media}
         items={note.mediaItems}
         noteDate={note.date}
+        content={note.content}
       />
 
       {/* Full Note Content */}

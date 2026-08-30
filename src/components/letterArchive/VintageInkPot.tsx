@@ -10,17 +10,15 @@ import { useTheme } from '../../hooks';
  */
 export const VintageInkPot: React.FC = () => {
   const { theme } = useTheme();
-
-  // Strictly render ONLY when the active theme is 'letter-archive'
-  if (theme !== 'letter-archive') {
-    return null;
-  }
+  const isLetterArchive = theme === 'letter-archive';
 
   return (
     <aside
       id="vintage-ink-pot-container"
       aria-label="Vintage writing desk ink pot decoration"
-      className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-20 pointer-events-auto select-none transition-transform duration-300 ease-out group"
+      className={`fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-20 select-none transition-opacity duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] group ${
+        isLetterArchive ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+      }`}
     >
       <style>{`
         @keyframes inkPotBreathe {

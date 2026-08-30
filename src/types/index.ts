@@ -11,3 +11,4 @@ export * from './achievements';
 export * from './bts';
 export * from './doodle';
 export * from './notification';
+export * from './catMeme';

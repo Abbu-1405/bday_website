@@ -45,7 +45,7 @@ export const BtsFilters: React.FC<BtsFiltersProps> = ({
             aria-selected={isActive}
             onClick={() => onSelectCategory(opt.id)}
             className={cn(
-              'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-serif font-medium transition-all whitespace-nowrap cursor-pointer select-none border',
+              'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-serif font-medium transition-[transform,background-color,border-color,box-shadow,color] duration-150 ease-out whitespace-nowrap cursor-pointer select-none border [@media(hover:hover)]:hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/40 motion-reduce:transform-none',
               isActive
                 ? isLetterArchive
                   ? 'bg-[#7A2E3B] text-[#FFF9F0] border-[#7A2E3B] font-semibold shadow-xs'

@@ -9,7 +9,8 @@ import {
   CheckCircle2,
   Scroll,
 } from 'lucide-react';
-import { SecretCard, SecretDetailModal } from '../components/secretVault';
+import { SecretCard, SecretDetailModal, SecretsOverrideModal } from '../components/secretVault';
+import { ScrollFocusReveal } from '../components';
 import '../components/secretVault/secretVault.css';
 import { sampleSecrets } from '../data';
 import { SecretItem } from '../types';
@@ -19,9 +20,12 @@ import {
   getDiscoveredSecretIds,
   getDiscoveredTimestamps,
   resetDiscoveredSecrets,
+  isSecretsOverrideUnlocked,
+  unlockSecretsOverride,
 } from '../utils';
 import { recordDiscovery } from '../services/discoveryService';
 import { evaluateBadges } from '../services/badgeService';
+import { useStarlitCatBridge } from '../hooks';
 
 export default function SecretVault() {
   const [secrets, setSecrets] = useState<SecretItem[]>(sampleSecrets);
@@ -29,7 +33,14 @@ export default function SecretVault() {
   const [timestamps, setTimestamps] = useState<Record<string, number>>(() => getDiscoveredTimestamps());
   const [selectedSecret, setSelectedSecret] = useState<SecretItem | null>(null);
   const [justRevealedSecret, setJustRevealedSecret] = useState<SecretItem | null>(null);
+  const [isOverrideModalOpen, setIsOverrideModalOpen] = useState(false);
+  const [isOverrideActive, setIsOverrideActive] = useState<boolean>(() => isSecretsOverrideUnlocked());
   const { playSecretReveal, playMagicalClick } = useAudio();
+  const { emitSecret } = useStarlitCatBridge();
+
+  React.useEffect(() => {
+    emitSecret('opened');
+  }, [emitSecret]);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -45,6 +56,7 @@ export default function SecretVault() {
     const syncVaultState = () => {
       setDiscoveredIds(getDiscoveredSecretIds());
       setTimestamps(getDiscoveredTimestamps());
+      setIsOverrideActive(isSecretsOverrideUnlocked());
     };
 
     window.addEventListener('starlit_secret_discovered', syncVaultState);
@@ -65,6 +77,9 @@ export default function SecretVault() {
     // Trigger centralized badge evaluation (will unlock "Curious" badge if first secret)
     evaluateBadges();
 
+    // Dispatch cat reaction for unlocked secret (HIGH priority, privacy-safe metadata only)
+    emitSecret('unlocked', secret.id);
+
     // Dispatch global window event
     window.dispatchEvent(new CustomEvent('starlit_secret_discovered', { detail: { secretId: secret.id } }));
 
@@ -72,14 +87,27 @@ export default function SecretVault() {
     setJustRevealedSecret(secret);
   };
 
+  const handleOverrideSuccess = () => {
+    playSecretReveal();
+    const allIds = secrets.map((s) => s.id);
+    const updated = unlockSecretsOverride(allIds);
+    setDiscoveredIds(updated);
+    setTimestamps(getDiscoveredTimestamps());
+    setIsOverrideActive(true);
+    evaluateBadges();
+    emitSecret('unlocked', 'override-all');
+  };
+
   const handleReset = () => {
     playMagicalClick();
     const initial = resetDiscoveredSecrets();
     setDiscoveredIds(initial);
     setTimestamps(getDiscoveredTimestamps());
+    setIsOverrideActive(false);
     setSelectedSecret(null);
     setJustRevealedSecret(null);
     evaluateBadges();
+    emitSecret('locked');
   };
 
   const discoveredCount = discoveredIds.length;
@@ -110,23 +138,39 @@ export default function SecretVault() {
               </p>
             </div>
 
-            {/* Discovery Progress Counter & Reset */}
-            <div className="flex flex-col items-center sm:items-end gap-3 shrink-0">
+            {/* Discovery Progress Counter, Override & Reset */}
+            <div className="flex flex-col items-center sm:items-end gap-2.5 shrink-0">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-serif bg-[#172235] text-[#E7D7B8] border border-[#B18A4A]/50 shadow-md">
                 <Eye className="h-3.5 w-3.5 text-[#B18A4A]" />
                 <span className="font-semibold">{discoveredCount} / {totalCount} Unveiled</span>
               </div>
 
-              {discoveredCount > 0 && (
+              <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-end">
                 <button
                   type="button"
-                  onClick={handleReset}
-                  className="inline-flex items-center gap-1.5 text-xs font-serif text-[#A99E8B] hover:text-[#F0E5CF] transition-colors cursor-pointer"
+                  id="secrets-override-trigger"
+                  onClick={() => setIsOverrideModalOpen(true)}
+                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#A99E8B] hover:text-[#F0E5CF] bg-[#0B1018]/60 hover:bg-[#172235] border border-[#B18A4A]/30 px-2.5 py-1 rounded-full transition-colors cursor-pointer"
+                  title="Chamber Override Verification"
+                  aria-label="Open Secrets Override verification"
                 >
-                  <RefreshCw className="h-3 w-3 text-[#B18A4A]" />
-                  <span>Reset discoveries</span>
+                  <Key className="h-3 w-3 text-[#B18A4A]" />
+                  <span>{isOverrideActive ? 'Override Active 🔓' : '🔐 Secrets Override'}</span>
                 </button>
-              )}
+
+                {discoveredCount > 0 && (
+                  <button
+                    type="button"
+                    id="secrets-reset-button"
+                    onClick={handleReset}
+                    className="inline-flex items-center gap-1 text-[11px] font-serif text-[#A99E8B] hover:text-[#F0E5CF] transition-colors cursor-pointer px-1 py-0.5"
+                    aria-label="Reset discovered secrets"
+                  >
+                    <RefreshCw className="h-2.5 w-2.5 text-[#B18A4A]" />
+                    <span>Reset discoveries</span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -177,13 +221,14 @@ export default function SecretVault() {
             {secrets.map((secret) => {
               const isDiscovered = discoveredIds.includes(secret.id);
               return (
-                <SecretCard
-                  key={secret.id}
-                  secret={secret}
-                  isDiscovered={isDiscovered}
-                  onDiscover={handleDiscover}
-                  onOpen={(s) => setSelectedSecret(s)}
-                />
+                <ScrollFocusReveal key={secret.id} className="h-full">
+                  <SecretCard
+                    secret={secret}
+                    isDiscovered={isDiscovered}
+                    onDiscover={handleDiscover}
+                    onOpen={(s) => setSelectedSecret(s)}
+                  />
+                </ScrollFocusReveal>
               );
             })}
           </div>
@@ -256,12 +301,27 @@ export default function SecretVault() {
           discoveredAt={selectedSecret ? timestamps[selectedSecret.id] : undefined}
         />
 
-        {/* 6. Footer Archive Notice */}
-        <footer className="pt-6 text-center border-t border-[#B18A4A]/25">
-          <p className="text-xs text-[#A99E8B] italic font-serif flex items-center justify-center gap-1.5">
+        {/* 6. Secrets Override Modal */}
+        <SecretsOverrideModal
+          isOpen={isOverrideModalOpen}
+          onClose={() => setIsOverrideModalOpen(false)}
+          onSuccess={handleOverrideSuccess}
+        />
+
+        {/* 7. Footer Archive Notice */}
+        <footer className="pt-6 border-t border-[#B18A4A]/25 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+          <p className="text-xs text-[#A99E8B] italic font-serif flex items-center justify-center sm:justify-start gap-1.5">
             <Scroll className="h-3.5 w-3.5 text-[#B18A4A]" />
             <span>Starlit Letters — Secret Vault Archive</span>
           </p>
+          <button
+            type="button"
+            id="secrets-override-footer-link"
+            onClick={() => setIsOverrideModalOpen(true)}
+            className="text-[11px] font-mono text-[#8C7A6B] hover:text-[#D8B86A] transition-colors cursor-pointer flex items-center gap-1 opacity-75 hover:opacity-100"
+          >
+            <span>{isOverrideActive ? '🔓 override active' : '🔐 override locked?'}</span>
+          </button>
         </footer>
 
       </div>

@@ -120,7 +120,10 @@ export const SecretCard: React.FC<SecretCardProps> = ({
           <div className="space-y-1 flex-1">
             <h3 className="font-serif font-medium text-base sm:text-lg text-[#F0E5CF] line-clamp-1 tracking-tight">
               {isDiscovered ? (
-                secret.title
+                <span className="inline-flex items-center gap-1.5">
+                  <span>{secret.title}</span>
+                  {secret.emoji && <span className="text-sm opacity-90 not-italic">{secret.emoji}</span>}
+                </span>
               ) : secret.isHidden ? (
                 <span className="italic text-[#A99E8B] font-normal">
                   &ldquo;A confidential note lies here...&rdquo;

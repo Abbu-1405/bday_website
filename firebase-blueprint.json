@@ -502,6 +502,131 @@
         "enabled",
         "version"
       ]
+    },
+    "CatMemory": {
+      "title": "User Cat Memory",
+      "description": "Persistent relationship memory, interaction counters, and major milestone history for a specific meme cat and user",
+      "type": "object",
+      "properties": {
+        "catId": {
+          "type": "string",
+          "description": "Unique identifier of the meme cat from the cast registry"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Firebase user ID of the authenticated user owning this relationship memory"
+        },
+        "relationshipPoints": {
+          "type": "number",
+          "description": "Exact relationship experience points accumulated"
+        },
+        "relationshipLevel": {
+          "type": "number",
+          "description": "Current relationship tier level (1 to 7)"
+        },
+        "relationshipLevelName": {
+          "type": "string",
+          "description": "Cat-specific title of current relationship level"
+        },
+        "encounterCount": {
+          "type": "number",
+          "description": "Total number of times this cat has visibly spawned and appeared to the user"
+        },
+        "meaningfulInteractionCount": {
+          "type": "number",
+          "description": "Total number of meaningful Starlit events and interactive actions shared with this cat"
+        },
+        "firstSeenAt": {
+          "type": "string",
+          "description": "ISO timestamp when this cat was first encountered"
+        },
+        "lastSeenAt": {
+          "type": "string",
+          "description": "ISO timestamp when this cat was most recently seen"
+        },
+        "lastInteractionAt": {
+          "type": "string",
+          "description": "ISO timestamp of the most recent interaction"
+        },
+        "milestoneHistory": {
+          "type": "array",
+          "description": "Array of major achieved relationship and encounter milestones"
+        },
+        "memorableInteractionReferences": {
+          "type": "array",
+          "description": "Array of recent safe interaction references (no private text/photo content)"
+        },
+        "relationshipState": {
+          "type": "string",
+          "description": "High-level state descriptor of the relationship"
+        },
+        "unlockedBehaviors": {
+          "type": "array",
+          "description": "Array of unlocked behavior identifiers for this cat"
+        },
+        "version": {
+          "type": "number",
+          "description": "Schema version identifier for memory records"
+        }
+      },
+      "required": [
+        "catId",
+        "userId",
+        "relationshipPoints",
+        "relationshipLevel",
+        "encounterCount",
+        "version"
+      ]
+    },
+    "CatPreference": {
+      "title": "User Cat Preference",
+      "description": "User customization preference for a specific cat (custom nickname, visibility, interaction toggles)",
+      "type": "object",
+      "properties": {
+        "catId": {
+          "type": "string",
+          "description": "Permanent identifier of the cat"
+        },
+        "userId": {
+          "type": "string",
+          "description": "ID of the authenticated user"
+        },
+        "customName": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "Optional user custom nickname for this cat"
+        },
+        "hidden": {
+          "type": "boolean",
+          "description": "Whether this cat is hidden from spawning (Legendary cats cannot be hidden)"
+        },
+        "interactions": {
+          "type": "object",
+          "properties": {
+            "petEnabled": { "type": "boolean" },
+            "treatEnabled": { "type": "boolean" },
+            "shooEnabled": { "type": "boolean" }
+          },
+          "required": ["petEnabled", "treatEnabled", "shooEnabled"],
+          "description": "Per-interaction enable/disable toggles"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp when preferences were last modified"
+        },
+        "version": {
+          "type": "number",
+          "description": "Schema version for preference records"
+        }
+      },
+      "required": [
+        "catId",
+        "userId",
+        "hidden",
+        "interactions",
+        "updatedAt",
+        "version"
+      ]
     }
   },
   "firestore": {
@@ -524,6 +649,14 @@
     "/users/{userId}/btsActivity/{activityId}": {
       "schema": "BtsActivity",
       "description": "Collection of Behind The Scenes activity records for a specific user"
+    },
+    "/users/{userId}/catMemories/{catId}": {
+      "schema": "CatMemory",
+      "description": "Private persistent cat relationship memory and milestone history for a specific user and cat"
+    },
+    "/users/{userId}/catPreferences/{catId}": {
+      "schema": "CatPreference",
+      "description": "Private customization preferences (custom nickname, visibility, interaction toggles) for a specific user and cat"
     },
     "/users/{userId}/doodles/{doodleId}": {
       "schema": "Doodle",

@@ -38,7 +38,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
   return (
     <div
       className={cn(
-        'inline-flex items-center rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] p-1',
+        'inline-flex items-center rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] p-1 transition-[background-color,border-color,box-shadow,color] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]',
         className
       )}
       role="radiogroup"
@@ -54,11 +54,11 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
             aria-checked={isActive}
             onClick={() => setTheme(item.id)}
             className={cn(
-              'flex items-center justify-center rounded-full transition-colors cursor-pointer font-medium',
+              'flex items-center justify-center rounded-full transition-[transform,background-color,border-color,box-shadow,color] duration-200 ease-out cursor-pointer font-medium active:scale-95 motion-reduce:transform-none',
               sizeClasses,
               isActive
                 ? 'bg-[var(--color-card)] text-[var(--color-text)] shadow-xs font-semibold'
-                : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'
+                : 'text-[var(--color-muted)] hover:text-[var(--color-text)] [@media(hover:hover)]:hover:bg-[var(--color-card)]/50'
             )}
             title={item.label}
           >

@@ -27,7 +27,7 @@ import {
   VintageBotanicalSprig,
 } from '../components/letterArchive/LetterArchiveDecorations';
 import { ROUTES } from '../constants';
-import { useAuth, useTheme } from '../hooks';
+import { useAuth, useTheme, useStarlitCatBridge } from '../hooks';
 import { useAudio } from '../contexts';
 import { getOverallProgress, getCurrentExploration } from '../services/discoveryService';
 import { getStreakData } from '../services/streakService';
@@ -39,9 +39,15 @@ export default function Home() {
   const { currentUser } = useAuth();
   const { theme } = useTheme();
   const { playMagicalClick, playShimmer } = useAudio();
+  const { emitHome } = useStarlitCatBridge();
   const isWhimsical = theme === 'whimsical-scrapbook';
   const isMidnight = theme === 'midnight-journal';
   const isLetterArchive = theme === 'letter-archive';
+
+  // Phase 4: Home entry reaction observer
+  React.useEffect(() => {
+    emitHome('entered');
+  }, [emitHome]);
 
   const overall = getOverallProgress();
   const streak = getStreakData();
@@ -88,11 +94,13 @@ export default function Home() {
 
   const handleCtaClick = (route: string) => {
     playMagicalClick();
+    emitHome('action');
     navigate(route);
   };
 
   const handleQuickAccessClick = (id: string) => {
     playMagicalClick();
+    emitHome('action');
     switch (id) {
       case 'adore':
         navigate(ROUTES.ADORE);
@@ -276,7 +284,11 @@ export default function Home() {
             size="md"
             onClick={() => handleCtaClick(primaryCtaRoute)}
             rightIcon={<ArrowRight className="h-3.5 w-3.5" />}
-            className="w-full sm:w-auto min-w-[160px] font-serif shadow-sm"
+            className={cn(
+              "w-full sm:w-auto min-w-[160px] font-serif",
+              isLetterArchive && "bg-[#7A2E3B] hover:bg-[#63242F] text-[#FFFBF2] border border-[rgba(194,147,77,0.5)] shadow-[0_3px_12px_rgba(122,46,59,0.28)]",
+              !isLetterArchive && "shadow-sm"
+            )}
           >
             {primaryCtaText}
           </Button>
@@ -285,7 +297,10 @@ export default function Home() {
             variant="secondary"
             size="md"
             onClick={() => handleCtaClick(ROUTES.MOMENTS)}
-            className="w-full sm:w-auto px-4 font-serif"
+            className={cn(
+              "w-full sm:w-auto px-4 font-serif",
+              isLetterArchive && "bg-[#F2E8DC] border-[rgba(138,110,89,0.38)] text-[#453226] hover:bg-[#EDE0CC] hover:text-[#2B1E16] shadow-[0_2px_6px_rgba(60,42,33,0.05)]"
+            )}
           >
             Explore Memories
           </Button>

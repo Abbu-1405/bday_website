@@ -87,7 +87,7 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
           type="button"
           onClick={handleToggle}
           className={cn(
-            'inline-flex items-center justify-center font-medium border border-[var(--color-border)] bg-[var(--color-card)]/90 backdrop-blur-md text-[var(--color-text)] hover:bg-[var(--color-surface)] shadow-[var(--shadow-soft)] transition-all cursor-pointer rounded-l-full',
+            'inline-flex items-center justify-center font-medium border border-[var(--color-border)] bg-[var(--color-card)]/90 backdrop-blur-md text-[var(--color-text)] hover:bg-[var(--color-surface)] shadow-[var(--shadow-soft)] transition-[transform,background-color,border-color,box-shadow,color] duration-200 ease-out cursor-pointer rounded-l-full [@media(hover:hover)]:hover:-translate-y-0.5 active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/40 motion-reduce:transform-none',
             isPlaying && 'border-[var(--color-primary)] text-[var(--color-primary)] bg-[var(--color-card)]',
             !isFloating && sizeClasses[size],
             (isFloating || isStatic) && 'h-10 px-3 justify-center gap-1.5',
@@ -116,7 +116,7 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
           aria-label="Audio Mixer & Track Settings"
           title="Audio Mixer & Track Settings"
           className={cn(
-            'flex items-center justify-center h-10 w-8 rounded-r-full border-y border-r border-[var(--color-border)] bg-[var(--color-card)]/90 backdrop-blur-md text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)] shadow-[var(--shadow-soft)] transition-colors cursor-pointer',
+            'flex items-center justify-center h-10 w-8 rounded-r-full border-y border-r border-[var(--color-border)] bg-[var(--color-card)]/90 backdrop-blur-md text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)] shadow-[var(--shadow-soft)] transition-[transform,background-color,border-color,box-shadow,color] duration-200 ease-out cursor-pointer [@media(hover:hover)]:hover:-translate-y-0.5 active:translate-y-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/40 motion-reduce:transform-none',
             isPlaying && 'border-r-[var(--color-primary)] border-y-[var(--color-primary)]'
           )}
         >
@@ -127,7 +127,7 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
       {/* Hidden-by-default Audio Mixer Popover */}
       {isMixerOpen && (
         <div
-          className="absolute right-0 mt-2 w-72 rounded-[var(--radius-xl)] bg-[var(--color-card)]/95 backdrop-blur-md border border-[var(--color-border)] p-3.5 shadow-[var(--shadow-lg)] z-50 space-y-3"
+          className="absolute right-0 mt-2 w-72 rounded-[var(--radius-xl)] bg-[var(--color-card)]/95 backdrop-blur-md border border-[var(--color-border)] p-3.5 shadow-[var(--shadow-lg)] z-50 space-y-3 animate-in fade-in zoom-in-95 duration-150"
           role="region"
           aria-label="Audio Mixer Controls"
         >
@@ -142,7 +142,7 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
               type="button"
               onClick={togglePlay}
               className={cn(
-                'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-serif font-medium transition-colors cursor-pointer border',
+                'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-serif font-medium transition-[transform,background-color,border-color,color] duration-150 ease-out cursor-pointer border active:scale-95',
                 isPlaying
                   ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'
                   : 'bg-[var(--color-surface-secondary)] text-[var(--color-muted)] border-[var(--color-border)] hover:text-[var(--color-text)]'
@@ -202,7 +202,7 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
                   type="button"
                   onClick={() => setTrack(t.id)}
                   className={cn(
-                    'w-full text-left p-2 rounded-[var(--radius-lg)] text-xs font-serif transition-colors cursor-pointer flex flex-col',
+                    'w-full text-left p-2 rounded-[var(--radius-lg)] text-xs font-serif transition-[transform,background-color,color] duration-150 ease-out cursor-pointer flex flex-col active:scale-[0.985] motion-reduce:transform-none',
                     currentTrack === t.id
                       ? 'bg-[var(--color-primary)] text-[var(--color-primary-foreground)] font-semibold'
                       : 'text-[var(--color-text)] hover:bg-[var(--color-surface)]'

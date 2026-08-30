@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Camera, Sparkles, Image as ImageIcon } from 'lucide-react';
-import { Container } from '../components';
+import { Container, ScrollFocusReveal } from '../components';
 import {
   FeaturedMomentCard,
   MomentCard,
@@ -10,11 +10,12 @@ import { sampleMoments } from '../data';
 import { Moment } from '../types';
 import { recordDiscovery } from '../services/discoveryService';
 import { getManagedMoments } from '../services/contentService';
-import { useTheme } from '../hooks';
+import { useTheme, useStarlitCatBridge } from '../hooks';
 import { cn } from '../utils';
 
 export default function Moments() {
   const { theme } = useTheme();
+  const { emitMoment } = useStarlitCatBridge();
   const isLetterArchive = theme === 'letter-archive';
   const isScrapbook = theme === 'whimsical-scrapbook';
 
@@ -22,35 +23,45 @@ export default function Moments() {
   const [selectedMoment, setSelectedMoment] = useState<Moment | null>(null);
 
   useEffect(() => {
+    emitMoment('opened');
+  }, [emitMoment]);
+
+  useEffect(() => {
     let isMounted = true;
     getManagedMoments().then((items) => {
-      if (isMounted) setMoments(items);
+      if (isMounted) {
+        const sorted = [...items].sort((a, b) => a.order - b.order);
+        setMoments(sorted);
+      }
     });
     return () => {
       isMounted = false;
     };
   }, []);
 
+  // Ensure explicit ranking order (1-20)
+  const orderedMoments = [...moments].sort((a, b) => a.order - b.order);
+
   // Identify featured moment or default to first
   const featuredMoment =
-    moments.find((m) => m.featured) || moments[0];
-  const supportingMoments = moments.filter(
+    orderedMoments.find((m) => m.featured) || orderedMoments[0];
+  const supportingMoments = orderedMoments.filter(
     (m) => m.id !== (featuredMoment ? featuredMoment.id : '')
   );
 
   const selectedIndex = selectedMoment
-    ? moments.findIndex((m) => m.id === selectedMoment.id)
+    ? orderedMoments.findIndex((m) => m.id === selectedMoment.id)
     : -1;
 
   const handlePrevMoment = () => {
     if (selectedIndex > 0) {
-      setSelectedMoment(moments[selectedIndex - 1]);
+      setSelectedMoment(orderedMoments[selectedIndex - 1]);
     }
   };
 
   const handleNextMoment = () => {
-    if (selectedIndex >= 0 && selectedIndex < moments.length - 1) {
-      setSelectedMoment(moments[selectedIndex + 1]);
+    if (selectedIndex >= 0 && selectedIndex < orderedMoments.length - 1) {
+      setSelectedMoment(orderedMoments[selectedIndex + 1]);
     }
   };
 
@@ -157,13 +168,15 @@ export default function Moments() {
             />
             <span>Featured Reflection</span>
           </div>
-          <FeaturedMomentCard
-            moment={featuredMoment}
-            onSelect={(m) => {
-              setSelectedMoment(m);
-              if (m) recordDiscovery('moments', m.id);
-            }}
-          />
+          <ScrollFocusReveal className="w-full">
+            <FeaturedMomentCard
+              moment={featuredMoment}
+              onSelect={(m) => {
+                setSelectedMoment(m);
+                if (m) recordDiscovery('moments', m.id);
+              }}
+            />
+          </ScrollFocusReveal>
         </div>
       )}
 
@@ -194,15 +207,16 @@ export default function Moments() {
                 : 'video';
 
             return (
-              <MomentCard
-                key={moment.id}
-                moment={moment}
-                aspectRatio={aspectRatio}
-                onSelect={(m) => {
-                  setSelectedMoment(m);
-                  if (m) recordDiscovery('moments', m.id);
-                }}
-              />
+              <ScrollFocusReveal key={moment.id} className="h-full">
+                <MomentCard
+                  moment={moment}
+                  aspectRatio={aspectRatio}
+                  onSelect={(m) => {
+                    setSelectedMoment(m);
+                    if (m) recordDiscovery('moments', m.id);
+                  }}
+                />
+              </ScrollFocusReveal>
             );
           })}
         </div>

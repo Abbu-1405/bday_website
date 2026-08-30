@@ -190,53 +190,55 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
           </div>
         </div>
 
-        {/* Photographic Display with Matte Border */}
-        <div className="relative z-10 pt-4">
-          <div
-            className={cn(
-              'relative rounded-[14px] overflow-hidden max-h-[360px] sm:max-h-[420px] w-full flex items-center justify-center shadow-lg',
-              isLetterArchive
-                ? 'p-2 bg-[#FAF5EC] border border-[rgba(138,110,89,0.32)]'
-                : isScrapbook
-                ? 'p-2 bg-[rgba(16,28,19,0.85)] border border-[rgba(216,184,106,0.25)]'
-                : 'p-2 bg-[rgba(12,22,38,0.85)] border border-[rgba(201,155,88,0.25)]'
-            )}
-          >
-            <img
-              src={moment.image}
-              alt={moment.title}
-              className="w-full max-h-[340px] sm:max-h-[400px] object-cover rounded-[10px]"
-              loading="lazy"
-              referrerPolicy="no-referrer"
-            />
+        {/* Photographic Display with Matte Border (if image exists) */}
+        {moment.image ? (
+          <div className="relative z-10 pt-4">
+            <div
+              className={cn(
+                'relative rounded-[14px] overflow-hidden max-h-[360px] sm:max-h-[420px] w-full flex items-center justify-center shadow-lg',
+                isLetterArchive
+                  ? 'p-2 bg-[#FAF5EC] border border-[rgba(138,110,89,0.32)]'
+                  : isScrapbook
+                  ? 'p-2 bg-[rgba(16,28,19,0.85)] border border-[rgba(216,184,106,0.25)]'
+                  : 'p-2 bg-[rgba(12,22,38,0.85)] border border-[rgba(201,155,88,0.25)]'
+              )}
+            >
+              <img
+                src={moment.image}
+                alt={moment.title}
+                className="w-full max-h-[340px] sm:max-h-[400px] object-cover rounded-[10px]"
+                loading="lazy"
+                referrerPolicy="no-referrer"
+              />
 
-            {/* Archival Photo Corner Accents for Letter Archive */}
-            {isLetterArchive && (
-              <>
-                <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-[#7A2E3B]/70 pointer-events-none" />
-                <div className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-[#7A2E3B]/70 pointer-events-none" />
-                <div className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-[#7A2E3B]/70 pointer-events-none" />
-                <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-[#7A2E3B]/70 pointer-events-none" />
-              </>
-            )}
+              {/* Archival Photo Corner Accents for Letter Archive */}
+              {isLetterArchive && (
+                <>
+                  <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-[#7A2E3B]/70 pointer-events-none" />
+                  <div className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-[#7A2E3B]/70 pointer-events-none" />
+                  <div className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-[#7A2E3B]/70 pointer-events-none" />
+                  <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-[#7A2E3B]/70 pointer-events-none" />
+                </>
+              )}
 
-            {/* Stamp Tag */}
-            <div className="absolute top-4 left-4 z-10">
-              <span
-                className={cn(
-                  'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-serif font-semibold tracking-wider shadow-sm backdrop-blur-xs',
-                  isLetterArchive
-                    ? 'bg-[#FAF5EC]/95 text-[#7A2E3B] border border-[rgba(138,110,89,0.4)]'
-                    : isScrapbook
-                    ? 'bg-[rgba(16,30,20,0.9)] text-[#D8B86A] border border-[rgba(216,184,106,0.4)]'
-                    : 'bg-[rgba(7,14,26,0.9)] text-[#E2BD78] border border-[rgba(201,155,88,0.4)]'
-                )}
-              >
-                № {String(moment.order).padStart(2, '0')}
-              </span>
+              {/* Stamp Tag */}
+              <div className="absolute top-4 left-4 z-10">
+                <span
+                  className={cn(
+                    'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-serif font-semibold tracking-wider shadow-sm backdrop-blur-xs',
+                    isLetterArchive
+                      ? 'bg-[#FAF5EC]/95 text-[#7A2E3B] border border-[rgba(138,110,89,0.4)]'
+                      : isScrapbook
+                      ? 'bg-[rgba(16,30,20,0.9)] text-[#D8B86A] border border-[rgba(216,184,106,0.4)]'
+                      : 'bg-[rgba(7,14,26,0.9)] text-[#E2BD78] border border-[rgba(201,155,88,0.4)]'
+                  )}
+                >
+                  № {String(moment.order).padStart(2, '0')}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        ) : null}
 
         {/* Header Metadata & Title */}
         <div className="relative z-10 pt-5 pb-3 space-y-3">
@@ -250,7 +252,7 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
                 : 'text-[#C2AF99]'
             )}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span
                 className={cn(
                   'inline-flex items-center gap-1 font-medium',
@@ -264,15 +266,37 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
                 <Calendar className="h-3.5 w-3.5" />
                 {moment.date}
               </span>
-              <span className="opacity-40">•</span>
-              <span className="inline-flex items-center gap-1">
-                <MapPin className="h-3.5 w-3.5 opacity-80" />
-                {moment.location}
-              </span>
+              {moment.location && (
+                <>
+                  <span className="opacity-40">•</span>
+                  <span className="inline-flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5 opacity-80" />
+                    {moment.location}
+                  </span>
+                </>
+              )}
+              {moment.momentStrength && (
+                <>
+                  <span className="opacity-40">•</span>
+                  <span
+                    className={cn(
+                      'inline-flex items-center gap-1 font-medium',
+                      isLetterArchive
+                        ? 'text-[#7A2E3B]'
+                        : isScrapbook
+                        ? 'text-[#D8B86A]'
+                        : 'text-[#E2BD78]'
+                    )}
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    Strength {moment.momentStrength}
+                  </span>
+                </>
+              )}
             </div>
 
             <span className="italic text-[11px] opacity-75">
-              Preserved in Memory Gallery
+              № {String(moment.order).padStart(2, '0')} • Preserved in Memory Gallery
             </span>
           </div>
 

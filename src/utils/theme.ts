@@ -13,6 +13,11 @@ export function getStoredTheme(): Theme {
     if (isValidTheme(saved)) {
       return saved;
     }
+    // If a dormant or invalid theme (e.g. 'cat-meme' or 'meme') is in localStorage,
+    // automatically sanitize it and persist the valid fallback default theme.
+    if (saved) {
+      setStoredTheme(DEFAULT_THEME);
+    }
   } catch {
     // Fallback if localStorage is inaccessible
   }
@@ -21,7 +26,9 @@ export function getStoredTheme(): Theme {
 
 export function setStoredTheme(theme: Theme): void {
   try {
-    localStorage.setItem(STORAGE_KEY, theme);
+    // Only persist if it is an active available theme, otherwise fallback to default
+    const validTheme = isValidTheme(theme) ? theme : DEFAULT_THEME;
+    localStorage.setItem(STORAGE_KEY, validTheme);
   } catch {
     // Handle storage errors gracefully
   }

@@ -162,6 +162,16 @@ export const VintageOpenWhenCard: React.FC<VintageOpenWhenCardProps> = ({
 }) => {
   const IconComponent = iconMap[letter.icon] || Mail;
   const personality = getPersonality(letter);
+  const order = letter.order || 1;
+
+  // Deterministic subtle rotation
+  const rotClasses = [
+    '-rotate-[0.3deg] sm:-rotate-[0.4deg]',
+    'rotate-[0.3deg] sm:rotate-[0.4deg]',
+    '-rotate-[0.2deg]',
+    'rotate-[0.2deg] sm:rotate-[0.3deg]',
+  ];
+  const rotClass = rotClasses[order % rotClasses.length];
 
   return (
     <div
@@ -176,28 +186,42 @@ export const VintageOpenWhenCard: React.FC<VintageOpenWhenCardProps> = ({
       }}
       aria-label={`Open letter: ${letter.title}`}
       className={cn(
-        'group relative flex flex-col justify-between p-5 sm:p-6 rounded-[16px] select-none cursor-pointer',
-        'bg-[#FAF5EC] border border-[rgba(138,110,89,0.35)]',
-        'shadow-[0_8px_24px_-4px_rgba(60,42,33,0.12),0_2px_6px_rgba(60,42,33,0.06)]',
-        'hover:-translate-y-1.5 hover:shadow-[0_18px_38px_-6px_rgba(60,42,33,0.2),0_4px_12px_rgba(60,42,33,0.08)] hover:border-[rgba(138,110,89,0.55)]',
+        'group relative flex flex-col justify-between p-5 sm:p-6 rounded-[14px] select-none cursor-pointer',
+        'bg-[#FAF5EC] border border-[rgba(125,95,75,0.25)]',
+        'shadow-[0_6px_20px_-4px_rgba(51,38,29,0.12),0_2px_6px_-1px_rgba(51,38,29,0.06)]',
+        'hover:-translate-y-1 hover:shadow-[0_14px_30px_-5px_rgba(51,38,29,0.18),0_4px_10px_-2px_rgba(51,38,29,0.08)] hover:border-[rgba(125,95,75,0.45)]',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7A2E3B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF5EC]',
         'transition-all duration-300 min-h-[260px] overflow-hidden motion-reduce:transition-none motion-reduce:hover:transform-none',
+        rotClass,
         className
       )}
+      style={{
+        boxShadow:
+          'inset 0 1px 1.5px rgba(255,255,255,0.7), inset 0 -1px 2px rgba(80,55,35,0.06)',
+      }}
       {...props}
     >
-      {/* Paper Texture Overlay */}
+      {/* Layer 1: Fine Cotton & Linen Pulp Grain */}
       <div
-        className="absolute inset-0 rounded-[16px] opacity-40 mix-blend-multiply pointer-events-none"
+        className="absolute inset-0 rounded-[14px] opacity-35 mix-blend-multiply pointer-events-none"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.05' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E")`,
-          backgroundSize: '120px 120px',
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='140' height='140' viewBox='0 0 140 140' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.08' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E")`,
+          backgroundSize: '140px 140px',
         }}
       />
 
-      {/* Diagonal Envelope Flap Seam Lines */}
+      {/* Layer 2: Embedded Cellulose Fibers */}
+      <div
+        className="absolute inset-0 rounded-[14px] opacity-[0.20] mix-blend-multiply pointer-events-none"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='180' height='180' viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%236A4E38' stroke-width='0.5' fill='none' stroke-linecap='round' opacity='0.6'%3E%3Cpath d='M12 28 Q24 32 38 26' /%3E%3Cpath d='M98 88 Q110 84 122 90' /%3E%3Cpath d='M42 144 Q54 140 66 146' /%3E%3Cpath d='M138 38 Q148 44 162 40' /%3E%3C/g%3E%3C/svg%3E")`,
+          backgroundSize: '180px 180px',
+        }}
+      />
+
+      {/* Layer 3: Diagonal Envelope Flap Seam Lines */}
       <svg
-        className="absolute inset-0 w-full h-full pointer-events-none opacity-25"
+        className="absolute inset-0 w-full h-full pointer-events-none opacity-20"
         viewBox="0 0 300 240"
         preserveAspectRatio="none"
         fill="none"
@@ -205,25 +229,25 @@ export const VintageOpenWhenCard: React.FC<VintageOpenWhenCardProps> = ({
         <path
           d="M0 0 L150 110 L300 0"
           stroke="#8A6E59"
-          strokeWidth="1.2"
+          strokeWidth="1.1"
           strokeLinecap="round"
         />
         <path
           d="M0 240 L115 110 M300 240 L185 110"
           stroke="#8A6E59"
-          strokeWidth="0.8"
+          strokeWidth="0.75"
           strokeDasharray="4 3"
         />
       </svg>
 
       {/* Subtle Corner Flourishes */}
-      <VintageCornerFlourish position="top-left" size={24} className="absolute top-2 left-2 opacity-50 pointer-events-none" />
-      <VintageCornerFlourish position="bottom-right" size={20} className="absolute bottom-2 right-2 opacity-35 pointer-events-none" />
+      <VintageCornerFlourish position="top-left" size={24} className="absolute top-2 left-2 opacity-40 pointer-events-none" />
+      <VintageCornerFlourish position="bottom-right" size={20} className="absolute bottom-2 right-2 opacity-30 pointer-events-none" />
 
       {/* Top Header: Letter Index & Themed Postage Stamp */}
       <div className="relative z-10 flex items-start justify-between gap-3 pt-0.5">
         <div className="space-y-1">
-          <span className="text-[11px] font-serif uppercase tracking-wider text-[#8C776C] block">
+          <span className="text-[11px] font-serif uppercase tracking-wider text-[#705846] block">
             Correspondence № {String(letter.order).padStart(2, '0')}
           </span>
           <span
@@ -240,7 +264,7 @@ export const VintageOpenWhenCard: React.FC<VintageOpenWhenCardProps> = ({
 
         {/* Vintage Themed Stamp with Perforations */}
         <div
-          className="relative px-2 py-1.5 rounded-[4px] border flex flex-col items-center justify-center shadow-2xs group-hover:scale-105 transition-transform duration-200"
+          className="relative px-2 py-1.5 rounded-[3px] border flex flex-col items-center justify-center shadow-2xs group-hover:scale-105 transition-transform duration-200"
           style={{
             backgroundColor: personality.stampBg,
             borderColor: personality.stampBorder,
@@ -275,9 +299,9 @@ export const VintageOpenWhenCard: React.FC<VintageOpenWhenCardProps> = ({
       {/* Center Presentation: Tactile Wax Seal & Title */}
       <div className="relative z-10 my-3.5 space-y-2.5">
         <div className="flex items-center gap-3">
-          {/* Tactile Wax Seal with subtle highlight on hover */}
+          {/* Tactile Wax Seal with dimensional bevel highlight */}
           <div
-            className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-[0_3px_10px_rgba(60,20,30,0.3),inset_0_1px_2px_rgba(255,255,255,0.35)] group-hover:shadow-[0_4px_14px_rgba(60,20,30,0.42),inset_0_1px_2px_rgba(255,255,255,0.5)] transition-all duration-300 group-hover:scale-105"
+            className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-[0_3px_10px_rgba(60,20,30,0.3),inset_0_1px_2px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.35)] group-hover:shadow-[0_4px_14px_rgba(60,20,30,0.38),inset_0_1px_2px_rgba(255,255,255,0.5)] transition-all duration-300 group-hover:scale-105"
             style={{
               background: personality.sealGradient,
               border: `1.5px solid ${personality.sealBorder}`,
@@ -289,15 +313,15 @@ export const VintageOpenWhenCard: React.FC<VintageOpenWhenCardProps> = ({
             />
           </div>
 
-          {/* Letter Title */}
-          <h3 className="text-base sm:text-lg font-serif font-medium text-[#2C221E] group-hover:text-[#7A2E3B] transition-colors leading-snug line-clamp-2">
+          {/* Letter Title in Espresso Ink */}
+          <h3 className="text-base sm:text-lg font-serif font-semibold text-[#2B1E16] group-hover:text-[#6F3040] transition-colors leading-snug line-clamp-2">
             {letter.title}
           </h3>
         </div>
 
         {/* Trigger Situation Inscribed in Warm Burgundy Italic Script */}
-        <div className="bg-[#F2E8DC]/70 border border-[rgba(138,110,89,0.25)] rounded-[8px] p-2 sm:p-2.5">
-          <p className="text-[10px] uppercase font-sans font-medium text-[#8C776C] tracking-wider mb-0.5">
+        <div className="bg-[#F2E8DC]/70 border border-[rgba(125,95,75,0.22)] rounded-[8px] p-2 sm:p-2.5">
+          <p className="text-[10px] uppercase font-sans font-medium text-[#705846] tracking-wider mb-0.5">
             To be opened:
           </p>
           <p className="text-xs sm:text-[12.5px] font-serif italic text-[#7A2E3B] leading-snug line-clamp-2">
@@ -312,8 +336,8 @@ export const VintageOpenWhenCard: React.FC<VintageOpenWhenCardProps> = ({
       </div>
 
       {/* Card Footer: Vintage Open Hint */}
-      <div className="relative z-10 pt-3 border-t border-[rgba(138,110,89,0.2)] flex items-center justify-between text-xs font-serif text-[#7A6253]">
-        <span className="inline-flex items-center gap-1.5 text-[11.5px] text-[#7A2E3B] font-medium group-hover:underline">
+      <div className="relative z-10 pt-3 border-t border-[rgba(100,75,52,0.18)] flex items-center justify-between text-xs font-serif text-[#705846]">
+        <span className="inline-flex items-center gap-1.5 text-[11.5px] text-[#7A2E3B] font-semibold group-hover:underline">
           <MailOpen className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
           <span>Unfold & read letter</span>
         </span>

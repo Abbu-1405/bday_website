@@ -11,7 +11,7 @@ export interface FooterProps extends React.HTMLAttributes<HTMLElement> {
 
 export const Footer: React.FC<FooterProps> = ({
   className,
-  quote = 'Placeholder closing quote.',
+  quote = 'Rien n’était une obligation, tout venait du cœur.',
   version = 'Version 2.0',
   copyright = '© Starlit Letters. All rights reserved.',
   showDivider = true,

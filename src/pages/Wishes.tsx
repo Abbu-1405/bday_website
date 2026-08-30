@@ -5,7 +5,7 @@ import { BotanicalCorner, CloverStrip } from '../components/whimsical/WhimsicalD
 import { Lantern, WishDetailModal, WishesAtmosphere } from '../components/wishes';
 import { sampleWishes } from '../data';
 import { Wish } from '../types';
-import { useTheme } from '../hooks';
+import { useTheme, useStarlitCatBridge } from '../hooks';
 import { useAudio } from '../contexts';
 import { getManagedWishes } from '../services/contentService';
 import { getCollectedWishIds, collectWish, resetCollectedWishes } from '../utils';
@@ -74,7 +74,12 @@ export default function Wishes() {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const { theme } = useTheme();
   const { playWishChime, playMagicalClick } = useAudio();
+  const { emitWish } = useStarlitCatBridge();
   const isWhimsical = theme === 'whimsical-scrapbook';
+
+  useEffect(() => {
+    emitWish('opened');
+  }, [emitWish]);
 
   useEffect(() => {
     let isMounted = true;
@@ -102,6 +107,7 @@ export default function Wishes() {
     const updated = collectWish(wish.id);
     setCollectedIds(updated);
     setSelectedWish(wish);
+    emitWish('completed', wish.id);
   };
 
   const handleReset = () => {
@@ -109,6 +115,7 @@ export default function Wishes() {
     const cleared = resetCollectedWishes();
     setCollectedIds(cleared);
     setSelectedWish(null);
+    emitWish('opened');
   };
 
   const collectedCount = collectedIds.length;

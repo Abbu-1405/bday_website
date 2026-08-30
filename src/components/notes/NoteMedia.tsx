@@ -21,6 +21,58 @@ export interface NoteMediaProps extends React.HTMLAttributes<HTMLDivElement> {
   item?: NoteMediaItem; // Single item prop
   items?: NoteMediaItem[]; // Multiple items array
   noteDate?: string; // ISO date YYYY-MM-DD
+  content?: string; // Note content to detect intentional future media placeholders
+}
+
+export interface FutureMediaRequirement {
+  hasFuturePhoto: boolean;
+  hasFutureVideo: boolean;
+  hasFutureDoc: boolean;
+  hasAnyFutureMedia: boolean;
+  phrases: string[];
+}
+
+/**
+ * Extracts intentional future media notices explicitly contained in the note's text content.
+ * Returns true only if the note explicitly mentions future photo/video/doc attachments.
+ */
+export function extractFutureMediaRequirements(content?: string): FutureMediaRequirement {
+  if (!content) {
+    return {
+      hasFuturePhoto: false,
+      hasFutureVideo: false,
+      hasFutureDoc: false,
+      hasAnyFutureMedia: false,
+      phrases: [],
+    };
+  }
+
+  const attachmentRegex =
+    /\([^)]*(?:attached|will be attached|attached later)[^)]*\)|(?:photos?|photoss?|videos?|html file)\s+will\s+be\s+attached(?:\s+later|\s+if\s+possible)?/gi;
+  const matches = content.match(attachmentRegex) || [];
+
+  let hasFuturePhoto = false;
+  let hasFutureVideo = false;
+  let hasFutureDoc = false;
+  const phrases: string[] = [];
+
+  for (const m of matches) {
+    const clean = m.replace(/[\n\r]+/g, ' ').trim();
+    phrases.push(clean);
+    if (/photo/i.test(clean)) hasFuturePhoto = true;
+    if (/video/i.test(clean)) hasFutureVideo = true;
+    if (/html|file|doc/i.test(clean)) hasFutureDoc = true;
+  }
+
+  const hasAnyFutureMedia = hasFuturePhoto || hasFutureVideo || hasFutureDoc;
+
+  return {
+    hasFuturePhoto,
+    hasFutureVideo,
+    hasFutureDoc,
+    hasAnyFutureMedia,
+    phrases,
+  };
 }
 
 export interface DownloadMediaOptions {
@@ -182,23 +234,40 @@ export const NoteMedia: React.FC<NoteMediaProps> = ({
   item,
   items,
   noteDate,
+  content,
   ...props
 }) => {
   const { duckAudio, unduckAudio } = useAudio();
 
-  // Collect all media items to render
-  const mediaList: NoteMediaItem[] = [];
+  // 1. Gather all actual media items that have valid content
+  const actualMediaList: NoteMediaItem[] = [];
 
+  const rawList: NoteMediaItem[] = [];
   if (items && items.length > 0) {
-    mediaList.push(...items.filter((i) => i.type !== 'none'));
+    rawList.push(...items);
   } else {
     const single = item || media;
-    if (single && single.type !== 'none') {
-      mediaList.push(single);
+    if (single) {
+      rawList.push(single);
     }
   }
 
-  if (mediaList.length === 0) {
+  for (const mediaItem of rawList) {
+    if (mediaItem.type === 'none') continue;
+    const hasValidSrc = Boolean(
+      mediaItem.src && mediaItem.src !== '#' && mediaItem.src !== ''
+    );
+    if (hasValidSrc || (mediaItem.type === 'document' && mediaItem.title)) {
+      actualMediaList.push(mediaItem);
+    }
+  }
+
+  // 2. Check for explicit future media placeholder request in note content
+  const futureMedia = extractFutureMediaRequirements(content);
+
+  // 3. Strict Default Behavior: If there is no actual media AND no explicit future media requested:
+  // Render NOTHING - no empty boxes, no placeholders, no gap
+  if (actualMediaList.length === 0 && !futureMedia.hasAnyFutureMedia) {
     return null;
   }
 
@@ -455,38 +524,109 @@ export const NoteMedia: React.FC<NoteMediaProps> = ({
     );
   };
 
+  // If actual media is present, render real media items
+  if (actualMediaList.length > 0) {
+    return (
+      <div className={cn('space-y-4 my-4', className)} {...props}>
+        {actualMediaList.map((mediaItem, index) => {
+          const key =
+            mediaItem.id || `media-${mediaItem.type}-${index}`;
+          switch (mediaItem.type) {
+            case 'image':
+              return (
+                <React.Fragment key={key}>
+                  {renderImage(mediaItem, index)}
+                </React.Fragment>
+              );
+            case 'video':
+              return (
+                <React.Fragment key={key}>
+                  {renderVideo(mediaItem, index)}
+                </React.Fragment>
+              );
+            case 'audio':
+              return (
+                <React.Fragment key={key}>
+                  {renderAudio(mediaItem, index)}
+                </React.Fragment>
+              );
+            case 'document':
+              return (
+                <DocumentCard key={key} mediaItem={mediaItem} index={index} />
+              );
+            default:
+              return null;
+          }
+        })}
+      </div>
+    );
+  }
+
+  // If ONLY explicit future media is requested for this note:
   return (
-    <div className={cn('space-y-4 my-4', className)} {...props}>
-      {mediaList.map((mediaItem, index) => {
-        const key =
-          mediaItem.id || `media-${mediaItem.type}-${index}`;
-        switch (mediaItem.type) {
-          case 'image':
-            return (
-              <React.Fragment key={key}>
-                {renderImage(mediaItem, index)}
-              </React.Fragment>
-            );
-          case 'video':
-            return (
-              <React.Fragment key={key}>
-                {renderVideo(mediaItem, index)}
-              </React.Fragment>
-            );
-          case 'audio':
-            return (
-              <React.Fragment key={key}>
-                {renderAudio(mediaItem, index)}
-              </React.Fragment>
-            );
-          case 'document':
-            return (
-              <DocumentCard key={key} mediaItem={mediaItem} index={index} />
-            );
-          default:
-            return null;
-        }
-      })}
+    <div className={cn('space-y-3 my-4', className)} {...props}>
+      {futureMedia.hasFuturePhoto && (
+        <div className="p-3.5 sm:p-4 rounded-[var(--radius-md)] bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="p-2.5 rounded-full bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] shrink-0 text-[var(--color-primary)]">
+              <ImageIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-primary)]">
+                  Future Photo Memory
+                </h4>
+              </div>
+              <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] italic mt-0.5">
+                {futureMedia.phrases.find((p) => /photo/i.test(p)) ||
+                  'Photos will be attached later'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {futureMedia.hasFutureVideo && (
+        <div className="p-3.5 sm:p-4 rounded-[var(--radius-md)] bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="p-2.5 rounded-full bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] shrink-0 text-amber-500">
+              <VideoIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-amber-500">
+                  Future Video Memory
+                </h4>
+              </div>
+              <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] italic mt-0.5">
+                {futureMedia.phrases.find((p) => /video/i.test(p)) ||
+                  'Video will be attached later'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {futureMedia.hasFutureDoc && (
+        <div className="p-3.5 sm:p-4 rounded-[var(--radius-md)] bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="p-2.5 rounded-full bg-[var(--color-surface-secondary)] border border-[var(--color-border-light)] shrink-0 text-purple-500">
+              <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-purple-500">
+                  Future Document / Interactive File
+                </h4>
+              </div>
+              <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] italic mt-0.5">
+                {futureMedia.phrases.find((p) => /html|doc|file/i.test(p)) ||
+                  'HTML / Document file will be attached'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

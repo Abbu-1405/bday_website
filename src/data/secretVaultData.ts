@@ -4,12 +4,15 @@ export const sampleSecrets: SecretItem[] = [
   {
     id: 'secret-01',
     order: 1,
-    title: 'A Whispered Beginning',
-    description: 'A gentle echo from the day this quiet sanctuary began.',
-    shortDescription: 'The initial whisper of our starlit space.',
-    content: `Some stories don't start with fireworks or loud declarations. They start quietly, like a gentle whisper in a crowded room that somehow catches your full attention.
+    title: 'The Haircut Shock',
+    emoji: '💇',
+    description: 'Nee haircut tarvata ninnu chusina appudu oka second naaku em cheppalo kuda artham kaaledu...',
+    shortDescription: 'Nee haircut tarvata shock...',
+    content: `Nee haircut tarvata ninnu chusina appudu oka second naaku em cheppalo kuda artham kaaledu 😭
 
-This vault holds those unwritten, quiet moments—the thoughts meant specifically for your eyes when the world goes still. Thank you for finding this first piece.`,
+Actually konchem shock ayya 😂
+
+Chala simple moment ae, kani enduko adi naaku ippatiki gurthundi.`,
     icon: 'Key',
     isHidden: false,
     unlockType: 'discovered',
@@ -19,12 +22,17 @@ This vault holds those unwritten, quiet moments—the thoughts meant specificall
   {
     id: 'secret-02',
     order: 2,
-    title: 'Unspoken Gratitude',
-    description: 'Something felt deeply, even when words failed to express it.',
-    shortDescription: 'Unspoken words held in quiet appreciation.',
-    content: `There are moments when gratitude is so overwhelming that spoken words feel too small to contain it.
+    title: 'The Photographer Who Failed Us',
+    emoji: '📸',
+    description: 'Mana first photos kosam chala excited ga unna. Photos vachaka chuste...',
+    shortDescription: 'The story behind our first photos...',
+    content: `Mana first photos kosam chala excited ga unna.
 
-I wanted a private place to record how much your presence means, even on days when I don't say it out loud. You bring a subtle grace into every room you enter.`,
+Photos vachaka chuste... 😂
+
+Asalu photographer em chesado naaku ippatiki artham kaadu 😭
+
+Kani emaina sare, avi mana first photos kada... so avi alaane special.`,
     icon: 'Lock',
     isHidden: false,
     unlockType: 'interaction',
@@ -34,12 +42,23 @@ I wanted a private place to record how much your presence means, even on days wh
   {
     id: 'secret-03',
     order: 3,
-    title: 'The Constellation Note',
-    description: 'A quiet constellation mapped out in memory.',
-    shortDescription: 'A starlit map of quiet understanding.',
-    content: `If every shared laugh and quiet understanding was a star, we would have an entire galaxy mapped between us.
+    title: 'The Things That Happened Before This',
+    emoji: '💻💥',
+    description: 'Ee website ki enni versions unnayo naake sariga teliyadu...',
+    shortDescription: 'All the versions & crashes before this...',
+    content: `Ee website ki enni versions unnayo naake sariga teliyadu 😂
 
-This note is a reminder to keep looking upward whenever things feel dark or uncertain. There is always light waiting to be discovered.`,
+Oka idea vasthe adi build cheyadam, nachakapothe marchadam, malli inkoti try cheyadam... ila chala chesa.
+
+Konni things naa mind lo super ga anipinchayi, build chesaka matram "idi enti ra babu" anipinchindi 😭
+
+Madhyalo Starlit Letters crash kuda ayindi.
+
+Antha work chesi build chesina tarvata motham break avvadam chala irritating ga anipinchindi.
+
+Kani malli fix chesa, malli build chesa.
+
+Ippudu nuvvu chustunna version venaka ila chala mess undi 😂`,
     icon: 'Eye',
     isHidden: true,
     unlockType: 'interaction',
@@ -49,12 +68,17 @@ This note is a reminder to keep looking upward whenever things feel dark or unce
   {
     id: 'secret-04',
     order: 4,
-    title: 'A Promise to Remember',
-    description: 'A commitment written for future quiet evenings.',
-    shortDescription: 'A quiet promise preserved for silent hours.',
-    content: `No matter how busy life becomes or how fast time seems to fly, I promise to always preserve this quiet, thoughtful corner for us.
+    title: 'Why I Called It Starlit Letters',
+    emoji: '🗝️',
+    description: 'Actually "Starlit Letters" ane name enduku pettano exact ga oka big reason ani cheppalenu...',
+    shortDescription: 'Why the name Starlit Letters was chosen...',
+    content: `Actually "Starlit Letters" ane name enduku pettano exact ga oka big reason ani cheppalenu 😂
 
-A space where honesty, warmth, and genuine care will always take precedence over noise.`,
+Kani aa name vinagane letters, memories, night sky... ila oka feeling vastundi.
+
+Anduke naaku aa name nachindi.
+
+So finally Starlit Letters ani fix chesa. 🌌`,
     icon: 'Feather',
     isHidden: false,
     unlockType: 'milestone',
@@ -64,27 +88,37 @@ A space where honesty, warmth, and genuine care will always take precedence over
   {
     id: 'secret-05',
     order: 5,
-    title: 'Midnight Paper Boat',
-    description: 'A gentle secret set afloat under moonlight.',
-    shortDescription: 'Setting subtle doubts afloat under moonlight.',
-    content: `Imagine writing down every worry or doubt on a small sheet of paper, folding it into a boat, and letting the quiet river stream carry it far away into the night.
+    title: 'The Three Slips & First Flowers',
+    emoji: '🌸🎟️',
+    description: 'Aa roju nuvvu three slips ichi ekkadiki teesukeltunnavo guess cheyamannav...',
+    shortDescription: 'Three slips, ISKCON clues & first flowers...',
+    content: `Aa roju nuvvu three slips ichi ekkadiki teesukeltunnavo guess cheyamannav 😂
 
-Whenever you feel weighed down, let this secret serve as your paper boat—a gentle reminder to release what you cannot control.`,
+Nenu clues follow chestu vachesa.
+
+ISKCON lo nee kosam first time flowers konna.
+
+Chinna thing ae... kani aa roju tho kalisi adi kuda naaku gurthundipoyindi. 🌸`,
     icon: 'Sparkles',
     isHidden: true,
     unlockType: 'interaction',
-    unlockCondition: 'Discovered by listening closely to the quiet chamber atmosphere.',
+    unlockCondition: 'Discovered by exploring subtle details across Starlit Letters.',
     secretHint: 'Look for something subtle in the quiet air.',
   },
   {
     id: 'secret-06',
     order: 6,
-    title: 'The Unwritten Stanza',
-    description: 'A line reserved for a future memory yet to unfold.',
-    shortDescription: 'A blank line held for our next chapter.',
-    content: `Some pages in a journal remain blank not because there is nothing to say, but because the best stories are still waiting to be written.
+    title: 'The Things We Made for Each Other',
+    emoji: '🎁',
+    description: 'Friendship Day time lo nenu nee kosam webpage chesa. Nuvvu naa kosam photos tho collection chesav...',
+    shortDescription: 'Creating things for each other...',
+    content: `Friendship Day time lo nenu nee kosam webpage chesa.
 
-This stanza belongs to our next adventure, our next shared quiet moment, and the memories we have yet to build.`,
+Nuvvu naa kosam photos tho collection chesav.
+
+Naaku interesting ga anipinchedi enti ante, iddaram okariki okaram edo create chesam... kani okati code, inkoti photos 😂
+
+Different ga unna, rendu kuda mana daggare unnayi.`,
     icon: 'BookOpen',
     isHidden: true,
     unlockType: 'date',
@@ -94,12 +128,21 @@ This stanza belongs to our next adventure, our next shared quiet moment, and the
   {
     id: 'secret-07',
     order: 7,
-    title: 'The Last Reflection',
-    description: 'A final quiet message hidden at the edge of the vault.',
-    shortDescription: 'A quiet message at the edge of curiosity.',
-    content: `You reached the edge of this quiet vault. Finding these hidden notes shows your curiosity and thoughtfulness.
+    title: 'The Story of Starlit Letters',
+    emoji: '🌌',
+    description: 'Starlit Letters ippudu unnattu first nunchi ledu. Chala things change ayyayi...',
+    shortDescription: 'How this became our small world...',
+    content: `Starlit Letters ippudu unnattu first nunchi ledu.
 
-Remember that true connection isn't built in grand gestures alone, but in the quiet, patient care we extend to one another every day.`,
+Chala things change ayyayi, chala ideas vachayi, konni work ayyayi, konni assalu work avvaledu 😂
+
+Slow ga anni kalisi ippudu unna version vachindi.
+
+Inka entha change chesthano naake teliyadu 😭
+
+Kani oka point ki idi just oka website laga kakunda, manam create chesina oka small world laga anipinchindi.
+
+Anduke idi naaku konchem special. 🌌`,
     icon: 'Shield',
     isHidden: false,
     unlockType: 'manual',

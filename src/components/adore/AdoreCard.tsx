@@ -22,14 +22,17 @@ export const AdoreCard: React.FC<AdoreCardProps> = ({
   return (
     <div
       className={cn(
-        'group relative flex flex-col justify-between select-none cursor-pointer transition-all duration-300 rounded-[18px] overflow-hidden h-full min-h-[220px]',
-        'hover:-translate-y-1 motion-reduce:transition-none motion-reduce:hover:transform-none',
+        'group relative flex flex-col justify-between select-none cursor-pointer rounded-[18px] overflow-hidden h-full min-h-[220px]',
+        'transition-[transform,box-shadow,border-color] duration-300 ease-out',
+        '[@media(hover:hover)]:hover:-translate-y-1 [@media(hover:hover)]:hover:scale-[1.008]',
+        'active:scale-[0.99] active:translate-y-0',
+        'motion-reduce:transition-none motion-reduce:hover:transform-none motion-reduce:hover:shadow-none motion-reduce:active:scale-100',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
         isLetterArchive
-          ? 'bg-[#FAF5EC] border border-[rgba(138,110,89,0.32)] shadow-[0_6px_20px_-4px_rgba(60,42,33,0.12),0_2px_6px_rgba(60,42,33,0.04)] hover:border-[rgba(122,46,59,0.55)] hover:shadow-[0_12px_28px_-6px_rgba(60,42,33,0.2)] focus-visible:ring-[#7A2E3B] focus-visible:ring-offset-[#FAF5EC]'
+          ? 'bg-[#FAF5EC] border border-[rgba(138,110,89,0.32)] shadow-[0_6px_20px_-4px_rgba(60,42,33,0.12),0_2px_6px_rgba(60,42,33,0.04)] [@media(hover:hover)]:hover:border-[rgba(122,46,59,0.55)] [@media(hover:hover)]:hover:shadow-[0_14px_30px_-6px_rgba(60,42,33,0.22),0_4px_10px_rgba(60,42,33,0.06)] focus-visible:ring-[#7A2E3B] focus-visible:ring-offset-[#FAF5EC]'
           : isScrapbook
-          ? 'bg-[linear-gradient(155deg,rgba(16,30,20,0.92)_0%,rgba(10,22,13,0.96)_100%)] border border-[rgba(216,184,106,0.25)] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.5)] hover:border-[rgba(216,184,106,0.5)] focus-visible:ring-[#D8B86A] focus-visible:ring-offset-[#0A160D]'
-          : 'bg-[linear-gradient(155deg,rgba(13,23,40,0.92)_0%,rgba(7,14,26,0.96)_100%)] border border-[rgba(201,155,88,0.28)] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.6)] hover:border-[rgba(201,155,88,0.55)] focus-visible:ring-[#C99B58] focus-visible:ring-offset-[#070E1A]',
+          ? 'bg-[linear-gradient(155deg,rgba(16,30,20,0.92)_0%,rgba(10,22,13,0.96)_100%)] border border-[rgba(216,184,106,0.25)] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.5)] [@media(hover:hover)]:hover:border-[rgba(216,184,106,0.55)] [@media(hover:hover)]:hover:shadow-[0_14px_30px_-6px_rgba(0,0,0,0.65),0_0_16px_rgba(216,184,106,0.14)] focus-visible:ring-[#D8B86A] focus-visible:ring-offset-[#0A160D]'
+          : 'bg-[linear-gradient(155deg,rgba(13,23,40,0.92)_0%,rgba(7,14,26,0.96)_100%)] border border-[rgba(201,155,88,0.28)] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.6)] [@media(hover:hover)]:hover:border-[rgba(201,155,88,0.58)] [@media(hover:hover)]:hover:shadow-[0_14px_32px_-6px_rgba(0,0,0,0.75),0_0_18px_rgba(243,213,138,0.16)] focus-visible:ring-[#C99B58] focus-visible:ring-offset-[#070E1A]',
         className
       )}
       onClick={() => onSelect(item)}
@@ -44,6 +47,19 @@ export const AdoreCard: React.FC<AdoreCardProps> = ({
       aria-label={`Read cherished quality ${item.order}: ${item.title}`}
       {...props}
     >
+      {/* Subtle Ambient Hover Top Edge Gleam */}
+      <div
+        className={cn(
+          'absolute inset-x-0 top-0 h-[1.5px] pointer-events-none opacity-0 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity duration-300 ease-out motion-reduce:hidden',
+          isLetterArchive
+            ? 'bg-gradient-to-r from-transparent via-[#B58A45]/45 to-transparent'
+            : isScrapbook
+            ? 'bg-gradient-to-r from-transparent via-[#D8B86A]/50 to-transparent'
+            : 'bg-gradient-to-r from-transparent via-[#F3D58A]/55 to-transparent'
+        )}
+        aria-hidden="true"
+      />
+
       <div className="p-4 sm:p-5 flex flex-col justify-between flex-grow space-y-3.5">
         <div className="space-y-3">
           {/* Top Header Row: Order Number and Category */}

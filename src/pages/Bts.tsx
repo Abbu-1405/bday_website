@@ -6,6 +6,7 @@ import {
   BtsViewerModal,
   BtsLockedState,
 } from '../components/bts';
+import { ScrollFocusReveal } from '../components';
 import { btsItems } from '../data';
 import { BtsItem, BtsFilterCategory } from '../types';
 import { useTheme, useAuth } from '../hooks';
@@ -155,12 +156,13 @@ export default function Bts() {
         {filteredItems.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 pt-2">
             {filteredItems.map((item, index) => (
-              <BtsCard
-                key={item.id}
-                item={item}
-                index={index}
-                onOpen={handleOpenItem}
-              />
+              <ScrollFocusReveal key={item.id} className="h-full">
+                <BtsCard
+                  item={item}
+                  index={index}
+                  onOpen={handleOpenItem}
+                />
+              </ScrollFocusReveal>
             ))}
           </div>
         ) : (

@@ -302,13 +302,13 @@ export const VintageLetterReader: React.FC<VintageLetterReaderProps> = ({
       </div>
 
       {/* Media Attachments (if any) */}
-      <div className="relative z-10 animate-[vintageItemReveal_500ms_cubic-bezier(0.16,1,0.3,1)_240ms_both] motion-reduce:animate-none">
-        <NoteMedia
-          media={note.media}
-          items={note.mediaItems}
-          noteDate={note.date}
-        />
-      </div>
+      <NoteMedia
+        media={note.media}
+        items={note.mediaItems}
+        noteDate={note.date}
+        content={note.content}
+        className="relative z-10 animate-[vintageItemReveal_500ms_cubic-bezier(0.16,1,0.3,1)_240ms_both] motion-reduce:animate-none"
+      />
 
       {/* Main Letter Content written in dark espresso ink */}
       <div className="relative z-10 py-2 sm:py-3 text-[#3B2A20] font-serif text-[15.5px] sm:text-[17.5px] leading-[1.75] sm:leading-[1.85] tracking-normal space-y-4 max-w-none animate-[vintageItemReveal_550ms_cubic-bezier(0.16,1,0.3,1)_300ms_both] motion-reduce:animate-none">

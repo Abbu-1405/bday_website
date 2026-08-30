@@ -3,9 +3,10 @@ export interface Moment {
   order: number;
   title: string;
   date: string;
-  location: string;
-  image: string;
+  location?: string;
+  image?: string;
   shortDescription: string;
   story: string;
   featured?: boolean;
+  momentStrength?: string;
 }

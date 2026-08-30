@@ -10,7 +10,7 @@ import {
   Lock,
 } from 'lucide-react';
 import { ContentCategory, saveContentItem } from '../../../services/contentService';
-import { useAuth } from '../../../hooks';
+import { useAuth, useStarlitCatBridge } from '../../../hooks';
 
 interface ContentItemEditorModalProps {
   category: ContentCategory;
@@ -28,6 +28,7 @@ export function ContentItemEditorModal({
   onSaveSuccess,
 }: ContentItemEditorModalProps) {
   const { currentUser } = useAuth();
+  const { emitLetter, emitSecret, emitMoment, emitWish, emitError } = useStarlitCatBridge();
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
 
   // Form Fields
@@ -46,7 +47,7 @@ export function ContentItemEditorModal({
 
   // Initialize fields on open
   useEffect(() => {
-    if (item) {
+    if (item && isOpen) {
       setTitle(item.title || '');
       setPreviewText(item.preview || item.shortDescription || item.description || '');
       setContent(item.content || item.story || '');
@@ -57,8 +58,19 @@ export function ContentItemEditorModal({
       setErrorMessage(null);
       setSuccessMessage(null);
       setActiveTab('edit');
+
+      // Phase 4: Gentle unobtrusive editor open reaction (safe metadata only)
+      if (category === 'notes' || category === 'openWhen' || category === 'adore') {
+        emitLetter('opened');
+      } else if (category === 'secrets') {
+        emitSecret('opened', item.id);
+      } else if (category === 'moments') {
+        emitMoment('opened', item.id);
+      } else if (category === 'wishes') {
+        emitWish('opened', item.id);
+      }
     }
-  }, [item]);
+  }, [item, isOpen, category, emitLetter, emitSecret, emitMoment, emitWish]);
 
   if (!isOpen || !item) return null;
 
@@ -142,11 +154,27 @@ export function ContentItemEditorModal({
       setSuccessMessage('Content saved successfully to production!');
       onSaveSuccess(mergedUpdatedItem);
 
+      // Phase 4: Event bridge notification on save (safe metadata only)
+      if (status === 'draft') {
+        emitLetter('saved', { itemId: item.id });
+      } else {
+        if (category === 'notes' || category === 'openWhen' || category === 'adore') {
+          emitLetter('sent', { itemId: item.id });
+        } else if (category === 'secrets') {
+          emitSecret('created', item.id);
+        } else if (category === 'moments') {
+          emitMoment('saved', item.id);
+        } else if (category === 'wishes') {
+          emitWish('created', item.id);
+        }
+      }
+
       setTimeout(() => {
         setSuccessMessage(null);
       }, 3000);
     } catch (err: any) {
       setErrorMessage(err?.message || 'Failed to save content. Check Firebase permissions.');
+      emitError({ category: 'letters', action: 'save_failed', status: 'failure' });
     } finally {
       setSaving(false);
     }

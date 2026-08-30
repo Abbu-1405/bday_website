@@ -116,6 +116,10 @@
   font-family: var(--font-quote);
 }
 
+.font-journal {
+  font-family: var(--font-journal, var(--font-heading));
+}
+
 .font-handwritten {
   font-family: var(--font-handwritten);
 }

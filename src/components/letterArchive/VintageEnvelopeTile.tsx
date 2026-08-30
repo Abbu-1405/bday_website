@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, Lock, Check, Heart } from 'lucide-react';
+import { Calendar, Lock, Heart } from 'lucide-react';
 import { Note365 } from '../../types';
 import { cn } from '../../utils';
 
@@ -10,47 +10,53 @@ export interface VintageEnvelopeTileProps extends React.HTMLAttributes<HTMLDivEl
   onLockedClick?: (note: Note365) => void;
 }
 
-// Paper color variations for natural, curated correspondence collection
+// Subtle aged paper variants for natural, authentic correspondence collection
 const PAPER_VARIANTS = [
   {
-    bg: '#F6EFE3',
-    flap: '#EFE5D5',
-    border: 'rgba(138, 110, 89, 0.28)',
-    innerShadow: 'rgba(90, 68, 50, 0.08)',
+    bg: '#F5EBD9',
+    flap: '#EBDDC5',
+    border: 'rgba(115, 85, 60, 0.28)',
+    fiberTone: '#8A6E59',
+    starOpacity: 0.12,
   },
   {
-    bg: '#F3ECE0',
-    flap: '#EADFCF',
-    border: 'rgba(138, 110, 89, 0.30)',
-    innerShadow: 'rgba(90, 68, 50, 0.09)',
+    bg: '#F3E7D3',
+    flap: '#E7D8C0',
+    border: 'rgba(115, 85, 60, 0.30)',
+    fiberTone: '#7D5C40',
+    starOpacity: 0.14,
   },
   {
-    bg: '#F6EFEB',
-    flap: '#EDE2DC',
-    border: 'rgba(145, 105, 105, 0.28)',
-    innerShadow: 'rgba(110, 70, 70, 0.08)',
+    bg: '#F4E9E2',
+    flap: '#E9DCD4',
+    border: 'rgba(125, 90, 85, 0.28)',
+    fiberTone: '#8C6860',
+    starOpacity: 0.10,
   },
   {
-    bg: '#F1EFEB',
-    flap: '#E6E4DC',
-    border: 'rgba(115, 125, 115, 0.28)',
-    innerShadow: 'rgba(70, 90, 70, 0.08)',
+    bg: '#EFECE1',
+    flap: '#E3DFD2',
+    border: 'rgba(105, 110, 95, 0.28)',
+    fiberTone: '#6B7360',
+    starOpacity: 0.13,
   },
   {
-    bg: '#F7F1E6',
-    flap: '#EFE7D8',
-    border: 'rgba(150, 125, 90, 0.28)',
-    innerShadow: 'rgba(100, 80, 50, 0.08)',
+    bg: '#F6EED8',
+    flap: '#EDE0C4',
+    border: 'rgba(135, 105, 65, 0.28)',
+    fiberTone: '#8A7045',
+    starOpacity: 0.15,
   },
   {
-    bg: '#F4EFEA',
-    flap: '#EBE3DB',
-    border: 'rgba(130, 110, 100, 0.28)',
-    innerShadow: 'rgba(90, 70, 60, 0.08)',
+    bg: '#F1E8DD',
+    flap: '#E5DCCE',
+    border: 'rgba(115, 95, 80, 0.28)',
+    fiberTone: '#7A6250',
+    starOpacity: 0.11,
   },
 ];
 
-// Wax Seal color & symbol styles
+// Wax Seal color & symbol variations
 const WAX_SEALS = [
   {
     color: 'radial-gradient(circle at 35% 35%, #9E384A 0%, #7A2E3B 60%, #4E1B24 100%)',
@@ -74,6 +80,16 @@ const WAX_SEALS = [
   },
 ];
 
+// Deterministic subtle rotation angles
+const ROTATION_CLASSES = [
+  '-rotate-[0.4deg] sm:-rotate-[0.5deg]',
+  'rotate-[0.3deg] sm:rotate-[0.4deg]',
+  '-rotate-[0.2deg]',
+  'rotate-[0.4deg] sm:rotate-[0.5deg]',
+  'rotate-0',
+  '-rotate-[0.3deg]',
+];
+
 export const VintageEnvelopeTile: React.FC<VintageEnvelopeTileProps> = ({
   className,
   note,
@@ -85,16 +101,11 @@ export const VintageEnvelopeTile: React.FC<VintageEnvelopeTileProps> = ({
   const { displayDate, title, preview, isUnlocked, isRead, isFavorite } = note;
   const dayIndex = note.dayIndex ?? 1;
 
-  // Deterministic styling variations
+  // Deterministic physical variations based on correspondence index
   const paperVariant = PAPER_VARIANTS[dayIndex % PAPER_VARIANTS.length];
   const waxVariant = WAX_SEALS[dayIndex % WAX_SEALS.length];
   const stampVariant = dayIndex % 4; // 0: Wildflower, 1: Moon & Star, 2: Fern, 3: Dove
-  const rotClass =
-    dayIndex % 3 === 0
-      ? '-rotate-[0.6deg]'
-      : dayIndex % 3 === 1
-      ? 'rotate-[0.6deg]'
-      : 'rotate-0';
+  const rotClass = ROTATION_CLASSES[dayIndex % ROTATION_CLASSES.length];
 
   const handleClick = () => {
     if (isUnlocked && onSelectNote) {
@@ -108,7 +119,6 @@ export const VintageEnvelopeTile: React.FC<VintageEnvelopeTileProps> = ({
     }
   };
 
-  // State-specific physical parameters
   const isUnopened = isUnlocked && !isRead;
   const isOpened = isUnlocked && isRead;
 
@@ -132,118 +142,143 @@ export const VintageEnvelopeTile: React.FC<VintageEnvelopeTileProps> = ({
       }${isFavorite ? ', Treasured' : ''})`}
       className={cn(
         'group relative flex flex-col justify-between select-none transition-all duration-300 ease-out cursor-pointer',
-        'rounded-[14px] p-4 sm:p-5 min-h-[190px]',
-        'focus-visible:ring-2 focus-visible:ring-[#B58A45] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF5EC] focus:outline-none',
+        'rounded-[13px] p-4 sm:p-5 min-h-[195px] overflow-hidden',
+        'focus-visible:ring-2 focus-visible:ring-[#7A2E3B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF5EC] focus:outline-none',
         'motion-reduce:hover:transform-none motion-reduce:transition-none',
         rotClass,
-        // Elevation & Physical Shadows for Unopened vs Opened vs Locked
+        // Tactile paper-resting-on-paper shadow layers
         !isUnlocked &&
-          'opacity-80 shadow-[0_4px_14px_-2px_rgba(60,42,33,0.08)] hover:-translate-y-1 hover:shadow-[0_8px_20px_-3px_rgba(60,42,33,0.12)]',
+          'opacity-80 shadow-[0_3px_10px_-2px_rgba(51,38,29,0.07)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_-3px_rgba(51,38,29,0.11)]',
         isUnopened &&
-          'shadow-[0_8px_24px_-4px_rgba(60,42,33,0.15),0_3px_8px_-2px_rgba(60,42,33,0.08)] hover:-translate-y-1.5 hover:shadow-[0_16px_32px_-4px_rgba(60,42,33,0.22),0_6px_12px_-2px_rgba(60,42,33,0.10)]',
+          'shadow-[0_6px_18px_-3px_rgba(51,38,29,0.13),0_2px_6px_-1px_rgba(51,38,29,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_26px_-4px_rgba(51,38,29,0.19),0_4px_8px_-2px_rgba(51,38,29,0.08)]',
         isOpened &&
-          'shadow-[0_4px_16px_-3px_rgba(60,42,33,0.08),0_1px_4px_-1px_rgba(60,42,33,0.04)] hover:-translate-y-1 hover:shadow-[0_10px_22px_-3px_rgba(60,42,33,0.13)]',
-        isToday && 'ring-2 ring-[#7A2E3B] ring-offset-2 ring-offset-[#F7F2EB]',
+          'shadow-[0_4px_14px_-3px_rgba(51,38,29,0.09),0_1px_4px_-1px_rgba(51,38,29,0.04)] hover:-translate-y-1 hover:shadow-[0_9px_20px_-3px_rgba(51,38,29,0.14)]',
+        isToday && 'ring-2 ring-[#7A2E3B]/80 ring-offset-2 ring-offset-[#F7F2EB]',
         className
       )}
       style={{
         backgroundColor: !isUnlocked
-          ? '#EDE4DA'
+          ? '#ECE2D6'
           : isUnopened
           ? paperVariant.bg
-          : '#FAF6EF',
+          : '#F8F4EC',
         borderColor: !isUnlocked
-          ? 'rgba(138, 110, 89, 0.22)'
+          ? 'rgba(125, 95, 75, 0.20)'
           : isUnopened
           ? paperVariant.border
-          : 'rgba(138, 110, 89, 0.24)',
+          : 'rgba(125, 95, 75, 0.22)',
         borderWidth: '1px',
         borderStyle: 'solid',
+        boxShadow: isUnopened
+          ? 'inset 0 1px 1.5px rgba(255,255,255,0.7), inset 0 -1px 2px rgba(80,55,35,0.07)'
+          : 'inset 0 1px 1px rgba(255,255,255,0.55), inset 0 -1px 1.5px rgba(80,55,35,0.05)',
       }}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       {...props}
     >
-      {/* Background Paper Micro-Texture & Natural Grain */}
+      {/* Layer 1: Fine Cotton & Linen Paper Pulp Grain */}
       <div
         className={cn(
-          'absolute inset-0 rounded-[14px] mix-blend-multiply pointer-events-none transition-opacity duration-300',
-          isUnopened ? 'opacity-42' : 'opacity-30'
+          'absolute inset-0 rounded-[13px] mix-blend-multiply pointer-events-none transition-opacity duration-300',
+          isUnopened ? 'opacity-40' : 'opacity-28'
         )}
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.05' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E")`,
-          backgroundSize: '120px 120px',
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='140' height='140' viewBox='0 0 140 140' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.08' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E")`,
+          backgroundSize: '140px 140px',
         }}
       />
 
-      {/* Triangular Envelope Flap Geometry */}
-      <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none overflow-hidden rounded-t-[14px]">
+      {/* Layer 2: Microscopic Embedded Cellulose Pulp Fibers */}
+      <div
+        className="absolute inset-0 rounded-[13px] opacity-[0.24] mix-blend-multiply pointer-events-none"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='180' height='180' viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%236A4E38' stroke-width='0.5' fill='none' stroke-linecap='round' opacity='0.6'%3E%3Cpath d='M10 24 Q22 28 36 22' /%3E%3Cpath d='M95 84 Q108 80 120 86' /%3E%3Cpath d='M40 140 Q52 136 64 142' /%3E%3Cpath d='M135 34 Q146 40 160 36' /%3E%3Cpath d='M140 148 Q150 142 162 148' /%3E%3Ccircle cx='76' cy='38' r='0.5' fill='%236A4E38' /%3E%3Ccircle cx='124' cy='112' r='0.45' fill='%236A4E38' /%3E%3C/g%3E%3C/svg%3E")`,
+          backgroundSize: '180px 180px',
+        }}
+      />
+
+      {/* Layer 3: Faint Dry Celestial Watermark (Starlit Letters Heritage) */}
+      <div
+        className="absolute bottom-2 right-2 w-28 h-28 pointer-events-none"
+        style={{
+          opacity: paperVariant.starOpacity,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 40 L50 25 L80 45 L105 30' stroke='%238A652E' stroke-width='0.65' stroke-dasharray='2 2'/%3E%3Ccircle cx='20' cy='40' r='1.8' fill='%238A652E'/%3E%3Ccircle cx='50' cy='25' r='2.2' fill='%238A652E'/%3E%3Ccircle cx='80' cy='45' r='1.8' fill='%238A652E'/%3E%3Ccircle cx='105' cy='30' r='2' fill='%238A652E'/%3E%3Cpath d='M30 90 L60 80 L90 95' stroke='%238A652E' stroke-width='0.55' stroke-dasharray='2 2'/%3E%3Ccircle cx='30' cy='90' r='1.6' fill='%238A652E'/%3E%3Ccircle cx='60' cy='80' r='2' fill='%238A652E'/%3E%3Ccircle cx='90' cy='95' r='1.8' fill='%238A652E'/%3E%3C/svg%3E")`,
+          backgroundSize: '120px 120px',
+          backgroundRepeat: 'no-repeat',
+        }}
+      />
+
+      {/* Layer 4: Triangular Envelope Flap Geometry with Highlight & Valley Shadows */}
+      <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none overflow-hidden rounded-t-[13px]">
         <svg
           className="w-full h-full"
           viewBox="0 0 300 70"
           preserveAspectRatio="none"
         >
-          {/* Top flap triangular fill with gradient */}
+          {/* Top flap triangular fill */}
           <polygon
-            points="0,0 300,0 150,60"
+            points="0,0 300,0 150,58"
             fill={
               !isUnlocked
-                ? '#E5DCD0'
+                ? '#E2D6C8'
                 : isUnopened
                 ? paperVariant.flap
-                : '#F2EADF'
+                : '#F1E8DC'
             }
             stroke={
               isUnopened
                 ? paperVariant.border
-                : 'rgba(138, 110, 89, 0.22)'
+                : 'rgba(125, 95, 75, 0.20)'
             }
-            strokeWidth="0.85"
+            strokeWidth="0.8"
           />
 
-          {/* Flap top highlight line */}
+          {/* Flap top left highlight line */}
           <line
             x1="0"
             y1="0"
             x2="150"
-            y2="60"
+            y2="58"
             stroke={
               isUnopened
-                ? 'rgba(255, 255, 255, 0.55)'
-                : 'rgba(255, 255, 255, 0.35)'
+                ? 'rgba(255, 255, 255, 0.65)'
+                : 'rgba(255, 255, 255, 0.40)'
             }
             strokeWidth="0.75"
           />
+
+          {/* Flap top right shadow line */}
           <line
             x1="300"
             y1="0"
             x2="150"
-            y2="60"
-            stroke="rgba(138, 110, 89, 0.25)"
+            y2="58"
+            stroke="rgba(90, 65, 45, 0.20)"
             strokeWidth="0.75"
           />
 
-          {/* Opened Letter subtle secondary crease line */}
+          {/* Opened Letter subtle secondary fold line */}
           {isOpened && (
             <line
               x1="20"
               y1="4"
               x2="150"
-              y2="54"
-              stroke="rgba(138, 110, 89, 0.18)"
-              strokeWidth="0.65"
+              y2="52"
+              stroke="rgba(115, 85, 60, 0.16)"
+              strokeWidth="0.6"
               strokeDasharray="4 2"
             />
           )}
         </svg>
       </div>
 
-      {/* Diagonal Envelope Bottom Fold Lines */}
-      <div className="absolute inset-0 rounded-[14px] pointer-events-none overflow-hidden">
+      {/* Layer 5: Diagonal Envelope Bottom Fold Lines */}
+      <div className="absolute inset-0 rounded-[13px] pointer-events-none overflow-hidden">
         <svg
           className={cn(
             'w-full h-full transition-opacity duration-300',
-            isUnopened ? 'opacity-40' : 'opacity-25'
+            isUnopened ? 'opacity-35' : 'opacity-20'
           )}
           viewBox="0 0 300 200"
           preserveAspectRatio="none"
@@ -269,18 +304,18 @@ export const VintageEnvelopeTile: React.FC<VintageEnvelopeTileProps> = ({
         </svg>
       </div>
 
-      {/* Central Physical Wax Seal at Flap Apex */}
+      {/* Layer 6: Central Dimensional Wax Seal Pressed at Flap Apex */}
       <div
         className={cn(
           'absolute top-9 sm:top-10 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center select-none transition-all duration-300',
           'w-8 h-8 rounded-full',
           'motion-reduce:transition-none motion-reduce:group-hover:scale-100',
           isUnopened &&
-            'shadow-[0_4px_10px_rgba(60,20,30,0.38),inset_0_1px_2px_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.45)] group-hover:scale-105 group-hover:brightness-110',
+            'shadow-[0_4px_10px_rgba(60,20,30,0.35),inset_0_1px_1.5px_rgba(255,255,255,0.45),inset_0_-1px_2px_rgba(0,0,0,0.4)] group-hover:scale-105 group-hover:brightness-105',
           isOpened &&
-            'shadow-[0_2px_6px_rgba(60,20,30,0.22),inset_0_1px_1.5px_rgba(255,255,255,0.25),inset_0_-1px_1.5px_rgba(0,0,0,0.35)] opacity-92 group-hover:opacity-100',
+            'shadow-[0_2px_6px_rgba(60,20,30,0.20),inset_0_1px_1px_rgba(255,255,255,0.3),inset_0_-1px_1.5px_rgba(0,0,0,0.3)] opacity-92 group-hover:opacity-100',
           !isUnlocked &&
-            'shadow-[0_2px_5px_rgba(40,30,25,0.35),inset_0_1px_1px_rgba(255,255,255,0.15)] opacity-85'
+            'shadow-[0_2px_5px_rgba(40,30,25,0.30),inset_0_1px_1px_rgba(255,255,255,0.15)] opacity-85'
         )}
         style={{
           background: !isUnlocked
@@ -306,9 +341,8 @@ export const VintageEnvelopeTile: React.FC<VintageEnvelopeTileProps> = ({
         {!isUnlocked ? (
           <Lock className="w-3.5 h-3.5 text-[#EFE0C1] opacity-85" />
         ) : isOpened ? (
-          /* Opened/Broken Wax Seal: Authentic parting fissure across the emblem */
+          /* Opened/Broken Wax Seal: Natural parting fissure across emblem */
           <div className="relative w-full h-full flex items-center justify-center text-[#DFB978]">
-            {/* Softened broken emblem */}
             <div className="opacity-80">
               {waxVariant.type === 'botanical' && (
                 <svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -332,7 +366,7 @@ export const VintageEnvelopeTile: React.FC<VintageEnvelopeTileProps> = ({
               )}
             </div>
 
-            {/* Fine natural hairline split indicating unsealed wax */}
+            {/* Fine natural hairline split across broken wax */}
             <svg
               className="absolute inset-0 w-full h-full pointer-events-none"
               viewBox="0 0 32 32"
@@ -353,7 +387,7 @@ export const VintageEnvelopeTile: React.FC<VintageEnvelopeTileProps> = ({
             </svg>
           </div>
         ) : (
-          /* Unopened Intact Seal: Pristine lustrous emblem */
+          /* Unopened Intact Seal */
           <div className="text-[#DFB978] opacity-95 transition-transform duration-200">
             {waxVariant.type === 'botanical' && (
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -379,11 +413,11 @@ export const VintageEnvelopeTile: React.FC<VintageEnvelopeTileProps> = ({
         )}
       </div>
 
-      {/* Top Header Layer: Date, Stamp & Favorite Mark */}
+      {/* Layer 7: Header Metadata & Vintage Postage Stamp */}
       <div className="relative z-10 flex items-start justify-between gap-2 pt-1">
-        {/* Left: Date & Status Text in Vintage Calligraphy */}
+        {/* Date & Archival Status */}
         <div className="space-y-0.5 max-w-[60%]">
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-serif font-medium text-[#7A6253] tracking-wide">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-serif font-medium text-[#705846] tracking-wide">
             <Calendar className="h-3 w-3 text-[#7A2E3B] shrink-0" />
             {displayDate}
           </span>
@@ -410,27 +444,27 @@ export const VintageEnvelopeTile: React.FC<VintageEnvelopeTileProps> = ({
               </span>
             )}
             {isUnlocked && isRead && (
-              <span className="text-[10px] text-[#6B5547] font-serif italic">
+              <span className="text-[10px] text-[#705846] font-serif italic">
                 (Opened)
               </span>
             )}
             {isUnlocked && !isRead && (
-              <span className="text-[10px] text-[#7A2E3B] font-serif italic">
+              <span className="text-[10px] text-[#7A2E3B] font-serif italic font-medium">
                 (Sealed)
               </span>
             )}
           </div>
         </div>
 
-        {/* Right: Vintage Postage Stamp */}
+        {/* Vintage Perforated Postage Stamp */}
         <div
           className={cn(
             'relative flex flex-col items-center justify-center',
             'w-10 h-12 rounded-[2px] bg-[#FAF4EA] shadow-xs',
-            'border border-dashed border-[#8A6E59]/60 p-1 select-none shrink-0'
+            'border border-dashed border-[#8A6E59]/60 p-0.5 select-none shrink-0'
           )}
           style={{
-            transform: dayIndex % 2 === 0 ? 'rotate(1.5deg)' : 'rotate(-1.2deg)',
+            transform: dayIndex % 2 === 0 ? 'rotate(1.2deg)' : 'rotate(-1.0deg)',
           }}
         >
           {/* Inner stamp frame */}
@@ -439,7 +473,7 @@ export const VintageEnvelopeTile: React.FC<VintageEnvelopeTileProps> = ({
               POST
             </span>
 
-            {/* Stamp artwork */}
+            {/* Stamp engraved artwork */}
             <div className="text-[#7A2E3B] opacity-80 my-auto">
               {stampVariant === 0 && (
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -479,28 +513,28 @@ export const VintageEnvelopeTile: React.FC<VintageEnvelopeTileProps> = ({
         </div>
       </div>
 
-      {/* Main Envelope Body: Title & Inscription */}
+      {/* Layer 8: Letter Title & Inscription Body */}
       <div className="relative z-10 mt-6 pt-3 space-y-1.5">
-        {/* Letter Title written in warm espresso ink */}
+        {/* Title in dark espresso ink */}
         <h3
           className={cn(
-            'font-serif text-[1.125rem] sm:text-[1.2rem] leading-snug line-clamp-1 transition-colors duration-200',
+            'font-serif text-[1.125rem] sm:text-[1.18rem] leading-snug line-clamp-1 transition-colors duration-200',
             !isUnlocked
               ? 'text-[#8C776C] font-normal italic'
               : isUnopened
-              ? 'text-[#2C221E] group-hover:text-[#7A2E3B] font-semibold'
-              : 'text-[#3E312B] group-hover:text-[#7A2E3B] font-normal'
+              ? 'text-[#2B1E16] group-hover:text-[#6F3040] font-semibold'
+              : 'text-[#3E2E24] group-hover:text-[#6F3040] font-medium'
           )}
         >
           {title}
         </h3>
 
-        {/* Handwritten / Calligraphic Excerpt */}
+        {/* Excerpt in warm brown printed ink */}
         <p
           className={cn(
-            'text-[12px] sm:text-[12.5px] line-clamp-2 leading-relaxed font-serif italic',
+            'text-[12px] sm:text-[12.5px] line-clamp-2 leading-relaxed font-serif',
             !isUnlocked
-              ? 'text-[#8C776C]'
+              ? 'text-[#8C776C] italic'
               : isUnopened
               ? 'text-[#5C4A42]'
               : 'text-[#6B5547]'
@@ -512,18 +546,18 @@ export const VintageEnvelopeTile: React.FC<VintageEnvelopeTileProps> = ({
         </p>
       </div>
 
-      {/* Envelope Footer: Day Index & Postal Inscription */}
-      <div className="relative z-10 pt-2.5 sm:pt-3 mt-2.5 sm:mt-3 border-t border-[rgba(138,110,89,0.22)] flex items-center justify-between text-[11px] text-[#8C776C] font-serif">
+      {/* Layer 9: Envelope Footer & Archival Action Inscription */}
+      <div className="relative z-10 pt-2.5 sm:pt-3 mt-2.5 sm:mt-3 border-t border-[rgba(100,75,52,0.18)] flex items-center justify-between text-[11px] text-[#705846] font-serif">
         <span className="tracking-wide text-[10.5px] sm:text-[11px]">
           Correspondence № {dayIndex}
         </span>
         {isUnopened && (
-          <span className="text-[#7A2E3B] font-medium tracking-wide opacity-85 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1 text-[10.5px] sm:text-[11px]">
+          <span className="text-[#7A2E3B] font-semibold tracking-wide opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1 text-[10.5px] sm:text-[11px]">
             Unfold &rarr;
           </span>
         )}
         {isOpened && (
-          <span className="text-[#8A6E59] font-medium tracking-wide opacity-75 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1 text-[10.5px] sm:text-[11px]">
+          <span className="text-[#8A6E59] font-medium tracking-wide opacity-80 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1 text-[10.5px] sm:text-[11px]">
             Read &rarr;
           </span>
         )}
@@ -536,3 +570,4 @@ export const VintageEnvelopeTile: React.FC<VintageEnvelopeTileProps> = ({
     </div>
   );
 };
+

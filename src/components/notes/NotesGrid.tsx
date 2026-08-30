@@ -3,6 +3,7 @@ import { CalendarX } from 'lucide-react';
 import { Note365 } from '../../types';
 import { NoteTile } from './NoteTile';
 import { Surface } from '../Surface';
+import { ScrollFocusReveal } from '../scroll/ScrollFocusReveal';
 import { cn } from '../../utils';
 import { useTheme } from '../../hooks';
 import { VintageEmptyState } from '../letterArchive/VintageEmptyState';
@@ -83,13 +84,14 @@ export const NotesGrid: React.FC<NotesGridProps> = ({
       {...props}
     >
       {notes.map((note) => (
-        <NoteTile
-          key={note.id}
-          note={note}
-          isToday={todayDate ? note.date === todayDate : false}
-          onSelectNote={onSelectNote}
-          onLockedClick={onLockedClick}
-        />
+        <ScrollFocusReveal key={note.id} className="h-full">
+          <NoteTile
+            note={note}
+            isToday={todayDate ? note.date === todayDate : false}
+            onSelectNote={onSelectNote}
+            onLockedClick={onLockedClick}
+          />
+        </ScrollFocusReveal>
       ))}
     </div>
   );
