@@ -44,5 +44,7 @@ export * from './notifications';
 export * from './catMeme';
 export * from './scroll';
 export * from './ambient';
+export * from './CrossFadeImage';
+export * from './AnimatedProgressNumber';
 
 

@@ -1,5 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider, AuthProvider, AudioProvider } from './contexts';
+import { ThemeProvider, AuthProvider, AudioProvider, SfxProvider } from './contexts';
 import { AppRoutes } from './routes';
 
 export default function App() {
@@ -8,7 +8,9 @@ export default function App() {
       <ThemeProvider>
         <AuthProvider>
           <AudioProvider>
-            <AppRoutes />
+            <SfxProvider>
+              <AppRoutes />
+            </SfxProvider>
           </AudioProvider>
         </AuthProvider>
       </ThemeProvider>

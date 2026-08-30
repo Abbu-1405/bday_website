@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Sparkles, X, Compass, Calendar, Camera, Heart, Mail, Feather, Lock, Clock, Star, Award, BookOpen } from 'lucide-react';
 import { BadgeItem } from '../types/achievements';
 import { Surface, Button } from '../components';
-import { useAudio } from '../contexts';
+import { useSfx } from '../contexts';
 
 interface AchievementCelebrationModalProps {
   badge: BadgeItem | null;
@@ -29,13 +29,15 @@ export const AchievementCelebrationModal: React.FC<AchievementCelebrationModalPr
   badge,
   onClose,
 }) => {
-  const { playBadgeFanfare } = useAudio();
+  const { playSfx } = useSfx();
+  const lastPlayedBadgeIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (badge) {
-      playBadgeFanfare();
+    if (badge && badge.id && lastPlayedBadgeIdRef.current !== badge.id) {
+      lastPlayedBadgeIdRef.current = badge.id;
+      playSfx('milestone');
     }
-  }, [badge]);
+  }, [badge, playSfx]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

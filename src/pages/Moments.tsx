@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Camera, Sparkles, Image as ImageIcon } from 'lucide-react';
-import { Container, ScrollFocusReveal } from '../components';
+import { Container, ScrollFocusReveal, EmptyState } from '../components';
+import { VintageEmptyState } from '../components/letterArchive/VintageEmptyState';
 import {
   FeaturedMomentCard,
   MomentCard,
@@ -11,11 +12,13 @@ import { Moment } from '../types';
 import { recordDiscovery } from '../services/discoveryService';
 import { getManagedMoments } from '../services/contentService';
 import { useTheme, useStarlitCatBridge } from '../hooks';
+import { useSfx } from '../contexts/SfxContext';
 import { cn } from '../utils';
 
 export default function Moments() {
   const { theme } = useTheme();
   const { emitMoment } = useStarlitCatBridge();
+  const { playSfx } = useSfx();
   const isLetterArchive = theme === 'letter-archive';
   const isScrapbook = theme === 'whimsical-scrapbook';
 
@@ -55,12 +58,14 @@ export default function Moments() {
 
   const handlePrevMoment = () => {
     if (selectedIndex > 0) {
+      playSfx('pageTurn');
       setSelectedMoment(orderedMoments[selectedIndex - 1]);
     }
   };
 
   const handleNextMoment = () => {
     if (selectedIndex >= 0 && selectedIndex < orderedMoments.length - 1) {
+      playSfx('pageTurn');
       setSelectedMoment(orderedMoments[selectedIndex + 1]);
     }
   };
@@ -143,84 +148,108 @@ export default function Moments() {
         </div>
       </div>
 
-      {/* Featured Moment Highlight */}
-      {featuredMoment && (
-        <div className="space-y-3">
-          <div
-            className={cn(
-              'flex items-center gap-2 text-xs font-serif font-medium px-1',
-              isLetterArchive
-                ? 'text-[#7A6253]'
-                : isScrapbook
-                ? 'text-[#7F8B78]'
-                : 'text-[#817568]'
-            )}
-          >
-            <Sparkles
-              className={cn(
-                'h-3.5 w-3.5',
-                isLetterArchive
-                  ? 'text-[#7A2E3B]'
-                  : isScrapbook
-                  ? 'text-[#D8B86A]'
-                  : 'text-[#E2BD78]'
-              )}
-            />
-            <span>Featured Reflection</span>
-          </div>
-          <ScrollFocusReveal className="w-full">
-            <FeaturedMomentCard
-              moment={featuredMoment}
-              onSelect={(m) => {
-                setSelectedMoment(m);
-                if (m) recordDiscovery('moments', m.id);
-              }}
-            />
-          </ScrollFocusReveal>
-        </div>
-      )}
-
-      {/* Memory Gallery Grid */}
-      <div className="space-y-4">
-        <div
-          className={cn(
-            'flex items-center justify-between text-xs font-serif font-medium px-1',
-            isLetterArchive
-              ? 'text-[#7A6253]'
-              : isScrapbook
-              ? 'text-[#7F8B78]'
-              : 'text-[#817568]'
-          )}
-        >
-          <span>Curated Memory Collection</span>
-          <span>{supportingMoments.length} items</span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-          {supportingMoments.map((moment, index) => {
-            // Assign varied aspect ratio styles for an editorial gallery look
-            const aspectRatio =
-              index % 3 === 0
-                ? 'portrait'
-                : index % 3 === 1
-                ? 'square'
-                : 'video';
-
-            return (
-              <ScrollFocusReveal key={moment.id} className="h-full">
-                <MomentCard
-                  moment={moment}
-                  aspectRatio={aspectRatio}
+      {/* Moments Content or Empty State */}
+      {orderedMoments.length === 0 ? (
+        isLetterArchive ? (
+          <VintageEmptyState
+            title="No preserved moments found"
+            message="No memory photographs or quiet reflections are currently archived in this season."
+          />
+        ) : (
+          <EmptyState
+            icon={<Camera className="h-6 w-6" />}
+            title="No preserved moments found"
+            description="No memory photographs or quiet reflections are currently archived in this season."
+          />
+        )
+      ) : (
+        <>
+          {/* Featured Moment Highlight */}
+          {featuredMoment && (
+            <div className="space-y-3">
+              <div
+                className={cn(
+                  'flex items-center gap-2 text-xs font-serif font-medium px-1',
+                  isLetterArchive
+                    ? 'text-[#7A6253]'
+                    : isScrapbook
+                    ? 'text-[#7F8B78]'
+                    : 'text-[#817568]'
+                )}
+              >
+                <Sparkles
+                  className={cn(
+                    'h-3.5 w-3.5',
+                    isLetterArchive
+                      ? 'text-[#7A2E3B]'
+                      : isScrapbook
+                      ? 'text-[#D8B86A]'
+                      : 'text-[#E2BD78]'
+                  )}
+                />
+                <span>Featured Reflection</span>
+              </div>
+              <ScrollFocusReveal className="w-full">
+                <FeaturedMomentCard
+                  moment={featuredMoment}
                   onSelect={(m) => {
+                    if (m) {
+                      playSfx('photoOpen');
+                      recordDiscovery('moments', m.id);
+                    }
                     setSelectedMoment(m);
-                    if (m) recordDiscovery('moments', m.id);
                   }}
                 />
               </ScrollFocusReveal>
-            );
-          })}
-        </div>
-      </div>
+            </div>
+          )}
+
+          {/* Memory Gallery Grid */}
+          <div className="space-y-4">
+            <div
+              className={cn(
+                'flex items-center justify-between text-xs font-serif font-medium px-1',
+                isLetterArchive
+                  ? 'text-[#7A6253]'
+                  : isScrapbook
+                  ? 'text-[#7F8B78]'
+                  : 'text-[#817568]'
+              )}
+            >
+              <span>Curated Memory Collection</span>
+              <span>{supportingMoments.length} items</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+              {supportingMoments.map((moment, index) => {
+                // Assign varied aspect ratio styles for an editorial gallery look
+                const aspectRatio =
+                  index % 3 === 0
+                    ? 'portrait'
+                    : index % 3 === 1
+                    ? 'square'
+                    : 'video';
+
+                return (
+                  <ScrollFocusReveal key={moment.id} className="h-full">
+                    <MomentCard
+                      moment={moment}
+                      aspectRatio={aspectRatio}
+                      onSelect={(m) => {
+                        if (m) {
+                          playSfx('photoOpen');
+                          recordDiscovery('moments', m.id);
+                        }
+                        setSelectedMoment(m);
+                      }}
+                    />
+                  </ScrollFocusReveal>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Detail Modal */}
       <MomentDetailModal

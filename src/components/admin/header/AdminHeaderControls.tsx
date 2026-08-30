@@ -12,7 +12,7 @@ import {
   Music,
 } from 'lucide-react';
 import { useAuth, useTheme } from '../../../hooks';
-import { useAudio, AMBIENT_TRACKS } from '../../../contexts';
+import { useAudio, useSfx, AMBIENT_TRACKS } from '../../../contexts';
 import { Theme } from '../../../types';
 import { ROUTES } from '../../../constants';
 
@@ -23,6 +23,7 @@ interface AdminHeaderControlsProps {
 export const AdminHeaderControls: React.FC<AdminHeaderControlsProps> = ({ className = '' }) => {
   const { currentUser, userProfile, logout } = useAuth();
   const { theme, setTheme } = useTheme();
+  const { playSfx } = useSfx();
   const {
     isPlaying,
     volume,
@@ -401,6 +402,9 @@ export const AdminHeaderControls: React.FC<AdminHeaderControlsProps> = ({ classN
                   type="button"
                   role="menuitem"
                   onClick={() => {
+                    if (theme !== t.id) {
+                      playSfx('themeTransition');
+                    }
                     setTheme(t.id);
                     setIsThemeOpen(false);
                   }}

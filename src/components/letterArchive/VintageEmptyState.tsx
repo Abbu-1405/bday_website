@@ -76,7 +76,7 @@ export const VintageEmptyState: React.FC<VintageEmptyStateProps> = ({
         'relative max-w-xl mx-auto rounded-[16px] p-8 sm:p-10 text-center select-none',
         'bg-[#FAF5EC] border border-[rgba(138,110,89,0.32)]',
         'shadow-[0_10px_28px_-6px_rgba(60,42,33,0.12)] space-y-4',
-        'animate-in fade-in zoom-in-95 duration-200 motion-reduce:animate-none',
+        'animate-empty-state',
         className
       )}
       {...props}

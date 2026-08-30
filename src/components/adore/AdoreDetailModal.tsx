@@ -10,6 +10,7 @@ import {
 import { AdoreItem } from '../../types';
 import { cn } from '../../utils';
 import { useTheme } from '../../hooks';
+import { CrossFadeImage } from '../CrossFadeImage';
 
 export interface AdoreDetailModalProps {
   item: AdoreItem | null;
@@ -201,7 +202,7 @@ export const AdoreDetailModal: React.FC<AdoreDetailModalProps> = ({
                   : 'p-2 bg-[rgba(12,22,38,0.85)] border border-[rgba(201,155,88,0.25)]'
               )}
             >
-              <img
+              <CrossFadeImage
                 src={item.image}
                 alt={item.title}
                 className="w-full max-h-[280px] sm:max-h-[340px] object-cover rounded-[10px]"

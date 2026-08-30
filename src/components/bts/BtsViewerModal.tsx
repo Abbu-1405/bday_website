@@ -25,6 +25,7 @@ import {
   recordBtsHtmlOpenExternal,
 } from '../../services';
 import { cn } from '../../utils';
+import { CrossFadeImage } from '../CrossFadeImage';
 
 interface BtsViewerModalProps {
   item: BtsItem | null;
@@ -279,7 +280,7 @@ export const BtsViewerModal: React.FC<BtsViewerModalProps> = ({
           {/* 1. IMAGE VIEWER */}
           {item.type === 'image' && (
             <div className="relative rounded-xl overflow-hidden bg-black/10 flex items-center justify-center max-h-[55vh] border border-current/10">
-              <img
+              <CrossFadeImage
                 src={item.path}
                 alt={item.title}
                 className="max-h-[55vh] w-auto max-w-full object-contain rounded-lg"

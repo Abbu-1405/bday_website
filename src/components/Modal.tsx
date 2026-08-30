@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '../utils';
+import { useSfx } from '../contexts';
 
 export interface ModalProps {
   isOpen: boolean;
@@ -24,10 +25,17 @@ export const Modal: React.FC<ModalProps> = ({
   size = 'md',
   className,
 }) => {
+  const { playSfx } = useSfx();
+
+  const handleClose = () => {
+    playSfx('click');
+    onClose();
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
-        onClose();
+        handleClose();
       }
     };
     if (isOpen) {
@@ -53,7 +61,7 @@ export const Modal: React.FC<ModalProps> = ({
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
-        onClick={onClose}
+        onClick={handleClose}
       />
 
       {/* Modal Dialog */}
@@ -74,7 +82,7 @@ export const Modal: React.FC<ModalProps> = ({
               )}
             </div>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface)] p-1 rounded-[var(--radius-md)] transition-[transform,background-color,color] duration-150 ease-out cursor-pointer active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/40 motion-reduce:transform-none"
               aria-label="Close"
             >

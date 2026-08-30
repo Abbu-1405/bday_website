@@ -19,7 +19,7 @@ import {
   Eye,
   Award,
 } from 'lucide-react';
-import { Container, Surface, Badge, AchievementsSection, HiddenDiscoveryElement, UniverseExploration } from '../components';
+import { Container, Surface, Badge, AchievementsSection, HiddenDiscoveryElement, UniverseExploration, AnimatedProgressNumber } from '../components';
 import { BotanicalCorner, CloverStrip } from '../components/whimsical/WhimsicalDecorations';
 import { MidnightCorner } from '../components/midnight/MidnightDecorations';
 import { VintageCornerFlourish, VintageBotanicalSprig } from '../components/letterArchive/LetterArchiveDecorations';
@@ -509,7 +509,7 @@ export default function Journey() {
                             )}>
                               <span>Discovered</span>
                               <span className="font-mono">
-                                {stage.discovered} / {stage.total} ({stage.percentage}%)
+                                {stage.discovered} / {stage.total} (<AnimatedProgressNumber value={stage.percentage} suffix="%" />)
                               </span>
                             </div>
                             <div className={cn(
@@ -521,7 +521,7 @@ export default function Journey() {
                             )}>
                               <div
                                 className={cn(
-                                  'h-full rounded-full transition-all duration-500',
+                                  'h-full rounded-full transition-all duration-500 ease-out motion-reduce:transition-none',
                                   isLetterArchive
                                     ? stage.state === 'COMPLETED' ? 'bg-[#7A2E3B]' : 'bg-[#C2934D]'
                                     : isMidnight

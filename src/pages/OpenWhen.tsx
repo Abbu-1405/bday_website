@@ -7,6 +7,7 @@ import { OpenWhenLetter } from '../types';
 import { recordDiscovery } from '../services/discoveryService';
 import { getManagedOpenWhenLetters } from '../services/contentService';
 import { useTheme, useStarlitCatBridge } from '../hooks';
+import { useSfx } from '../contexts/SfxContext';
 import { cn } from '../utils';
 import {
   VintageOrnamentalDivider,
@@ -16,6 +17,7 @@ import {
 export default function OpenWhen() {
   const { theme } = useTheme();
   const { emitLetter } = useStarlitCatBridge();
+  const { playSfx } = useSfx();
   const isLetterArchive = theme === 'letter-archive';
 
   const [letters, setLetters] = useState<OpenWhenLetter[]>(sampleOpenWhenLetters);
@@ -41,12 +43,14 @@ export default function OpenWhen() {
 
   const handlePrevLetter = () => {
     if (selectedIndex > 0) {
+      playSfx('pageTurn');
       setSelectedLetter(letters[selectedIndex - 1]);
     }
   };
 
   const handleNextLetter = () => {
     if (selectedIndex >= 0 && selectedIndex < letters.length - 1) {
+      playSfx('pageTurn');
       setSelectedLetter(letters[selectedIndex + 1]);
     }
   };
@@ -181,8 +185,11 @@ export default function OpenWhen() {
             <OpenWhenCard
               letter={letter}
               onSelect={(l) => {
+                if (l) {
+                  playSfx('openWhen');
+                  recordDiscovery('openWhen', l.id);
+                }
                 setSelectedLetter(l);
-                if (l) recordDiscovery('openWhen', l.id);
               }}
             />
           </ScrollFocusReveal>

@@ -15,6 +15,7 @@ import '../components/secretVault/secretVault.css';
 import { sampleSecrets } from '../data';
 import { SecretItem } from '../types';
 import { useAudio } from '../contexts';
+import { useSfx } from '../contexts/SfxContext';
 import { getManagedSecrets } from '../services/contentService';
 import {
   getDiscoveredSecretIds,
@@ -36,6 +37,7 @@ export default function SecretVault() {
   const [isOverrideModalOpen, setIsOverrideModalOpen] = useState(false);
   const [isOverrideActive, setIsOverrideActive] = useState<boolean>(() => isSecretsOverrideUnlocked());
   const { playSecretReveal, playMagicalClick } = useAudio();
+  const { playSfx } = useSfx();
   const { emitSecret } = useStarlitCatBridge();
 
   React.useEffect(() => {
@@ -69,7 +71,7 @@ export default function SecretVault() {
   }, []);
 
   const handleDiscover = (secret: SecretItem) => {
-    playSecretReveal();
+    playSfx('secretUnlock');
     recordDiscovery('secret', secret.id);
     setDiscoveredIds(getDiscoveredSecretIds());
     setTimestamps(getDiscoveredTimestamps());
@@ -88,7 +90,7 @@ export default function SecretVault() {
   };
 
   const handleOverrideSuccess = () => {
-    playSecretReveal();
+    playSfx('secretUnlock');
     const allIds = secrets.map((s) => s.id);
     const updated = unlockSecretsOverride(allIds);
     setDiscoveredIds(updated);

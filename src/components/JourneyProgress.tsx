@@ -2,6 +2,7 @@ import React from 'react';
 import { Compass, BookOpen, Sparkles, Lock } from 'lucide-react';
 import { Surface } from './Surface';
 import { Badge } from './Badge';
+import { AnimatedProgressNumber } from './AnimatedProgressNumber';
 import { cn } from '../utils';
 import { getOverallProgress, getStageProgress } from '../services/discoveryService';
 import { getStreakData } from '../services/streakService';
@@ -98,7 +99,7 @@ export const JourneyProgress: React.FC<JourneyProgressProps> = ({
 
           {isLetterArchive ? (
             <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-serif uppercase tracking-wider font-semibold rounded-sm bg-[#F2E8DC] border border-[rgba(166,124,61,0.45)] text-[#7A2E3B] shadow-2xs">
-              ✦ {percentage}% OVERALL
+              ✦ <AnimatedProgressNumber value={percentage} suffix="%" /> OVERALL
             </span>
           ) : (
             <Badge
@@ -110,7 +111,7 @@ export const JourneyProgress: React.FC<JourneyProgressProps> = ({
                 isWhimsical && "bg-[rgba(216,184,106,0.15)] text-[#D8B86A] border border-[rgba(216,184,106,0.25)]"
               )}
             >
-              {percentage}% Overall
+              <AnimatedProgressNumber value={percentage} suffix="%" /> Overall
             </Badge>
           )}
         </div>
@@ -137,7 +138,7 @@ export const JourneyProgress: React.FC<JourneyProgressProps> = ({
 
                 {/* Wine burgundy ink fill */}
                 <div
-                  className="h-[2px] bg-[#7A2E3B] transition-all duration-500 relative"
+                  className="h-[2px] bg-[#7A2E3B] transition-all duration-500 ease-out motion-reduce:transition-none relative"
                   style={{ width: `${percentage}%` }}
                 >
                   {/* Antique Gold Compass / Star Pin Indicator */}
@@ -162,7 +163,7 @@ export const JourneyProgress: React.FC<JourneyProgressProps> = ({
           )}>
             <div
               className={cn(
-                "h-full rounded-full transition-all duration-500",
+                "h-full rounded-full transition-all duration-500 ease-out motion-reduce:transition-none",
                 isMidnight && "bg-gradient-to-r from-[#C99B58] to-[#E2BD78]",
                 isWhimsical && "bg-gradient-to-r from-[#D8B86A] to-[#E5C97F]",
                 !isMidnight && !isWhimsical && "bg-[var(--color-primary)]"

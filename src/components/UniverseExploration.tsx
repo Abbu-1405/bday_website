@@ -17,6 +17,7 @@ import {
 import { Surface } from './Surface';
 import { Badge } from './Badge';
 import { Button } from './Button';
+import { AnimatedProgressNumber } from './AnimatedProgressNumber';
 import { cn } from '../utils';
 import { ROUTES } from '../constants';
 import { useAuth } from '../hooks';
@@ -104,7 +105,7 @@ export const UniverseExploration: React.FC<UniverseExplorationProps> = ({
         <div className="flex flex-col items-start sm:items-end shrink-0 gap-1.5 self-start sm:self-center">
           <div className="flex items-center gap-2">
             <span className="text-h1 font-serif font-extrabold text-[var(--color-primary)]">
-              {overall.percentage}%
+              <AnimatedProgressNumber value={overall.percentage} suffix="%" />
             </span>
             <Badge
               variant={isFullCircle ? 'success' : 'primary'}
@@ -354,7 +355,7 @@ export const UniverseExploration: React.FC<UniverseExplorationProps> = ({
                   aria-label={`${stage.title} progress`}
                 >
                   <div
-                    className="bg-[var(--color-primary)] h-full rounded-full transition-all duration-500"
+                    className="bg-[var(--color-primary)] h-full rounded-full transition-all duration-500 ease-out motion-reduce:transition-none"
                     style={{ width: `${stage.percentage}%` }}
                   />
                 </div>

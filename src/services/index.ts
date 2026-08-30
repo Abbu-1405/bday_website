@@ -15,3 +15,4 @@ export * from './notificationService';
 export * from './notificationTemplateService';
 export * from './notificationIntelligenceService';
 export * from './catInteraction';
+export * from './sfxService';

@@ -140,6 +140,7 @@ export const NoteReader: React.FC<NoteReaderProps> = ({
             size="sm"
             onClick={onPreviousNote}
             disabled={!hasPreviousNote}
+            disableSfx={true}
             aria-label="Previous note"
             title="Previous note"
             className="p-1.5 h-8 w-8 min-w-0 touch-manipulation"
@@ -152,6 +153,7 @@ export const NoteReader: React.FC<NoteReaderProps> = ({
             size="sm"
             onClick={onNextNote}
             disabled={!hasNextNote}
+            disableSfx={true}
             aria-label="Next note"
             title="Next note"
             className="p-1.5 h-8 w-8 min-w-0 touch-manipulation"
@@ -259,6 +261,7 @@ export const NoteReader: React.FC<NoteReaderProps> = ({
               size="sm"
               onClick={onPreviousNote}
               disabled={!hasPreviousNote}
+              disableSfx={true}
               leftIcon={<ChevronLeft className="h-3.5 w-3.5" />}
               className="flex-1 sm:flex-initial text-xs touch-manipulation"
             >
@@ -270,6 +273,7 @@ export const NoteReader: React.FC<NoteReaderProps> = ({
               size="sm"
               onClick={onNextNote}
               disabled={!hasNextNote}
+              disableSfx={true}
               rightIcon={<ChevronRight className="h-3.5 w-3.5" />}
               className="flex-1 sm:flex-initial text-xs touch-manipulation"
             >

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Palette, Check } from 'lucide-react';
 import { useTheme } from '../hooks';
+import { useSfx } from '../contexts';
 import { Theme } from '../types';
 import { cn } from '../utils';
 
@@ -14,6 +15,7 @@ export const FloatingThemeButton: React.FC<FloatingThemeButtonProps> = ({
   position = 'top-right',
 }) => {
   const { theme, setTheme } = useTheme();
+  const { playSfx } = useSfx();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -95,6 +97,9 @@ export const FloatingThemeButton: React.FC<FloatingThemeButtonProps> = ({
                 type="button"
                 role="menuitem"
                 onClick={() => {
+                  if (theme !== t.id) {
+                    playSfx('themeTransition');
+                  }
                   setTheme(t.id);
                   setIsOpen(false);
                 }}

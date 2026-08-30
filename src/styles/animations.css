@@ -56,6 +56,31 @@
   }
 }
 
+@keyframes emptyStateFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+.animate-empty-state {
+  animation: emptyStateFadeIn 225ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-empty-state {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    will-change: auto !important;
+  }
+}
+
 /* Scroll Focus Reveal */
 .scroll-focus-reveal {
   transform-origin: center center;

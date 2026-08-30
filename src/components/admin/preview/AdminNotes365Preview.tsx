@@ -25,6 +25,7 @@ import { Note365, NoteMediaItem } from '../../../types';
 import { sampleNotes365 } from '../../../data';
 import { getManagedNotes365 } from '../../../services/contentService';
 import { AdminNotePreviewModal } from './AdminNotePreviewModal';
+import { useSfx } from '../../../contexts';
 
 type SortOption = 'day-asc' | 'day-desc' | 'date-asc' | 'date-desc' | 'title-asc' | 'media-first';
 type FilterType = 'all' | 'milestone' | 'has-image' | 'has-video' | 'has-audio' | 'has-doc' | 'text-only';
@@ -54,6 +55,7 @@ const MONTH_OPTIONS = [
 export const AdminNotes365Preview: React.FC<AdminNotes365PreviewProps> = ({
   onNavigateToContent,
 }) => {
+  const { playSfx } = useSfx();
   const [notes, setNotes] = useState<Note365[]>(sampleNotes365);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -251,6 +253,7 @@ export const AdminNotes365Preview: React.FC<AdminNotes365PreviewProps> = ({
 
   // Open note in Admin Preview Mode
   const handleOpenPreview = (note: Note365) => {
+    playSfx('letterOpen');
     // Record previewed state strictly in local admin session
     setPreviewedNoteIds((prev) => {
       const next = new Set(prev);
@@ -261,6 +264,7 @@ export const AdminNotes365Preview: React.FC<AdminNotes365PreviewProps> = ({
   };
 
   const handleToggleSessionFavorite = (noteId: string) => {
+    playSfx('favorite');
     setSessionFavorites((prev) => {
       const next = new Set(prev);
       if (next.has(noteId)) {

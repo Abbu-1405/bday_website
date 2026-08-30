@@ -21,6 +21,7 @@ import {
 import { ROUTES } from '../constants';
 import { cn } from '../utils';
 import { useTheme } from '../hooks';
+import { useSfx } from '../contexts';
 
 export interface FloatingNavigationProps {
   className?: string;
@@ -31,6 +32,7 @@ export const FloatingNavigation: React.FC<FloatingNavigationProps> = ({ classNam
   const location = useLocation();
   const navRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
+  const { playSfx } = useSfx();
   const shouldReduceMotion = useReducedMotion();
   const isLetterArchive = theme === 'letter-archive';
   const isScrapbook = theme === 'whimsical-scrapbook';
@@ -107,6 +109,11 @@ export const FloatingNavigation: React.FC<FloatingNavigationProps> = ({ classNam
           <li key={item.path}>
             <NavLink
               to={item.path}
+              onClick={() => {
+                if (location.pathname !== item.path) {
+                  playSfx('navigation');
+                }
+              }}
               className={({ isActive }) =>
                 cn(
                   'relative flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-serif font-medium whitespace-nowrap cursor-pointer leading-tight focus-visible:outline-none focus-visible:ring-2 transition-[transform,color,background-color] duration-150 active:scale-[0.96] motion-reduce:transform-none',
@@ -255,7 +262,12 @@ export const FloatingNavigation: React.FC<FloatingNavigationProps> = ({ classNam
                   key={item.path}
                   to={item.path}
                   role="menuitem"
-                  onClick={() => setIsMoreOpen(false)}
+                  onClick={() => {
+                    if (location.pathname !== item.path) {
+                      playSfx('navigation');
+                    }
+                    setIsMoreOpen(false);
+                  }}
                   className={({ isActive }) =>
                     cn(
                       'flex items-center gap-2.5 px-3 py-2 rounded-[10px] text-xs font-serif font-medium transition-[background-color,border-color,box-shadow,color,transform] duration-150 ease-out cursor-pointer active:scale-[0.985] motion-reduce:transform-none',

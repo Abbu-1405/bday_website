@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 import { Container, Surface, Button, Badge } from '../components';
 import { useAuth, useTheme } from '../hooks';
-import { useAudio, AMBIENT_TRACKS } from '../contexts';
+import { useAudio, useSfx, AMBIENT_TRACKS } from '../contexts';
 import { ROUTES } from '../constants';
 import { Theme, NotificationPermissionState, NotificationPreferences, NotificationEvent, DEFAULT_NOTIFICATION_PREFERENCES } from '../types';
 import {
@@ -70,6 +70,7 @@ const COMMON_TIMEZONES = [
 export default function Settings() {
   const { currentUser, loading, isAdmin, loginWithGoogle, logout } = useAuth();
   const { theme, setTheme } = useTheme();
+  const { playSfx } = useSfx();
   const { isPlaying, volume, currentTrack, togglePlay, setVolume, setTrack } = useAudio();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -335,7 +336,12 @@ export default function Settings() {
                   type="button"
                   role="radio"
                   aria-checked={isActive}
-                  onClick={() => setTheme(t.id)}
+                  onClick={() => {
+                    if (theme !== t.id) {
+                      playSfx('themeTransition');
+                    }
+                    setTheme(t.id);
+                  }}
                   className={`group relative p-4 sm:p-5 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[140px] sm:min-h-[160px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-background)] ${
                     isActive
                       ? 'border-[var(--color-primary)] bg-[var(--color-surface-secondary)] ring-1 ring-[var(--color-primary)] shadow-sm'

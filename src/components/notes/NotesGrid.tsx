@@ -52,7 +52,7 @@ export const NotesGrid: React.FC<NotesGridProps> = ({
     }
 
     return (
-      <Surface variant="elevated" padding="lg" className="text-center py-12 space-y-3 border border-[var(--color-border-light)]">
+      <Surface variant="elevated" padding="lg" className="text-center py-12 space-y-3 border border-[var(--color-border-light)] animate-empty-state">
         <CalendarX className="h-8 w-8 text-[var(--color-muted)] mx-auto opacity-70" />
         <h3 className="text-body font-serif font-medium text-[var(--color-text-secondary)]">
           {emptyTitle}

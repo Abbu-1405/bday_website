@@ -8,9 +8,11 @@ import { cn } from '../utils';
 import { recordDiscovery } from '../services/discoveryService';
 import { getManagedAdoreItems } from '../services/contentService';
 import { useTheme } from '../hooks';
+import { useSfx } from '../contexts/SfxContext';
 
 export default function Adore() {
   const { theme } = useTheme();
+  const { playSfx } = useSfx();
   const isLetterArchive = theme === 'letter-archive';
   const isScrapbook = theme === 'whimsical-scrapbook';
 
@@ -52,12 +54,14 @@ export default function Adore() {
 
   const handlePrevItem = () => {
     if (selectedIndex > 0) {
+      playSfx('pageTurn');
       setSelectedItem(filteredItems[selectedIndex - 1]);
     }
   };
 
   const handleNextItem = () => {
     if (selectedIndex >= 0 && selectedIndex < filteredItems.length - 1) {
+      playSfx('pageTurn');
       setSelectedItem(filteredItems[selectedIndex + 1]);
     }
   };
@@ -203,10 +207,11 @@ export default function Adore() {
             <AdoreCard
               item={item}
               onSelect={(selected) => {
-                setSelectedItem(selected);
                 if (selected) {
+                  playSfx('photoOpen');
                   recordDiscovery('adore', selected.id);
                 }
+                setSelectedItem(selected);
               }}
             />
           </ScrollFocusReveal>

@@ -6,6 +6,7 @@ import { isSecretDiscovered } from '../utils/secretVaultStorage';
 import { recordDiscovery } from '../services/discoveryService';
 import { evaluateBadges } from '../services/badgeService';
 import { HiddenDiscoveryModal } from './HiddenDiscoveryModal';
+import { useSfx } from '../contexts/SfxContext';
 import { cn } from '../utils';
 
 export interface HiddenDiscoveryElementProps extends React.HTMLAttributes<HTMLButtonElement> {
@@ -33,6 +34,7 @@ export const HiddenDiscoveryElement: React.FC<HiddenDiscoveryElementProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAlreadyUnlocked, setIsAlreadyUnlocked] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const { playSfx } = useSfx();
 
   const secretObj = sampleSecrets.find((s) => s.id === secretId);
 
@@ -43,6 +45,7 @@ export const HiddenDiscoveryElement: React.FC<HiddenDiscoveryElementProps> = ({
     setIsAlreadyUnlocked(discovered);
 
     if (!discovered) {
+      playSfx('secretUnlock');
       recordDiscovery('secret', secretId);
       evaluateBadges();
       // Dispatch global window event for live state updates across tabs/components

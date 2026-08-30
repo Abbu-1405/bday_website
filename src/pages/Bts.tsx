@@ -11,6 +11,7 @@ import { btsItems } from '../data';
 import { BtsItem, BtsFilterCategory } from '../types';
 import { useTheme, useAuth } from '../hooks';
 import { useAudio } from '../contexts';
+import { useSfx } from '../contexts/SfxContext';
 import { recordBtsPageOpen, recordBtsRandom } from '../services';
 import { cn } from '../utils';
 import { Film, RotateCcw } from 'lucide-react';
@@ -19,6 +20,7 @@ export default function Bts() {
   const { theme } = useTheme();
   const { currentUser } = useAuth();
   const { playMagicalClick, playPaperRustle } = useAudio();
+  const { playSfx } = useSfx();
 
   const isLetterArchive = theme === 'letter-archive';
   const isScrapbook = theme === 'whimsical-scrapbook';
@@ -104,7 +106,7 @@ export default function Bts() {
   };
 
   const handleOpenItem = (item: BtsItem) => {
-    playPaperRustle();
+    playSfx('photoOpen');
     setSelectedItem(item);
   };
 

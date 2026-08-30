@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Note365 } from '../../../types';
 import { NoteReader } from '../../notes/NoteReader';
+import { useSfx } from '../../../contexts';
 
 interface AdminNotePreviewModalProps {
   note: Note365 | null;
@@ -29,6 +30,8 @@ export const AdminNotePreviewModal: React.FC<AdminNotePreviewModalProps> = ({
   onClose,
   onSelectNote,
 }) => {
+  const { playSfx } = useSfx();
+
   if (!note) return null;
 
   const currentIndex = allNotes.findIndex((n) => n.id === note.id);
@@ -40,12 +43,14 @@ export const AdminNotePreviewModal: React.FC<AdminNotePreviewModalProps> = ({
 
   const handlePrevious = () => {
     if (previousNote) {
+      playSfx('pageTurn');
       onSelectNote(previousNote);
     }
   };
 
   const handleNext = () => {
     if (nextNote) {
+      playSfx('pageTurn');
       onSelectNote(nextNote);
     }
   };

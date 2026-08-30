@@ -14,7 +14,9 @@ import {
 import { NoteMediaItem } from '../../types';
 import { cn } from '../../utils';
 import { Button } from '../Button';
+import { CrossFadeImage } from '../CrossFadeImage';
 import { useAudio } from '../../contexts';
+import { useSfx } from '../../contexts/SfxContext';
 
 export interface NoteMediaProps extends React.HTMLAttributes<HTMLDivElement> {
   media?: NoteMediaItem; // Legacy single item prop
@@ -238,6 +240,7 @@ export const NoteMedia: React.FC<NoteMediaProps> = ({
   ...props
 }) => {
   const { duckAudio, unduckAudio } = useAudio();
+  const { playSfx } = useSfx();
 
   // 1. Gather all actual media items that have valid content
   const actualMediaList: NoteMediaItem[] = [];
@@ -281,7 +284,7 @@ export const NoteMedia: React.FC<NoteMediaProps> = ({
       <div className="space-y-2">
         <div className="overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-border-light)] bg-[var(--color-surface-secondary)]">
           {imageSrc ? (
-            <img
+            <CrossFadeImage
               src={imageSrc}
               alt={altText}
               loading="lazy"
@@ -318,9 +321,11 @@ export const NoteMedia: React.FC<NoteMediaProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() =>
-                  window.open(imageSrc, '_blank', 'noopener,noreferrer')
-                }
+                disableSfx={true}
+                onClick={() => {
+                  playSfx('photoOpen');
+                  window.open(imageSrc, '_blank', 'noopener,noreferrer');
+                }}
                 leftIcon={<Eye className="h-3.5 w-3.5" />}
                 className="text-xs"
                 aria-label="View Image in full size"

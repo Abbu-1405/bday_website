@@ -1,6 +1,7 @@
 import React from 'react';
 import { BookOpen, Moon, Sparkles } from 'lucide-react';
 import { useTheme } from '../hooks';
+import { useSfx } from '../contexts';
 import { Theme } from '../types';
 import { cn } from '../utils';
 
@@ -14,6 +15,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
   size = 'md',
 }) => {
   const { theme, setTheme } = useTheme();
+  const { playSfx } = useSfx();
 
   const themes: { id: Theme; label: string; icon: React.ReactNode }[] = [
     {
@@ -52,7 +54,12 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
             type="button"
             role="radio"
             aria-checked={isActive}
-            onClick={() => setTheme(item.id)}
+            onClick={() => {
+              if (theme !== item.id) {
+                playSfx('themeTransition');
+              }
+              setTheme(item.id);
+            }}
             className={cn(
               'flex items-center justify-center rounded-full transition-[transform,background-color,border-color,box-shadow,color] duration-200 ease-out cursor-pointer font-medium active:scale-95 motion-reduce:transform-none',
               sizeClasses,

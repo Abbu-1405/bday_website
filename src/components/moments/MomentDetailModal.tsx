@@ -12,6 +12,7 @@ import {
 import { Moment } from '../../types';
 import { cn } from '../../utils';
 import { useTheme } from '../../hooks';
+import { CrossFadeImage } from '../CrossFadeImage';
 
 export interface MomentDetailModalProps {
   moment: Moment | null;
@@ -203,7 +204,7 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
                   : 'p-2 bg-[rgba(12,22,38,0.85)] border border-[rgba(201,155,88,0.25)]'
               )}
             >
-              <img
+              <CrossFadeImage
                 src={moment.image}
                 alt={moment.title}
                 className="w-full max-h-[340px] sm:max-h-[400px] object-cover rounded-[10px]"

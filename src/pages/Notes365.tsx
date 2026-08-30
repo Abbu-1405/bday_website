@@ -19,6 +19,7 @@ import {
   notesProgressService,
 } from '../utils';
 import { useTheme } from '../hooks';
+import { useSfx } from '../contexts';
 
 const MONTH_NAMES = [
   'January',
@@ -37,6 +38,7 @@ const MONTH_NAMES = [
 
 export default function Notes365() {
   const { theme } = useTheme();
+  const { playSfx } = useSfx();
   const isLetterArchive = theme === 'letter-archive';
 
   const [rawNotes, setRawNotes] = useState<Note365[]>(() => {
@@ -100,6 +102,7 @@ export default function Notes365() {
   }));
 
   const handlePreviousMonth = () => {
+    playSfx('pageTurn');
     if (currentMonth === 1) {
       setCurrentYear((prev) => prev - 1);
       setCurrentMonth(12);
@@ -109,6 +112,7 @@ export default function Notes365() {
   };
 
   const handleNextMonth = () => {
+    playSfx('pageTurn');
     if (currentMonth === 12) {
       setCurrentYear((prev) => prev + 1);
       setCurrentMonth(1);
@@ -199,8 +203,13 @@ export default function Notes365() {
 
   const todayDate = actualTodayStr;
 
-  const handleSelectNote = (note: Note365) => {
+  const handleSelectNote = (note: Note365, isPageTurn = false) => {
     if (note.isUnlocked) {
+      if (isPageTurn) {
+        playSfx('pageTurn');
+      } else {
+        playSfx('letterOpen');
+      }
       setLockedNotice(null);
       // Mark as read when opened if not read already
       if (!note.isRead) {
@@ -251,7 +260,7 @@ export default function Notes365() {
 
   const handlePreviousNote = () => {
     if (previousNoteCandidate && previousNoteCandidate.isUnlocked) {
-      handleSelectNote(previousNoteCandidate);
+      handleSelectNote(previousNoteCandidate, true);
       // Synchronize currentYear and currentMonth to match target note's month
       const [y, m] = previousNoteCandidate.date.split('-').map(Number);
       if (y && m) {
@@ -263,7 +272,7 @@ export default function Notes365() {
 
   const handleNextNote = () => {
     if (nextNoteCandidate && nextNoteCandidate.isUnlocked) {
-      handleSelectNote(nextNoteCandidate);
+      handleSelectNote(nextNoteCandidate, true);
       // Synchronize currentYear and currentMonth to match target note's month
       const [y, m] = nextNoteCandidate.date.split('-').map(Number);
       if (y && m) {
@@ -278,6 +287,7 @@ export default function Notes365() {
     if (!target || !target.isUnlocked) return;
 
     notesProgressService.toggleNoteFavorite(noteId);
+    playSfx('favorite');
     setRawNotes((prev) =>
       prev.map((n) =>
         n.id === noteId ? { ...n, isFavorite: !n.isFavorite } : n

@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { Volume2, VolumeX, SlidersHorizontal, Music } from 'lucide-react';
-import { useAudio, AMBIENT_TRACKS } from '../contexts';
+import { useAudio, AMBIENT_TRACKS, useSfx } from '../contexts';
 import { cn } from '../utils';
 
 export interface AudioButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -31,6 +31,7 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
     toggleMixer,
     closeMixer,
   } = useAudio();
+  const { playSfx } = useSfx();
 
   const isControlled = externalIsPlaying !== undefined;
   const isPlaying = isControlled ? externalIsPlaying : contextIsPlaying;
@@ -51,6 +52,7 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
   }, [isMixerOpen, closeMixer]);
 
   const handleToggle = () => {
+    playSfx('click');
     if (externalOnToggle) {
       externalOnToggle();
     } else {
@@ -111,7 +113,10 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
         {/* Mixer Trigger */}
         <button
           type="button"
-          onClick={toggleMixer}
+          onClick={() => {
+            playSfx('click');
+            toggleMixer();
+          }}
           aria-expanded={isMixerOpen}
           aria-label="Audio Mixer & Track Settings"
           title="Audio Mixer & Track Settings"
@@ -140,7 +145,10 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
 
             <button
               type="button"
-              onClick={togglePlay}
+              onClick={() => {
+                playSfx('click');
+                togglePlay();
+              }}
               className={cn(
                 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-serif font-medium transition-[transform,background-color,border-color,color] duration-150 ease-out cursor-pointer border active:scale-95',
                 isPlaying
@@ -200,7 +208,12 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
                 <button
                   key={t.id}
                   type="button"
-                  onClick={() => setTrack(t.id)}
+                  onClick={() => {
+                    if (currentTrack !== t.id) {
+                      playSfx('click');
+                    }
+                    setTrack(t.id);
+                  }}
                   className={cn(
                     'w-full text-left p-2 rounded-[var(--radius-lg)] text-xs font-serif transition-[transform,background-color,color] duration-150 ease-out cursor-pointer flex flex-col active:scale-[0.985] motion-reduce:transform-none',
                     currentTrack === t.id

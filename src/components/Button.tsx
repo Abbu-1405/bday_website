@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '../utils';
+import { useSfx } from '../contexts';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'text' | 'danger';
@@ -7,6 +8,8 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  /** Disable automatic click sound effect if needed */
+  disableSfx?: boolean;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -20,10 +23,21 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       rightIcon,
       children,
       disabled,
+      disableSfx = false,
+      onClick,
       ...props
     },
     ref
   ) => {
+    const { playSfx } = useSfx();
+
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (!disabled && !isLoading && !disableSfx) {
+        playSfx('click');
+      }
+      onClick?.(e);
+    };
+
     const baseStyles =
       'inline-flex items-center justify-center font-medium transition-[transform,background-color,border-color,box-shadow,color,opacity] duration-200 ease-out will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:transform-none disabled:shadow-none text-button cursor-pointer active:translate-y-0 active:scale-[0.985] motion-reduce:transform-none';
 
@@ -55,6 +69,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled || isLoading}
         className={cn(baseStyles, variants[variant], sizeClass, className)}
+        onClick={handleClick}
         {...props}
       >
         {isLoading && (

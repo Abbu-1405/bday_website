@@ -26,6 +26,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     <div
       className={cn(
         'flex flex-col items-center justify-center text-center p-8 sm:p-12 rounded-[var(--radius-card)] bg-[var(--color-surface)] border border-[var(--color-border-light)]',
+        'animate-empty-state',
         className
       )}
       {...props}
