@@ -36,6 +36,8 @@ export const AdminLiveActivity: React.FC<AdminLiveActivityProps> = ({
     selectedSection: 'all',
     selectedEventType: 'all',
     searchQuery: '',
+    uidQuery: '',
+    displayNameQuery: '',
   });
 
   // Subscribe to live activity stream
@@ -97,18 +99,38 @@ export const AdminLiveActivity: React.FC<AdminLiveActivityProps> = ({
       selectedSection: 'all',
       selectedEventType: 'all',
       searchQuery: '',
+      uidQuery: '',
+      displayNameQuery: '',
     });
   };
 
   // Filtered live feed computation
   const filteredFeedItems = useMemo(() => {
     return feedItems.filter((item) => {
-      // 1. User Filter
+      // 1. User Dropdown Filter
       if (filters.selectedUserId !== 'all' && item.userId !== filters.selectedUserId) {
         return false;
       }
 
-      // 2. Section Filter
+      // 2. User UID Text Filter
+      if (filters.uidQuery.trim()) {
+        const qUid = filters.uidQuery.toLowerCase().trim();
+        const itemUid = (item.userId || '').toLowerCase();
+        if (!itemUid.includes(qUid)) {
+          return false;
+        }
+      }
+
+      // 3. User Display Name Text Filter
+      if (filters.displayNameQuery.trim()) {
+        const qName = filters.displayNameQuery.toLowerCase().trim();
+        const itemName = (item.userDisplayName || '').toLowerCase();
+        if (!itemName.includes(qName)) {
+          return false;
+        }
+      }
+
+      // 4. Section Filter
       if (filters.selectedSection !== 'all') {
         const itemSec = (item.section || '').toLowerCase();
         const selSec = filters.selectedSection.toLowerCase();
@@ -117,7 +139,7 @@ export const AdminLiveActivity: React.FC<AdminLiveActivityProps> = ({
         }
       }
 
-      // 3. Event Type Filter
+      // 5. Event Type Filter
       if (filters.selectedEventType !== 'all') {
         if (filters.selectedEventType === 'error') {
           if (!item.isError && item.type !== 'error') return false;
@@ -128,7 +150,7 @@ export const AdminLiveActivity: React.FC<AdminLiveActivityProps> = ({
         }
       }
 
-      // 4. Search Query Filter
+      // 6. Generic Search Query Filter
       if (filters.searchQuery.trim()) {
         const q = filters.searchQuery.toLowerCase();
         const matchTitle = (item.actionTitle || '').toLowerCase().includes(q);
@@ -137,7 +159,8 @@ export const AdminLiveActivity: React.FC<AdminLiveActivityProps> = ({
         const matchEmail = (item.userEmail || '').toLowerCase().includes(q);
         const matchSec = (item.section || '').toLowerCase().includes(q);
         const matchRoute = (item.route || '').toLowerCase().includes(q);
-        if (!matchTitle && !matchDesc && !matchUser && !matchEmail && !matchSec && !matchRoute) {
+        const matchUid = (item.userId || '').toLowerCase().includes(q);
+        if (!matchTitle && !matchDesc && !matchUser && !matchEmail && !matchSec && !matchRoute && !matchUid) {
           return false;
         }
       }
@@ -152,6 +175,8 @@ export const AdminLiveActivity: React.FC<AdminLiveActivityProps> = ({
     if (filters.selectedSection !== 'all') count++;
     if (filters.selectedEventType !== 'all') count++;
     if (filters.searchQuery.trim() !== '') count++;
+    if (filters.uidQuery.trim() !== '') count++;
+    if (filters.displayNameQuery.trim() !== '') count++;
     return count;
   }, [filters]);
 

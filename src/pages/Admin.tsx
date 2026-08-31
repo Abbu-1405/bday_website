@@ -213,6 +213,7 @@ export default function Admin() {
           {activeTab === 'activity' && (
             <AdminActivityFeed
               activities={activities}
+              users={users}
               loading={activitiesLoading}
               selectedFilter={activityFilter}
               onFilterChange={(filter) => setActivityFilter(filter)}

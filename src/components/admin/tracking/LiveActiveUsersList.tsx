@@ -144,7 +144,7 @@ export const LiveActiveUsersList: React.FC<LiveActiveUsersListProps> = ({
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
                           <span className="text-xs font-semibold text-slate-200 truncate">
-                            {u.displayName}
+                            {u.displayName || 'Unknown User'}
                           </span>
                           {u.role === 'admin' && (
                             <span title="Admin">
@@ -152,7 +152,12 @@ export const LiveActiveUsersList: React.FC<LiveActiveUsersListProps> = ({
                             </span>
                           )}
                         </div>
-                        <p className="text-[11px] text-slate-400 truncate">{u.email}</p>
+                        {u.email && u.email !== 'No email' && (
+                          <p className="text-[11px] text-slate-400 truncate">{u.email}</p>
+                        )}
+                        <p className="font-mono text-[10px] text-slate-500 truncate">
+                          UID: <span className="text-slate-400 select-all">{u.userId}</span>
+                        </p>
                       </div>
                     </div>
                     <div>{getStatusBadge(u.status)}</div>

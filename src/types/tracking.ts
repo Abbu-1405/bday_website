@@ -368,6 +368,8 @@ export interface LiveFeedFilters {
   selectedSection: string; // 'all' or section name
   selectedEventType: string; // 'all' or specific type
   searchQuery: string;
+  uidQuery: string;
+  displayNameQuery: string;
 }
 
 

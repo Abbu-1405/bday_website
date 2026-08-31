@@ -188,6 +188,29 @@ export const LiveActivityFeedList: React.FC<LiveActivityFeedListProps> = ({
                     <IconComp className="w-4 h-4" />
                   </div>
                   <div className="space-y-1 min-w-0">
+                    {/* 1. User Identity Header: DISPLAY NAME, with UID directly underneath */}
+                    <div className="flex flex-col pb-1 mb-1 border-b border-slate-800/50">
+                      <button
+                        onClick={() => onViewUserDetails && onViewUserDetails(item.userId)}
+                        className="flex items-center gap-1.5 hover:text-indigo-300 transition-colors text-left group"
+                        title="View user details & history"
+                      >
+                        <User className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                        <span className="font-semibold text-slate-200 group-hover:text-indigo-300">
+                          {item.userDisplayName || 'Unknown User'}
+                        </span>
+                        {item.userRole === 'admin' && (
+                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                            Admin
+                          </span>
+                        )}
+                      </button>
+                      <span className="font-mono text-[10px] text-slate-400 pl-5">
+                        UID: <span className="text-slate-300 select-all">{item.userId || 'unknown'}</span>
+                      </span>
+                    </div>
+
+                    {/* 2. Activity Title, Section & Error Badge */}
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-semibold text-slate-200">{item.actionTitle}</span>
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-slate-300">
@@ -204,28 +227,21 @@ export const LiveActivityFeedList: React.FC<LiveActivityFeedListProps> = ({
                       {item.actionDescription}
                     </p>
 
+                    {/* 3. Timestamp & Metadata footer */}
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-slate-400 text-[11px] pt-1">
-                      <button
-                        onClick={() => onViewUserDetails && onViewUserDetails(item.userId)}
-                        className="flex items-center gap-1 hover:text-indigo-300 transition-colors text-left"
-                      >
-                        <User className="w-3 h-3 text-indigo-400" />
-                        <span className="font-medium text-slate-300">{item.userDisplayName}</span>
-                      </button>
-
-                      <span className="flex items-center gap-1 text-slate-500">
-                        <Clock className="w-3 h-3" />
+                      <span className="flex items-center gap-1 text-slate-400">
+                        <Clock className="w-3 h-3 text-slate-500" />
                         {item.timestampFormatted}
                       </span>
 
                       {item.deviceCategory && (
-                        <span className="flex items-center gap-1 text-slate-500">
+                        <span className="flex items-center gap-1 text-slate-400">
                           {getDeviceIcon(item.deviceCategory)}
                           <span className="capitalize">{item.deviceCategory}</span>
                         </span>
                       )}
 
-                      <span className="font-mono text-[10px] text-slate-600">
+                      <span className="font-mono text-[10px] text-slate-500">
                         Sess: {item.sessionId.slice(0, 8)}...
                       </span>
                     </div>
