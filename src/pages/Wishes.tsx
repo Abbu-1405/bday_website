@@ -9,6 +9,7 @@ import { useTheme, useStarlitCatBridge } from '../hooks';
 import { useAudio } from '../contexts';
 import { getManagedWishes } from '../services/contentService';
 import { getCollectedWishIds, collectWish, resetCollectedWishes } from '../utils';
+import { userTrackingService } from '../services/userTrackingService';
 import '../components/wishes/wishes.css';
 
 // Organic positioning, depth scale & continuous sky ascent parameters for all 20 lanterns
@@ -104,6 +105,13 @@ export default function Wishes() {
 
   const handleOpenWish = (wish: Wish) => {
     playWishChime();
+    userTrackingService.trackItemOpen({
+      itemId: wish.id,
+      itemType: 'wish',
+      title: wish.title,
+      itemNumber: wish.order,
+      section: 'wishes',
+    });
     const updated = collectWish(wish.id);
     setCollectedIds(updated);
     setSelectedWish(wish);

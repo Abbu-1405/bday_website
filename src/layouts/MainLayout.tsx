@@ -31,13 +31,14 @@ import {
   recordNotificationTargetOpened,
 } from '../services/notificationService';
 import { BadgeItem } from '../types/achievements';
-import { useTheme, useAuth } from '../hooks';
+import { useTheme, useAuth, useUserTracking } from '../hooks';
 import { StarlitCatEventBridge } from '../services/catInteraction/StarlitCatEventBridge';
 import { CatAudioService } from '../services/catInteraction/CatAudioService';
 import letterArchiveCursor from '../assets/icons/Letter-archive.cur';
 import midnightJournalCursor from '../assets/icons/Midnight-journal.cur';
 
 export const MainLayout: React.FC = () => {
+  useUserTracking();
   const location = useLocation();
   const { currentUser } = useAuth();
   const { theme } = useTheme();

@@ -29,6 +29,7 @@ import { ScrollFocusReveal } from '../components';
 import { ReflectionWriter } from '../components/reflections/ReflectionWriter';
 import { DoodleCanvasModal, DoodlesDrawer } from '../components/doodle';
 import { DoodleItem } from '../types/doodle';
+import { userTrackingService } from '../services/userTrackingService';
 import '../components/reflections/reflections.css';
 
 export default function Reflections() {
@@ -164,6 +165,56 @@ export default function Reflections() {
       (l) => l.title.toLowerCase().includes(term) || l.content.toLowerCase().includes(term)
     );
   }, [letters, searchTerm]);
+
+  // Debounced search tracking
+  useEffect(() => {
+    if (!searchTerm.trim()) return;
+    const timer = setTimeout(() => {
+      userTrackingService.trackSearch({
+        section: 'reflections',
+        searchTerm: searchTerm,
+        resultCount: activeTab === 'feelings' ? filteredFeelings.length : filteredLetters.length,
+      });
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [searchTerm, activeTab, filteredFeelings.length, filteredLetters.length]);
+
+  // Tab & Sort filter tracking
+  useEffect(() => {
+    userTrackingService.trackFilter({
+      section: 'reflections',
+      filterType: 'tab',
+      selectedValue: activeTab,
+    });
+  }, [activeTab]);
+
+  useEffect(() => {
+    userTrackingService.trackFilter({
+      section: 'reflections',
+      filterType: 'sortOrder',
+      selectedValue: sortOrder,
+    });
+  }, [sortOrder]);
+
+  const handleSelectFeeling = (feeling: UserFeelingRef) => {
+    userTrackingService.trackItemOpen({
+      itemId: feeling.id,
+      itemType: 'user_feeling',
+      title: feeling.content ? feeling.content.slice(0, 30) : 'Feeling Entry',
+      section: 'reflections',
+    });
+    setSelectedFeeling(feeling);
+  };
+
+  const handleSelectLetter = (letter: UserLetterRef) => {
+    userTrackingService.trackItemOpen({
+      itemId: letter.id,
+      itemType: 'user_letter',
+      title: letter.title || 'Written Letter',
+      section: 'reflections',
+    });
+    setSelectedLetter(letter);
+  };
 
   // 1. Logged-out State (Atmospheric Journal Gate)
   if (!currentUser) {
@@ -493,7 +544,7 @@ export default function Reflections() {
                       type="feeling"
                       item={feeling}
                       index={idx}
-                      onSelect={() => setSelectedFeeling(feeling)}
+                      onSelect={() => handleSelectFeeling(feeling)}
                     />
                   </ScrollFocusReveal>
                 ))}
@@ -590,7 +641,7 @@ export default function Reflections() {
                       type="letter"
                       item={letter}
                       index={idx}
-                      onSelect={() => setSelectedLetter(letter)}
+                      onSelect={() => handleSelectLetter(letter)}
                     />
                   </ScrollFocusReveal>
                 ))}

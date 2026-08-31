@@ -27,6 +27,11 @@ import {
 import { AdminOverview } from '../components/admin/AdminOverview';
 import { AdminActivityFeed } from '../components/admin/AdminActivityFeed';
 import { AdminUsersList } from '../components/admin/AdminUsersList';
+import {
+  AdminActivityOverview,
+  AdminLiveActivity,
+  AdminUserDetail,
+} from '../components/admin/tracking';
 import { ActivityDetailModal } from '../components/admin/ActivityDetailModal';
 import { AdminFeelingsInbox } from '../components/admin/AdminFeelingsInbox';
 import { AdminLettersInbox } from '../components/admin/AdminLettersInbox';
@@ -36,8 +41,21 @@ import { AdminDoodlesDashboard } from '../components/admin/doodles';
 import { AdminNotes365Preview } from '../components/admin/preview';
 import { AdminNotificationQueue } from '../components/admin/AdminNotificationQueue';
 import { AdminHeader } from '../components/admin/header';
+import { Radio } from 'lucide-react';
 
-type AdminTab = 'overview' | 'activity' | 'bts' | 'doodles' | 'notifications' | 'preview' | 'users' | 'feelings' | 'letters' | 'content' | 'settings';
+type AdminTab =
+  | 'overview'
+  | 'live_activity'
+  | 'activity'
+  | 'bts'
+  | 'doodles'
+  | 'notifications'
+  | 'preview'
+  | 'users'
+  | 'feelings'
+  | 'letters'
+  | 'content'
+  | 'settings';
 
 export default function Admin() {
   const { currentUser, userProfile, isAdmin, logout } = useAuth();
@@ -97,13 +115,16 @@ export default function Admin() {
     loadData();
   }, [activityFilter]);
 
+  const [selectedUserDetailId, setSelectedUserDetailId] = useState<string | null>(null);
+
   const navItems: { id: AdminTab; label: string; icon: React.ElementType; badge?: string }[] = [
     { id: 'overview' as AdminTab, label: 'Overview', icon: LayoutDashboard },
-    { id: 'activity' as AdminTab, label: 'Activity', icon: Activity },
+    { id: 'live_activity' as AdminTab, label: 'Live Activity', icon: Radio, badge: 'LIVE' },
+    { id: 'activity' as AdminTab, label: 'Activity Log', icon: Activity },
     { id: 'bts' as AdminTab, label: 'BTS Activity', icon: Film, badge: 'NEW' },
     { id: 'doodles' as AdminTab, label: 'Doodles', icon: Pen },
     { id: 'notifications' as AdminTab, label: 'Notifications', icon: Bell, badge: 'QUEUE' },
-    { id: 'users' as AdminTab, label: 'Users', icon: Users },
+    { id: 'users' as AdminTab, label: 'Users & Activity', icon: Users },
     { id: 'feelings' as AdminTab, label: 'Feelings', icon: Heart },
     { id: 'letters' as AdminTab, label: 'Letters', icon: Mail },
     { id: 'content' as AdminTab, label: 'Content', icon: FolderKanban },
@@ -168,11 +189,25 @@ export default function Admin() {
               stats={stats}
               loading={statsLoading}
               onRefresh={loadData}
-              onNavigateToActivity={() => setActiveTab('activity')}
+              onNavigateToActivity={() => setActiveTab('live_activity')}
+              onNavigateToUsers={() => setActiveTab('users')}
               onNavigateToBts={() => setActiveTab('bts')}
               onNavigateToFeelings={() => setActiveTab('feelings')}
               onNavigateToLetters={() => setActiveTab('letters')}
             />
+          )}
+
+          {activeTab === 'live_activity' && (
+            selectedUserDetailId ? (
+              <AdminUserDetail
+                userId={selectedUserDetailId}
+                onBack={() => setSelectedUserDetailId(null)}
+              />
+            ) : (
+              <AdminLiveActivity
+                onViewUserDetails={(userId) => setSelectedUserDetailId(userId)}
+              />
+            )
           )}
 
           {activeTab === 'activity' && (
@@ -191,9 +226,7 @@ export default function Admin() {
 
           {activeTab === 'notifications' && <AdminNotificationQueue />}
 
-          {activeTab === 'users' && (
-            <AdminUsersList users={users} loading={usersLoading} />
-          )}
+          {activeTab === 'users' && <AdminActivityOverview />}
 
           {activeTab === 'feelings' && <AdminFeelingsInbox />}
 

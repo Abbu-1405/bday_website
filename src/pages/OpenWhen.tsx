@@ -9,6 +9,7 @@ import { getManagedOpenWhenLetters } from '../services/contentService';
 import { useTheme, useStarlitCatBridge } from '../hooks';
 import { useSfx } from '../contexts/SfxContext';
 import { cn } from '../utils';
+import { userTrackingService } from '../services/userTrackingService';
 import {
   VintageOrnamentalDivider,
   VintageCornerFlourish,
@@ -41,17 +42,43 @@ export default function OpenWhen() {
     ? letters.findIndex((l) => l.id === selectedLetter.id)
     : -1;
 
+  const handleSelectLetter = (l: OpenWhenLetter | null) => {
+    if (l) {
+      playSfx('openWhen');
+      recordDiscovery('openWhen', l.id);
+      userTrackingService.trackItemOpen({
+        itemId: l.id,
+        itemType: 'open_when_letter',
+        title: l.title,
+        itemNumber: l.order,
+        section: 'open_when',
+      });
+      if (l.image) {
+        userTrackingService.trackMediaView({
+          mediaId: l.id,
+          mediaType: 'image',
+          parentItemId: l.id,
+          title: l.title,
+          section: 'open_when',
+        });
+      }
+    }
+    setSelectedLetter(l);
+  };
+
   const handlePrevLetter = () => {
     if (selectedIndex > 0) {
       playSfx('pageTurn');
-      setSelectedLetter(letters[selectedIndex - 1]);
+      const prev = letters[selectedIndex - 1];
+      handleSelectLetter(prev);
     }
   };
 
   const handleNextLetter = () => {
     if (selectedIndex >= 0 && selectedIndex < letters.length - 1) {
       playSfx('pageTurn');
-      setSelectedLetter(letters[selectedIndex + 1]);
+      const next = letters[selectedIndex + 1];
+      handleSelectLetter(next);
     }
   };
 
@@ -184,13 +211,7 @@ export default function OpenWhen() {
           <ScrollFocusReveal key={letter.id} className="h-full">
             <OpenWhenCard
               letter={letter}
-              onSelect={(l) => {
-                if (l) {
-                  playSfx('openWhen');
-                  recordDiscovery('openWhen', l.id);
-                }
-                setSelectedLetter(l);
-              }}
+              onSelect={handleSelectLetter}
             />
           </ScrollFocusReveal>
         ))}

@@ -14,6 +14,7 @@ import { getManagedMoments } from '../services/contentService';
 import { useTheme, useStarlitCatBridge } from '../hooks';
 import { useSfx } from '../contexts/SfxContext';
 import { cn } from '../utils';
+import { userTrackingService } from '../services/userTrackingService';
 
 export default function Moments() {
   const { theme } = useTheme();
@@ -56,17 +57,41 @@ export default function Moments() {
     ? orderedMoments.findIndex((m) => m.id === selectedMoment.id)
     : -1;
 
+  const handleSelectMoment = (m: Moment | null) => {
+    if (m) {
+      playSfx('photoOpen');
+      recordDiscovery('moments', m.id);
+      userTrackingService.trackItemOpen({
+        itemId: m.id,
+        itemType: 'moment',
+        title: m.title,
+        itemNumber: m.order,
+        section: 'moments',
+      });
+      userTrackingService.trackMediaView({
+        mediaId: m.id,
+        mediaType: 'image',
+        parentItemId: m.id,
+        title: m.title,
+        section: 'moments',
+      });
+    }
+    setSelectedMoment(m);
+  };
+
   const handlePrevMoment = () => {
     if (selectedIndex > 0) {
       playSfx('pageTurn');
-      setSelectedMoment(orderedMoments[selectedIndex - 1]);
+      const prev = orderedMoments[selectedIndex - 1];
+      handleSelectMoment(prev);
     }
   };
 
   const handleNextMoment = () => {
     if (selectedIndex >= 0 && selectedIndex < orderedMoments.length - 1) {
       playSfx('pageTurn');
-      setSelectedMoment(orderedMoments[selectedIndex + 1]);
+      const next = orderedMoments[selectedIndex + 1];
+      handleSelectMoment(next);
     }
   };
 
@@ -192,13 +217,7 @@ export default function Moments() {
               <ScrollFocusReveal className="w-full">
                 <FeaturedMomentCard
                   moment={featuredMoment}
-                  onSelect={(m) => {
-                    if (m) {
-                      playSfx('photoOpen');
-                      recordDiscovery('moments', m.id);
-                    }
-                    setSelectedMoment(m);
-                  }}
+                  onSelect={handleSelectMoment}
                 />
               </ScrollFocusReveal>
             </div>
@@ -235,13 +254,7 @@ export default function Moments() {
                     <MomentCard
                       moment={moment}
                       aspectRatio={aspectRatio}
-                      onSelect={(m) => {
-                        if (m) {
-                          playSfx('photoOpen');
-                          recordDiscovery('moments', m.id);
-                        }
-                        setSelectedMoment(m);
-                      }}
+                      onSelect={handleSelectMoment}
                     />
                   </ScrollFocusReveal>
                 );

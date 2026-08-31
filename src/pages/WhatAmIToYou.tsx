@@ -17,6 +17,7 @@ import { ROUTES } from '../constants';
 import { submitFeeling, submitLetter } from '../services';
 import { DoodleItem } from '../types/doodle';
 import { KeepsakeReveal } from '../components/whatAmIToYou';
+import { userTrackingService } from '../services/userTrackingService';
 import '../components/whatAmIToYou/whatAmIToYou.css';
 
 export default function WhatAmIToYou() {
@@ -33,6 +34,14 @@ export default function WhatAmIToYou() {
   // Mode selection: 'feeling' (quiet thought) vs 'letter' (written letter)
   const [activeMode, setActiveMode] = useState<'feeling' | 'letter'>('feeling');
 
+  React.useEffect(() => {
+    userTrackingService.trackFilter({
+      section: 'what_am_i_to_you',
+      filterType: 'mode',
+      selectedValue: activeMode,
+    });
+  }, [activeMode]);
+
   const handleGoogleLogin = async () => {
     if (isLoggingIn) return;
     setIsLoggingIn(true);
@@ -42,6 +51,12 @@ export default function WhatAmIToYou() {
     } catch (err: any) {
       if (err.message && !err.message.includes('cancelled')) {
         setAuthError(err.message);
+        userTrackingService.trackError({
+          category: 'auth',
+          message: err.message,
+          section: 'what_am_i_to_you',
+          operation: 'loginWithGoogle',
+        });
       }
     } finally {
       setIsLoggingIn(false);
@@ -76,6 +91,12 @@ export default function WhatAmIToYou() {
     } catch (err: any) {
       console.error('Failed to submit feeling:', err);
       setFeelingError('Unable to send. Please check your connection and try again.');
+      userTrackingService.trackError({
+        category: 'user_submission',
+        message: err.message || 'Failed to submit feeling',
+        section: 'what_am_i_to_you',
+        operation: 'submitFeeling',
+      });
     } finally {
       setIsSubmittingFeeling(false);
     }
@@ -97,6 +118,12 @@ export default function WhatAmIToYou() {
     } catch (err: any) {
       console.error('Failed to submit letter:', err);
       setLetterError('Unable to send letter. Please check your connection and try again.');
+      userTrackingService.trackError({
+        category: 'user_submission',
+        message: err.message || 'Failed to submit letter',
+        section: 'what_am_i_to_you',
+        operation: 'submitLetter',
+      });
     } finally {
       setIsSubmittingLetter(false);
     }

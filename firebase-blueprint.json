@@ -578,6 +578,120 @@
         "version"
       ]
     },
+    "UserSession": {
+      "title": "User Tracking Session",
+      "description": "Authenticated user session metadata, device details, duration, and activity lifecycle",
+      "type": "object",
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "description": "Unique session identifier for the browser/tab instance"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Firebase user ID of the authenticated user owning this session"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "ended"],
+          "description": "Active or ended lifecycle status of the session"
+        },
+        "startedAt": {
+          "type": "string",
+          "description": "Server timestamp when session began"
+        },
+        "lastActivityAt": {
+          "type": "string",
+          "description": "Server timestamp of most recent user activity"
+        },
+        "endedAt": {
+          "type": "string",
+          "description": "Server timestamp when session ended"
+        },
+        "durationSeconds": {
+          "type": "number",
+          "description": "Total duration of the session in seconds"
+        },
+        "initialRoute": {
+          "type": "string",
+          "description": "First route path navigated during the session"
+        },
+        "currentRoute": {
+          "type": "string",
+          "description": "Current or final route path visited"
+        },
+        "device": {
+          "type": "object",
+          "description": "Normalized, non-invasive device, browser, OS, and screen metadata"
+        },
+        "eventCount": {
+          "type": "number",
+          "description": "Total number of batched events recorded during the session"
+        },
+        "createdAtClientEpoch": {
+          "type": "number",
+          "description": "Client timestamp (milliseconds) when session was created"
+        },
+        "lastActivityClientEpoch": {
+          "type": "number",
+          "description": "Client timestamp (milliseconds) of most recent interaction"
+        }
+      },
+      "required": [
+        "sessionId",
+        "userId",
+        "status"
+      ]
+    },
+    "SessionEvent": {
+      "title": "Session Tracking Event",
+      "description": "Granular user event batched during an active tracking session",
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "description": "Unique event identifier"
+        },
+        "sessionId": {
+          "type": "string",
+          "description": "Session ID this event belongs to"
+        },
+        "userId": {
+          "type": "string",
+          "description": "User ID performing the event"
+        },
+        "type": {
+          "type": "string",
+          "description": "Event type identifier"
+        },
+        "category": {
+          "type": "string",
+          "description": "Event category"
+        },
+        "route": {
+          "type": "string",
+          "description": "Route path where event occurred"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Server timestamp when event was recorded"
+        },
+        "clientEpoch": {
+          "type": "number",
+          "description": "Client timestamp (milliseconds)"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Non-sensitive metadata payload"
+        }
+      },
+      "required": [
+        "eventId",
+        "sessionId",
+        "userId",
+        "type"
+      ]
+    },
     "CatPreference": {
       "title": "User Cat Preference",
       "description": "User customization preference for a specific cat (custom nickname, visibility, interaction toggles)",
@@ -677,6 +791,14 @@
     "/users/{userId}/photoBooth/{photoId}": {
       "schema": "PhotoBoothMemory",
       "description": "Private collection of photo memories captured by a specific user"
+    },
+    "/users/{userId}/sessions/{sessionId}": {
+      "schema": "UserSession",
+      "description": "Private collection of tracking sessions for a specific authenticated user"
+    },
+    "/users/{userId}/sessions/{sessionId}/events/{eventId}": {
+      "schema": "SessionEvent",
+      "description": "Private sub-collection of batched events within a tracking session"
     }
   }
 }

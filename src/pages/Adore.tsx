@@ -9,6 +9,7 @@ import { recordDiscovery } from '../services/discoveryService';
 import { getManagedAdoreItems } from '../services/contentService';
 import { useTheme } from '../hooks';
 import { useSfx } from '../contexts/SfxContext';
+import { userTrackingService } from '../services/userTrackingService';
 
 export default function Adore() {
   const { theme } = useTheme();
@@ -48,21 +49,59 @@ export default function Adore() {
       ? adoreItems
       : adoreItems.filter((item) => item.category === activeCategory);
 
+  // Filter tracking
+  useEffect(() => {
+    if (activeCategory !== 'All') {
+      userTrackingService.trackFilter({
+        section: 'adore',
+        filterType: 'category',
+        selectedValue: activeCategory,
+        resultCount: filteredItems.length,
+      });
+    }
+  }, [activeCategory, filteredItems.length]);
+
   const selectedIndex = selectedItem
     ? filteredItems.findIndex((item) => item.id === selectedItem.id)
     : -1;
 
+  const handleSelectItem = (item: AdoreItem | null) => {
+    if (item) {
+      playSfx('photoOpen');
+      recordDiscovery('adore', item.id);
+      userTrackingService.trackItemOpen({
+        itemId: item.id,
+        itemType: 'adore',
+        title: item.title,
+        itemNumber: item.order,
+        section: 'adore',
+      });
+      if (item.image) {
+        userTrackingService.trackMediaView({
+          mediaId: item.id,
+          mediaType: 'image',
+          parentItemId: item.id,
+          title: item.title,
+          section: 'adore',
+        });
+      }
+    }
+    setSelectedItem(item);
+  };
+
   const handlePrevItem = () => {
     if (selectedIndex > 0) {
       playSfx('pageTurn');
-      setSelectedItem(filteredItems[selectedIndex - 1]);
+      const prev = filteredItems[selectedIndex - 1];
+      handleSelectItem(prev);
     }
   };
 
   const handleNextItem = () => {
     if (selectedIndex >= 0 && selectedIndex < filteredItems.length - 1) {
       playSfx('pageTurn');
-      setSelectedItem(filteredItems[selectedIndex + 1]);
+      const next = filteredItems[selectedIndex + 1];
+      handleSelectItem(next);
     }
   };
 
@@ -206,13 +245,7 @@ export default function Adore() {
           <ScrollFocusReveal key={item.id} className="h-full">
             <AdoreCard
               item={item}
-              onSelect={(selected) => {
-                if (selected) {
-                  playSfx('photoOpen');
-                  recordDiscovery('adore', selected.id);
-                }
-                setSelectedItem(selected);
-              }}
+              onSelect={handleSelectItem}
             />
           </ScrollFocusReveal>
         ))}

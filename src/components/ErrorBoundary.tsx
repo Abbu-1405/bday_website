@@ -1,5 +1,6 @@
 import React, { ErrorInfo, ReactNode } from 'react';
 import { RotateCw, Sparkles } from 'lucide-react';
+import { userTrackingService } from '../services/userTrackingService';
 
 interface Props {
   children: ReactNode;
@@ -28,6 +29,13 @@ export class ErrorBoundary extends React.Component<Props, State> {
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('[STARRY CRASH SHIELD] Uncaught error caught by ErrorBoundary:', error, errorInfo);
     this.setState({ errorInfo });
+    try {
+      userTrackingService.trackError({
+        category: 'uncaught_react_boundary',
+        message: error?.message || 'React render exception',
+        component: errorInfo?.componentStack?.slice(0, 200) || 'ErrorBoundary',
+      });
+    } catch {}
   }
 
   private handleReload = () => {

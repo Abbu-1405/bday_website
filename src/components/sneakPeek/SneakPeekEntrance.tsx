@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { SneakPeekLanding } from './SneakPeekLanding';
 import { SneakPeekLetter } from './SneakPeekLetter';
+import { userTrackingService } from '../../services/userTrackingService';
 
 export const SNEAK_PEEK_SKIPPED_STORAGE_KEY = 'starlit_sneak_peek_skipped';
 
@@ -21,6 +22,11 @@ export const SneakPeekEntrance: React.FC<SneakPeekEntranceProps> = ({
   );
   const [isDismissing, setIsDismissing] = useState<boolean>(false);
 
+  // Track entrance view on mount
+  useEffect(() => {
+    userTrackingService.trackSneakPeek('viewed');
+  }, []);
+
   // Check if reduced motion is preferred
   const prefersReducedMotion =
     typeof window !== 'undefined' &&
@@ -35,6 +41,7 @@ export const SneakPeekEntrance: React.FC<SneakPeekEntranceProps> = ({
   }, []);
 
   const handleSkip = useCallback(() => {
+    userTrackingService.trackSneakPeek('skipped');
     try {
       // Record skip state to localStorage
       localStorage.setItem(SNEAK_PEEK_SKIPPED_STORAGE_KEY, new Date().toISOString());
@@ -51,6 +58,7 @@ export const SneakPeekEntrance: React.FC<SneakPeekEntranceProps> = ({
   }, [onComplete, prefersReducedMotion]);
 
   const handleGetStarted = useCallback(() => {
+    userTrackingService.trackSneakPeek('completed');
     setPhase('closing');
     setIsDismissing(true);
     const duration = prefersReducedMotion ? 50 : 700;

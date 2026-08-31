@@ -13,6 +13,7 @@ import { useTheme, useAuth } from '../hooks';
 import { useAudio } from '../contexts';
 import { useSfx } from '../contexts/SfxContext';
 import { recordBtsPageOpen, recordBtsRandom } from '../services';
+import { userTrackingService } from '../services/userTrackingService';
 import { cn } from '../utils';
 import { Film, RotateCcw } from 'lucide-react';
 
@@ -94,6 +95,31 @@ export default function Bts() {
     });
   }, [activeCategory, searchQuery]);
 
+  // Debounced search tracking
+  useEffect(() => {
+    if (!searchQuery.trim()) return;
+    const timer = setTimeout(() => {
+      userTrackingService.trackSearch({
+        section: 'bts',
+        searchTerm: searchQuery,
+        resultCount: filteredItems.length,
+      });
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [searchQuery, filteredItems.length]);
+
+  // Filter category tracking
+  useEffect(() => {
+    if (activeCategory !== 'all') {
+      userTrackingService.trackFilter({
+        section: 'bts',
+        filterType: 'category',
+        selectedValue: activeCategory,
+        resultCount: filteredItems.length,
+      });
+    }
+  }, [activeCategory, filteredItems.length]);
+
   // Handle Random BTS action
   const handleRandomBts = () => {
     playMagicalClick();
@@ -101,12 +127,25 @@ export default function Bts() {
     if (candidateList.length === 0) return;
     const randomIndex = Math.floor(Math.random() * candidateList.length);
     const chosenItem = candidateList[randomIndex];
-    setSelectedItem(chosenItem);
+    handleOpenItem(chosenItem);
     recordBtsRandom(chosenItem);
   };
 
   const handleOpenItem = (item: BtsItem) => {
     playSfx('photoOpen');
+    userTrackingService.trackItemOpen({
+      itemId: item.id,
+      itemType: 'bts_item',
+      title: item.title,
+      section: 'bts',
+    });
+    userTrackingService.trackMediaView({
+      mediaId: item.id,
+      mediaType: item.type,
+      parentItemId: item.id,
+      title: item.title,
+      section: 'bts',
+    });
     setSelectedItem(item);
   };
 

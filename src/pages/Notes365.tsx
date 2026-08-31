@@ -20,6 +20,7 @@ import {
 } from '../utils';
 import { useTheme } from '../hooks';
 import { useSfx } from '../contexts';
+import { userTrackingService } from '../services/userTrackingService';
 
 const MONTH_NAMES = [
   'January',
@@ -203,6 +204,64 @@ export default function Notes365() {
 
   const todayDate = actualTodayStr;
 
+  // Search tracking with debounce
+  React.useEffect(() => {
+    if (!searchQuery.trim()) return;
+    const timer = setTimeout(() => {
+      userTrackingService.trackSearch({
+        section: 'notes_365',
+        searchTerm: searchQuery,
+        resultCount: sortedNotes.length,
+      });
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [searchQuery, sortedNotes.length]);
+
+  // Filter tracking
+  React.useEffect(() => {
+    if (monthScope !== 'current') {
+      userTrackingService.trackFilter({
+        section: 'notes_365',
+        filterType: 'monthScope',
+        selectedValue: monthScope,
+        resultCount: sortedNotes.length,
+      });
+    }
+  }, [monthScope, sortedNotes.length]);
+
+  React.useEffect(() => {
+    if (readFilter !== 'all') {
+      userTrackingService.trackFilter({
+        section: 'notes_365',
+        filterType: 'readFilter',
+        selectedValue: readFilter,
+        resultCount: sortedNotes.length,
+      });
+    }
+  }, [readFilter, sortedNotes.length]);
+
+  React.useEffect(() => {
+    if (favoriteOnly) {
+      userTrackingService.trackFilter({
+        section: 'notes_365',
+        filterType: 'favoriteOnly',
+        selectedValue: 'true',
+        resultCount: sortedNotes.length,
+      });
+    }
+  }, [favoriteOnly, sortedNotes.length]);
+
+  React.useEffect(() => {
+    if (sortBy !== 'oldest') {
+      userTrackingService.trackFilter({
+        section: 'notes_365',
+        filterType: 'sortBy',
+        selectedValue: sortBy,
+        resultCount: sortedNotes.length,
+      });
+    }
+  }, [sortBy, sortedNotes.length]);
+
   const handleSelectNote = (note: Note365, isPageTurn = false) => {
     if (note.isUnlocked) {
       if (isPageTurn) {
@@ -211,6 +270,16 @@ export default function Notes365() {
         playSfx('letterOpen');
       }
       setLockedNotice(null);
+
+      // Track note open / revisit
+      userTrackingService.trackItemOpen({
+        itemId: note.id,
+        itemType: 'note',
+        title: note.title,
+        itemNumber: note.dayIndex || note.date,
+        section: 'notes_365',
+      });
+
       // Mark as read when opened if not read already
       if (!note.isRead) {
         notesProgressService.markNoteAsRead(note.id);

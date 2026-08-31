@@ -35,6 +35,7 @@ import {
 import { useTheme, useAuth } from '../hooks';
 import { useAudio } from '../contexts';
 import { cn } from '../utils';
+import { userTrackingService } from '../services/userTrackingService';
 
 // Helper to map icon names to Lucide Icon components safely
 const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
@@ -56,6 +57,14 @@ export default function Journey() {
   const { currentUser } = useAuth();
   const { playMagicalClick, playShimmer } = useAudio();
   const [activeTab, setActiveTab] = useState<'stages' | 'achievements'>('stages');
+
+  React.useEffect(() => {
+    userTrackingService.trackFilter({
+      section: 'journey',
+      filterType: 'tab',
+      selectedValue: activeTab,
+    });
+  }, [activeTab]);
 
   const isWhimsical = theme === 'whimsical-scrapbook';
   const isMidnight = theme === 'midnight-journal';

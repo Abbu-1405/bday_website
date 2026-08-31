@@ -13,3 +13,4 @@ export * from './doodle';
 export * from './notification';
 export * from './catMeme';
 export * from './sfx';
+export * from './tracking';

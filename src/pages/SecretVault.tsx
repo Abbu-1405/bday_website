@@ -27,6 +27,7 @@ import {
 import { recordDiscovery } from '../services/discoveryService';
 import { evaluateBadges } from '../services/badgeService';
 import { useStarlitCatBridge } from '../hooks';
+import { userTrackingService } from '../services/userTrackingService';
 
 export default function SecretVault() {
   const [secrets, setSecrets] = useState<SecretItem[]>(sampleSecrets);
@@ -73,6 +74,12 @@ export default function SecretVault() {
   const handleDiscover = (secret: SecretItem) => {
     playSfx('secretUnlock');
     recordDiscovery('secret', secret.id);
+    userTrackingService.trackItemOpen({
+      itemId: secret.id,
+      itemType: 'secret',
+      title: secret.title,
+      section: 'secret_vault',
+    });
     setDiscoveredIds(getDiscoveredSecretIds());
     setTimestamps(getDiscoveredTimestamps());
 
@@ -228,7 +235,15 @@ export default function SecretVault() {
                     secret={secret}
                     isDiscovered={isDiscovered}
                     onDiscover={handleDiscover}
-                    onOpen={(s) => setSelectedSecret(s)}
+                    onOpen={(s) => {
+                      userTrackingService.trackItemOpen({
+                        itemId: s.id,
+                        itemType: 'secret',
+                        title: s.title,
+                        section: 'secret_vault',
+                      });
+                      setSelectedSecret(s);
+                    }}
                   />
                 </ScrollFocusReveal>
               );

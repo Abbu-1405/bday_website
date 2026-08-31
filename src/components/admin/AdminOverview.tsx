@@ -18,6 +18,7 @@ interface AdminOverviewProps {
   loading: boolean;
   onRefresh: () => void;
   onNavigateToActivity: () => void;
+  onNavigateToUsers?: () => void;
   onNavigateToFeelings?: () => void;
   onNavigateToLetters?: () => void;
   onNavigateToBts?: () => void;
@@ -28,6 +29,7 @@ export const AdminOverview: React.FC<AdminOverviewProps> = ({
   loading,
   onRefresh,
   onNavigateToActivity,
+  onNavigateToUsers,
   onNavigateToFeelings,
   onNavigateToLetters,
   onNavigateToBts,
@@ -38,7 +40,7 @@ export const AdminOverview: React.FC<AdminOverviewProps> = ({
       value: stats.totalUsers,
       icon: Users,
       color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
-      onClick: undefined,
+      onClick: onNavigateToUsers,
     },
     {
       label: 'Total Activity Events',

@@ -2,6 +2,7 @@ import { GoogleAuthProvider, signInWithPopup, signOut, User } from 'firebase/aut
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, isFirebaseConfigured } from '../firebase';
 import { UserProfile } from '../types';
+import { userTrackingService } from './userTrackingService';
 
 let isPopupActive = false;
 
@@ -128,6 +129,7 @@ export const loginWithGoogle = async (): Promise<User> => {
 export const logoutUser = async (): Promise<void> => {
   if (!isFirebaseConfigured) return;
   try {
+    userTrackingService.handleUserLogout();
     await signOut(auth);
     console.log('[AUTH] User signed out successfully');
   } catch (err) {

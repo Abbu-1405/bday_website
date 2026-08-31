@@ -17,6 +17,7 @@ import { Button } from '../Button';
 import { CrossFadeImage } from '../CrossFadeImage';
 import { useAudio } from '../../contexts';
 import { useSfx } from '../../contexts/SfxContext';
+import { userTrackingService } from '../../services/userTrackingService';
 
 export interface NoteMediaProps extends React.HTMLAttributes<HTMLDivElement> {
   media?: NoteMediaItem; // Legacy single item prop
@@ -324,6 +325,13 @@ export const NoteMedia: React.FC<NoteMediaProps> = ({
                 disableSfx={true}
                 onClick={() => {
                   playSfx('photoOpen');
+                  userTrackingService.trackMediaView({
+                    mediaId: mediaItem.id || filename,
+                    mediaType: 'image',
+                    parentItemId: noteDate,
+                    title,
+                    section: 'notes_365',
+                  });
                   window.open(imageSrc, '_blank', 'noopener,noreferrer');
                 }}
                 leftIcon={<Eye className="h-3.5 w-3.5" />}
@@ -360,7 +368,16 @@ export const NoteMedia: React.FC<NoteMediaProps> = ({
               playsInline
               preload="metadata"
               poster={mediaItem.thumbnail}
-              onPlay={duckAudio}
+              onPlay={() => {
+                duckAudio();
+                userTrackingService.trackMediaView({
+                  mediaId: mediaItem.id || filename,
+                  mediaType: 'video',
+                  parentItemId: noteDate,
+                  title,
+                  section: 'notes_365',
+                });
+              }}
               onPause={unduckAudio}
               onEnded={unduckAudio}
               className="w-full max-h-[460px] aspect-video object-contain rounded-[var(--radius-md)]"
@@ -444,7 +461,16 @@ export const NoteMedia: React.FC<NoteMediaProps> = ({
           <audio
             controls
             preload="metadata"
-            onPlay={duckAudio}
+            onPlay={() => {
+              duckAudio();
+              userTrackingService.trackMediaView({
+                mediaId: mediaItem.id || filename,
+                mediaType: 'audio',
+                parentItemId: noteDate,
+                title,
+                section: 'notes_365',
+              });
+            }}
             onPause={unduckAudio}
             onEnded={unduckAudio}
             className="w-full h-10 accent-[var(--color-primary)] focus:outline-none"
@@ -474,6 +500,13 @@ export const NoteMedia: React.FC<NoteMediaProps> = ({
 
     const handleOpenDoc = () => {
       setDocOpened(true);
+      userTrackingService.trackMediaView({
+        mediaId: mediaItem.id || filename,
+        mediaType: 'document',
+        parentItemId: noteDate,
+        title,
+        section: 'notes_365',
+      });
       if (docSrc && docSrc !== '#') {
         window.open(docSrc, '_blank', 'noopener,noreferrer');
       }

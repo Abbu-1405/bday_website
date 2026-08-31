@@ -54,6 +54,14 @@ service cloud.firestore {
       allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
     }
 
+    match /{path=**}/sessions/{sessionId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+    }
+
+    match /{path=**}/events/{eventId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+    }
+
     // Admin metadata & read states (Admin only write, signed-in read for global flags)
     match /adminMeta/{document=**} {
       allow read: if isSignedIn() || isAdmin();
@@ -183,6 +191,19 @@ service cloud.firestore {
       match /catEasterEggDiscoveries/{eggId} {
         allow read: if isOwner(userId) || isAdmin();
         allow create, update, delete: if isOwner(userId) || isAdmin();
+      }
+
+      // User Sessions & Events sub-collections (User Activity Tracking Foundation)
+      match /sessions/{sessionId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create, update: if isOwner(userId) && request.resource.data.userId == userId;
+        allow delete: if isAdmin();
+
+        match /events/{eventId} {
+          allow read: if isOwner(userId) || isAdmin();
+          allow create: if isOwner(userId) && request.resource.data.userId == userId;
+          allow update, delete: if isAdmin();
+        }
       }
     }
   }
