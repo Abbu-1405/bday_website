@@ -46,5 +46,6 @@ export * from './scroll';
 export * from './ambient';
 export * from './CrossFadeImage';
 export * from './AnimatedProgressNumber';
+export * from './sneakPeek';
 
 
