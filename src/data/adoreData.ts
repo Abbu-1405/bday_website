@@ -157,7 +157,7 @@ ellina or neetho kaassepu call maatladina that is enough for me.`,
   {
     id: 'adore-19',
     order: 19,
-    title: '19. Sharing the same last 2 grain cells',
+    title: '19. Sharing the same last 2 brain cells',
     shortDescription: 'Ekadiki ayina bayatiki podaam anthe you are always ready nd always ready in experimenting...',
     content: `Ekadiki ayina bayatiki podaam anthe you are always ready nd always ready
 in experimenting new things weather they maybe places or food items or

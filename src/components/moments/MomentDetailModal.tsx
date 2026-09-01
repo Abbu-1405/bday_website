@@ -6,7 +6,6 @@ import {
   ChevronRight,
   ArrowLeft,
   X,
-  Sparkles,
   Camera,
 } from 'lucide-react';
 import { Moment } from '../../types';
@@ -88,18 +87,18 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
           background: isLetterArchive
             ? 'linear-gradient(155deg, #FBF7F0 0%, #F5EDE0 100%)'
             : isScrapbook
-            ? 'linear-gradient(155deg, rgba(16, 28, 19, 0.96) 0%, rgba(10, 20, 13, 0.98) 100%)'
-            : 'linear-gradient(155deg, rgba(13, 23, 40, 0.96) 0%, rgba(7, 14, 26, 0.98) 100%)',
+            ? 'linear-gradient(155deg, #FAF1DF 0%, #F5E8D0 100%)'
+            : 'linear-gradient(155deg, #142238 0%, #101A2B 100%)',
           borderColor: isLetterArchive
             ? 'rgba(138, 110, 89, 0.38)'
             : isScrapbook
-            ? 'rgba(216, 184, 106, 0.3)'
-            : 'rgba(201, 155, 88, 0.32)',
+            ? 'rgba(120, 140, 107, 0.45)'
+            : '#344761',
           boxShadow: isLetterArchive
             ? '0 24px 60px -12px rgba(60, 42, 33, 0.28), 0 0 20px rgba(122, 46, 59, 0.08)'
             : isScrapbook
-            ? '0 24px 60px -12px rgba(0, 0, 0, 0.75), 0 0 30px rgba(79, 107, 72, 0.15)'
-            : '0 24px 60px -12px rgba(0, 0, 0, 0.8), 0 0 30px rgba(201, 155, 88, 0.15)',
+            ? '0 24px 60px -12px rgba(74, 64, 56, 0.25), 0 0 30px rgba(210, 168, 74, 0.15)'
+            : '0 24px 60px -12px rgba(0, 0, 0, 0.85), 0 0 30px rgba(145, 169, 200, 0.12)',
         }}
         onClick={(e) => e.stopPropagation()}
         tabIndex={-1}
@@ -111,8 +110,8 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
             borderColor: isLetterArchive
               ? 'rgba(138, 110, 89, 0.22)'
               : isScrapbook
-              ? 'rgba(216, 184, 106, 0.2)'
-              : 'rgba(201, 155, 88, 0.2)',
+              ? 'rgba(120, 140, 107, 0.3)'
+              : '#273951',
           }}
         >
           <button
@@ -123,8 +122,8 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
               isLetterArchive
                 ? 'text-[#5C4A42] hover:text-[#7A2E3B] hover:bg-[#EDE2D2]/60 focus-visible:ring-[#7A2E3B]'
                 : isScrapbook
-                ? 'text-[#B8C0AE] hover:text-[#D8B86A] hover:bg-[rgba(79,107,72,0.25)] focus-visible:ring-[#D8B86A]'
-                : 'text-[#C2AF99] hover:text-[#E2BD78] hover:bg-[rgba(201,155,88,0.15)] focus-visible:ring-[#C99B58]'
+                ? 'text-[#6D655B] hover:text-[#4A4038] hover:bg-[#E5D1B0]/50 focus-visible:ring-[#788C6B]'
+                : 'text-[#9EADC2] hover:text-[#E9EDF4] hover:bg-[#18273B] focus-visible:ring-[#D6B56C]'
             )}
           >
             <ArrowLeft className="h-4 w-4" />
@@ -144,8 +143,8 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
                   ? isLetterArchive
                     ? 'border-[rgba(138,110,89,0.35)] text-[#5C4A42] hover:bg-[#EDE2D2] hover:text-[#7A2E3B] focus-visible:ring-[#7A2E3B]'
                     : isScrapbook
-                    ? 'border-[rgba(216,184,106,0.3)] text-[#B8C0AE] hover:bg-[rgba(79,107,72,0.3)] hover:text-[#F7F1DF] focus-visible:ring-[#D8B86A]'
-                    : 'border-[rgba(201,155,88,0.3)] text-[#C2AF99] hover:bg-[rgba(201,155,88,0.18)] hover:text-[#F2E4CF] focus-visible:ring-[#C99B58]'
+                    ? 'border-[rgba(120,140,107,0.35)] text-[#6D655B] hover:bg-[#E5D1B0]/60 hover:text-[#4A4038] focus-visible:ring-[#788C6B]'
+                    : 'border-[#344761] text-[#9EADC2] hover:bg-[#18273B] hover:text-[#E9EDF4] focus-visible:ring-[#D6B56C]'
                   : 'border-transparent opacity-35 cursor-not-allowed text-inherit'
               )}
             >
@@ -164,8 +163,8 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
                   ? isLetterArchive
                     ? 'border-[rgba(138,110,89,0.35)] text-[#5C4A42] hover:bg-[#EDE2D2] hover:text-[#7A2E3B] focus-visible:ring-[#7A2E3B]'
                     : isScrapbook
-                    ? 'border-[rgba(216,184,106,0.3)] text-[#B8C0AE] hover:bg-[rgba(79,107,72,0.3)] hover:text-[#F7F1DF] focus-visible:ring-[#D8B86A]'
-                    : 'border-[rgba(201,155,88,0.3)] text-[#C2AF99] hover:bg-[rgba(201,155,88,0.18)] hover:text-[#F2E4CF] focus-visible:ring-[#C99B58]'
+                    ? 'border-[rgba(120,140,107,0.35)] text-[#6D655B] hover:bg-[#E5D1B0]/60 hover:text-[#4A4038] focus-visible:ring-[#788C6B]'
+                    : 'border-[#344761] text-[#9EADC2] hover:bg-[#18273B] hover:text-[#E9EDF4] focus-visible:ring-[#D6B56C]'
                   : 'border-transparent opacity-35 cursor-not-allowed text-inherit'
               )}
             >
@@ -180,8 +179,8 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
                 isLetterArchive
                   ? 'text-[#7A6253] hover:text-[#3B2A20] hover:bg-[#EDE2D2] focus-visible:ring-[#7A2E3B]'
                   : isScrapbook
-                  ? 'text-[#8C9882] hover:text-[#F7F1DF] hover:bg-[rgba(79,107,72,0.25)] focus-visible:ring-[#D8B86A]'
-                  : 'text-[#817568] hover:text-[#F2E4CF] hover:bg-[rgba(201,155,88,0.15)] focus-visible:ring-[#C99B58]'
+                  ? 'text-[#8C8376] hover:text-[#4A4038] hover:bg-[#E5D1B0]/50 focus-visible:ring-[#788C6B]'
+                  : 'text-[#74859D] hover:text-[#E9EDF4] hover:bg-[#18273B] focus-visible:ring-[#D6B56C]'
               )}
               aria-label="Close memory"
               title="Close memory"
@@ -200,8 +199,8 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
                 isLetterArchive
                   ? 'p-2 bg-[#FAF5EC] border border-[rgba(138,110,89,0.32)]'
                   : isScrapbook
-                  ? 'p-2 bg-[rgba(16,28,19,0.85)] border border-[rgba(216,184,106,0.25)]'
-                  : 'p-2 bg-[rgba(12,22,38,0.85)] border border-[rgba(201,155,88,0.25)]'
+                  ? 'p-2 bg-[#F5E8D0] border border-[rgba(120,140,107,0.35)]'
+                  : 'p-2 bg-[#0B1424] border border-[#344761]'
               )}
             >
               <CrossFadeImage
@@ -230,8 +229,8 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
                     isLetterArchive
                       ? 'bg-[#FAF5EC]/95 text-[#7A2E3B] border border-[rgba(138,110,89,0.4)]'
                       : isScrapbook
-                      ? 'bg-[rgba(16,30,20,0.9)] text-[#D8B86A] border border-[rgba(216,184,106,0.4)]'
-                      : 'bg-[rgba(7,14,26,0.9)] text-[#E2BD78] border border-[rgba(201,155,88,0.4)]'
+                      ? 'bg-[#FAF1DF]/95 text-[#788C6B] border border-[rgba(120,140,107,0.4)]'
+                      : 'bg-[#101A2B]/95 text-[#D6B56C] border border-[#344761]'
                   )}
                 >
                   № {String(moment.order).padStart(2, '0')}
@@ -249,8 +248,8 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
               isLetterArchive
                 ? 'text-[#6B5547]'
                 : isScrapbook
-                ? 'text-[#B8C0AE]'
-                : 'text-[#C2AF99]'
+                ? 'text-[#6D655B]'
+                : 'text-[#9EADC2]'
             )}
           >
             <div className="flex items-center gap-2 flex-wrap">
@@ -260,8 +259,8 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
                   isLetterArchive
                     ? 'text-[#7A2E3B]'
                     : isScrapbook
-                    ? 'text-[#D8B86A]'
-                    : 'text-[#E2BD78]'
+                    ? 'text-[#788C6B]'
+                    : 'text-[#D6B56C]'
                 )}
               >
                 <Calendar className="h-3.5 w-3.5" />
@@ -273,24 +272,6 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
                   <span className="inline-flex items-center gap-1">
                     <MapPin className="h-3.5 w-3.5 opacity-80" />
                     {moment.location}
-                  </span>
-                </>
-              )}
-              {moment.momentStrength && (
-                <>
-                  <span className="opacity-40">•</span>
-                  <span
-                    className={cn(
-                      'inline-flex items-center gap-1 font-medium',
-                      isLetterArchive
-                        ? 'text-[#7A2E3B]'
-                        : isScrapbook
-                        ? 'text-[#D8B86A]'
-                        : 'text-[#E2BD78]'
-                    )}
-                  >
-                    <Sparkles className="h-3.5 w-3.5" />
-                    Strength {moment.momentStrength}
                   </span>
                 </>
               )}
@@ -308,8 +289,8 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
               isLetterArchive
                 ? 'text-[#3B2A20]'
                 : isScrapbook
-                ? 'text-[#F7F1DF]'
-                : 'text-[#F2E4CF]'
+                ? 'text-[#4A4038]'
+                : 'text-[#E9EDF4]'
             )}
           >
             {moment.title}
@@ -322,8 +303,8 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
               isLetterArchive
                 ? 'bg-[#EDE2D2]/60 border-[rgba(138,110,89,0.25)] text-[#5C4A42]'
                 : isScrapbook
-                ? 'bg-[rgba(79,107,72,0.2)] border-[rgba(216,184,106,0.25)] text-[#B8C0AE]'
-                : 'bg-[rgba(201,155,88,0.1)] border-[rgba(201,155,88,0.25)] text-[#C2AF99]'
+                ? 'bg-[#F5E8D0] border-[rgba(120,140,107,0.3)] text-[#6D655B]'
+                : 'bg-[#142238] border-[#344761] text-[#C5D0DF]'
             )}
           >
             <p className="text-sm font-serif italic leading-relaxed">
@@ -339,8 +320,8 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
                 background: isLetterArchive
                   ? 'linear-gradient(90deg, transparent, rgba(138, 110, 89, 0.4), transparent)'
                   : isScrapbook
-                  ? 'linear-gradient(90deg, transparent, rgba(216, 184, 106, 0.4), transparent)'
-                  : 'linear-gradient(90deg, transparent, rgba(201, 155, 88, 0.4), transparent)',
+                  ? 'linear-gradient(90deg, transparent, rgba(120, 140, 107, 0.4), transparent)'
+                  : 'linear-gradient(90deg, transparent, #344761, transparent)',
               }}
             />
             <span
@@ -349,8 +330,8 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
                 isLetterArchive
                   ? 'text-[#7A2E3B]'
                   : isScrapbook
-                  ? 'text-[#D8B86A]'
-                  : 'text-[#E2BD78]'
+                  ? 'text-[#D2A84A]'
+                  : 'text-[#D6B56C]'
               )}
             >
               {isScrapbook ? '✿' : '✦'}
@@ -361,8 +342,8 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
                 background: isLetterArchive
                   ? 'linear-gradient(90deg, transparent, rgba(138, 110, 89, 0.4), transparent)'
                   : isScrapbook
-                  ? 'linear-gradient(90deg, transparent, rgba(216, 184, 106, 0.4), transparent)'
-                  : 'linear-gradient(90deg, transparent, rgba(201, 155, 88, 0.4), transparent)',
+                  ? 'linear-gradient(90deg, transparent, rgba(120, 140, 107, 0.4), transparent)'
+                  : 'linear-gradient(90deg, transparent, #344761, transparent)',
               }}
             />
           </div>
@@ -375,8 +356,8 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
             isLetterArchive
               ? 'text-[#3B2A20]'
               : isScrapbook
-              ? 'text-[#EFE6D4]'
-              : 'text-[#E8DBC6]'
+              ? 'text-[#4A4038]'
+              : 'text-[#E9EDF4]'
           )}
         >
           {moment.story.split('\n\n').map((paragraph, index) => (
@@ -391,8 +372,8 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
             borderColor: isLetterArchive
               ? 'rgba(138, 110, 89, 0.22)'
               : isScrapbook
-              ? 'rgba(216, 184, 106, 0.2)'
-              : 'rgba(201, 155, 88, 0.2)',
+              ? 'rgba(120, 140, 107, 0.3)'
+              : '#273951',
           }}
         >
           <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -406,8 +387,8 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
                   ? isLetterArchive
                     ? 'border-[rgba(138,110,89,0.35)] text-[#5C4A42] hover:bg-[#EDE2D2] hover:text-[#7A2E3B] focus-visible:ring-[#7A2E3B]'
                     : isScrapbook
-                    ? 'border-[rgba(216,184,106,0.3)] text-[#B8C0AE] hover:bg-[rgba(79,107,72,0.3)] hover:text-[#F7F1DF] focus-visible:ring-[#D8B86A]'
-                    : 'border-[rgba(201,155,88,0.3)] text-[#C2AF99] hover:bg-[rgba(201,155,88,0.18)] hover:text-[#F2E4CF] focus-visible:ring-[#C99B58]'
+                    ? 'border-[rgba(120,140,107,0.35)] text-[#6D655B] hover:bg-[#E5D1B0]/60 hover:text-[#4A4038] focus-visible:ring-[#788C6B]'
+                    : 'border-[#344761] text-[#9EADC2] hover:bg-[#18273B] hover:text-[#E9EDF4] focus-visible:ring-[#D6B56C]'
                   : 'border-[rgba(138,110,89,0.15)] text-inherit opacity-40 cursor-not-allowed'
               )}
             >
@@ -425,8 +406,8 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
                   ? isLetterArchive
                     ? 'border-[rgba(138,110,89,0.35)] text-[#5C4A42] hover:bg-[#EDE2D2] hover:text-[#7A2E3B] focus-visible:ring-[#7A2E3B]'
                     : isScrapbook
-                    ? 'border-[rgba(216,184,106,0.3)] text-[#B8C0AE] hover:bg-[rgba(79,107,72,0.3)] hover:text-[#F7F1DF] focus-visible:ring-[#D8B86A]'
-                    : 'border-[rgba(201,155,88,0.3)] text-[#C2AF99] hover:bg-[rgba(201,155,88,0.18)] hover:text-[#F2E4CF] focus-visible:ring-[#C99B58]'
+                    ? 'border-[rgba(120,140,107,0.35)] text-[#6D655B] hover:bg-[#E5D1B0]/60 hover:text-[#4A4038] focus-visible:ring-[#788C6B]'
+                    : 'border-[#344761] text-[#9EADC2] hover:bg-[#18273B] hover:text-[#E9EDF4] focus-visible:ring-[#D6B56C]'
                   : 'border-[rgba(138,110,89,0.15)] text-inherit opacity-40 cursor-not-allowed'
               )}
             >
@@ -443,8 +424,8 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
               isLetterArchive
                 ? 'text-[#6B5547] hover:text-[#7A2E3B] hover:bg-[#EDE2D2]/80 focus-visible:ring-[#7A2E3B]'
                 : isScrapbook
-                ? 'text-[#8C9882] hover:text-[#F7F1DF] hover:bg-[rgba(79,107,72,0.3)] focus-visible:ring-[#D8B86A]'
-                : 'text-[#817568] hover:text-[#F2E4CF] hover:bg-[rgba(201,155,88,0.18)] focus-visible:ring-[#C99B58]'
+                ? 'text-[#8C8376] hover:text-[#4A4038] hover:bg-[#E5D1B0]/50 focus-visible:ring-[#788C6B]'
+                : 'text-[#74859D] hover:text-[#E9EDF4] hover:bg-[#18273B] focus-visible:ring-[#D6B56C]'
             )}
           >
             Close Memory

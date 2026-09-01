@@ -127,14 +127,14 @@ export const OpenWhenDetailModal: React.FC<OpenWhenDetailModalProps> = ({
         )}
         style={{
           background: isScrapbook
-            ? 'linear-gradient(155deg, rgba(16, 28, 19, 0.96) 0%, rgba(10, 20, 13, 0.98) 100%)'
-            : 'linear-gradient(155deg, rgba(12, 22, 38, 0.96) 0%, rgba(6, 12, 22, 0.98) 100%)',
+            ? 'linear-gradient(155deg, #FAF1DF 0%, #F5E8D0 100%)'
+            : 'linear-gradient(155deg, #142238 0%, #101A2B 100%)',
           borderColor: isScrapbook
-            ? 'rgba(216, 184, 106, 0.3)'
-            : 'rgba(201, 155, 88, 0.32)',
+            ? 'rgba(120, 140, 107, 0.45)'
+            : '#344761',
           boxShadow: isScrapbook
-            ? '0 24px 60px -12px rgba(0, 0, 0, 0.75), 0 0 30px rgba(79, 107, 72, 0.15)'
-            : '0 24px 60px -12px rgba(0, 0, 0, 0.8), 0 0 30px rgba(201, 155, 88, 0.15)',
+            ? '0 24px 60px -12px rgba(74, 64, 56, 0.25), 0 0 30px rgba(210, 168, 74, 0.15)'
+            : '0 24px 60px -12px rgba(0, 0, 0, 0.85), 0 0 30px rgba(145, 169, 200, 0.12)',
         }}
         onClick={(e) => e.stopPropagation()}
         tabIndex={-1}
@@ -144,8 +144,8 @@ export const OpenWhenDetailModal: React.FC<OpenWhenDetailModalProps> = ({
           className="absolute top-[28%] left-6 right-6 h-[1px] pointer-events-none opacity-25"
           style={{
             background: isScrapbook
-              ? 'linear-gradient(90deg, transparent 0%, rgba(216, 184, 106, 0.4) 20%, rgba(216, 184, 106, 0.4) 80%, transparent 100%)'
-              : 'linear-gradient(90deg, transparent 0%, rgba(201, 155, 88, 0.4) 20%, rgba(201, 155, 88, 0.4) 80%, transparent 100%)',
+              ? 'linear-gradient(90deg, transparent 0%, rgba(120, 140, 107, 0.4) 20%, rgba(120, 140, 107, 0.4) 80%, transparent 100%)'
+              : 'linear-gradient(90deg, transparent 0%, #344761 20%, #344761 80%, transparent 100%)',
           }}
         />
 
@@ -154,8 +154,8 @@ export const OpenWhenDetailModal: React.FC<OpenWhenDetailModalProps> = ({
           className="relative z-10 flex items-center justify-between pb-4 border-b"
           style={{
             borderColor: isScrapbook
-              ? 'rgba(216, 184, 106, 0.2)'
-              : 'rgba(201, 155, 88, 0.2)',
+              ? 'rgba(120, 140, 107, 0.3)'
+              : '#273951',
           }}
         >
           <button
@@ -178,8 +178,8 @@ export const OpenWhenDetailModal: React.FC<OpenWhenDetailModalProps> = ({
                 'p-1.5 rounded border text-xs font-serif transition-colors touch-manipulation',
                 hasPrev
                   ? isScrapbook
-                    ? 'border-[rgba(216,184,106,0.3)] text-[var(--color-text-secondary)] hover:bg-[rgba(79,107,72,0.3)] hover:text-[var(--color-text)]'
-                    : 'border-[rgba(201,155,88,0.3)] text-[var(--color-text-secondary)] hover:bg-[rgba(201,155,88,0.18)] hover:text-[var(--color-text)]'
+                    ? 'border-[rgba(120,140,107,0.35)] text-[#6D655B] hover:bg-[#E5D1B0]/60 hover:text-[#4A4038]'
+                    : 'border-[#344761] text-[#9EADC2] hover:bg-[#18273B] hover:text-[#E9EDF4]'
                   : 'border-[var(--color-border-light)] text-[var(--color-muted)] cursor-not-allowed opacity-40'
               )}
             >
@@ -196,8 +196,8 @@ export const OpenWhenDetailModal: React.FC<OpenWhenDetailModalProps> = ({
                 'p-1.5 rounded border text-xs font-serif transition-colors touch-manipulation',
                 hasNext
                   ? isScrapbook
-                    ? 'border-[rgba(216,184,106,0.3)] text-[var(--color-text-secondary)] hover:bg-[rgba(79,107,72,0.3)] hover:text-[var(--color-text)]'
-                    : 'border-[rgba(201,155,88,0.3)] text-[var(--color-text-secondary)] hover:bg-[rgba(201,155,88,0.18)] hover:text-[var(--color-text)]'
+                    ? 'border-[rgba(120,140,107,0.35)] text-[#6D655B] hover:bg-[#E5D1B0]/60 hover:text-[#4A4038]'
+                    : 'border-[#344761] text-[#9EADC2] hover:bg-[#18273B] hover:text-[#E9EDF4]'
                   : 'border-[var(--color-border-light)] text-[var(--color-muted)] cursor-not-allowed opacity-40'
               )}
             >
@@ -234,12 +234,12 @@ export const OpenWhenDetailModal: React.FC<OpenWhenDetailModalProps> = ({
               className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded border"
               style={{
                 backgroundColor: isScrapbook
-                  ? 'rgba(79, 107, 72, 0.25)'
-                  : 'rgba(201, 155, 88, 0.16)',
+                  ? 'rgba(120, 140, 107, 0.15)'
+                  : '#18273B',
                 borderColor: isScrapbook
-                  ? 'rgba(216, 184, 106, 0.35)'
-                  : 'rgba(201, 155, 88, 0.35)',
-                color: isScrapbook ? '#D8B86A' : '#E2BD78',
+                  ? 'rgba(120, 140, 107, 0.35)'
+                  : '#344761',
+                color: isScrapbook ? '#788C6B' : '#D6B56C',
               }}
             >
               Unfolded
@@ -248,7 +248,7 @@ export const OpenWhenDetailModal: React.FC<OpenWhenDetailModalProps> = ({
 
           <h2
             id="themed-open-when-title"
-            className="text-2xl sm:text-3xl font-serif text-[var(--color-text)] font-normal tracking-tight leading-snug pt-1"
+            className="text-2xl sm:text-3xl font-serif text-[var(--color-text)] font-semibold tracking-tight leading-snug pt-1"
           >
             {letter.title}
           </h2>
@@ -258,11 +258,11 @@ export const OpenWhenDetailModal: React.FC<OpenWhenDetailModalProps> = ({
             className="p-3 rounded-[10px] border space-y-0.5"
             style={{
               backgroundColor: isScrapbook
-                ? 'rgba(79, 107, 72, 0.2)'
-                : 'rgba(201, 155, 88, 0.1)',
+                ? '#F5E8D0'
+                : '#142238',
               borderColor: isScrapbook
-                ? 'rgba(216, 184, 106, 0.25)'
-                : 'rgba(201, 155, 88, 0.25)',
+                ? 'rgba(120, 140, 107, 0.3)'
+                : '#344761',
             }}
           >
             <p className="text-[10px] font-sans font-medium text-[var(--color-muted)] uppercase tracking-wider">
@@ -279,17 +279,17 @@ export const OpenWhenDetailModal: React.FC<OpenWhenDetailModalProps> = ({
               className="h-[1px] flex-1"
               style={{
                 background: isScrapbook
-                  ? 'linear-gradient(90deg, transparent, rgba(216, 184, 106, 0.4), transparent)'
-                  : 'linear-gradient(90deg, transparent, rgba(201, 155, 88, 0.4), transparent)',
+                  ? 'linear-gradient(90deg, transparent, rgba(120, 140, 107, 0.4), transparent)'
+                  : 'linear-gradient(90deg, transparent, #344761, transparent)',
               }}
             />
-            <span className="text-[10px] text-[var(--color-accent)]">✦</span>
+            <span className="text-[10px] text-[var(--color-accent)]">{isScrapbook ? '✿' : '✦'}</span>
             <span
               className="h-[1px] flex-1"
               style={{
                 background: isScrapbook
-                  ? 'linear-gradient(90deg, transparent, rgba(216, 184, 106, 0.4), transparent)'
-                  : 'linear-gradient(90deg, transparent, rgba(201, 155, 88, 0.4), transparent)',
+                  ? 'linear-gradient(90deg, transparent, rgba(120, 140, 107, 0.4), transparent)'
+                  : 'linear-gradient(90deg, transparent, #344761, transparent)',
               }}
             />
           </div>
@@ -312,8 +312,8 @@ export const OpenWhenDetailModal: React.FC<OpenWhenDetailModalProps> = ({
           className="relative z-10 pt-6 mt-6 border-t flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-serif"
           style={{
             borderColor: isScrapbook
-              ? 'rgba(216, 184, 106, 0.2)'
-              : 'rgba(201, 155, 88, 0.2)',
+              ? 'rgba(120, 140, 107, 0.3)'
+              : '#273951',
           }}
         >
           <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -325,8 +325,8 @@ export const OpenWhenDetailModal: React.FC<OpenWhenDetailModalProps> = ({
                 'inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded border flex-1 sm:flex-initial transition-colors touch-manipulation',
                 hasPrev
                   ? isScrapbook
-                    ? 'border-[rgba(216,184,106,0.3)] text-[var(--color-text-secondary)] hover:bg-[rgba(79,107,72,0.3)] hover:text-[var(--color-text)]'
-                    : 'border-[rgba(201,155,88,0.3)] text-[var(--color-text-secondary)] hover:bg-[rgba(201,155,88,0.18)] hover:text-[var(--color-text)]'
+                    ? 'border-[rgba(120,140,107,0.35)] text-[#6D655B] hover:bg-[#E5D1B0]/60 hover:text-[#4A4038]'
+                    : 'border-[#344761] text-[#9EADC2] hover:bg-[#18273B] hover:text-[#E9EDF4]'
                   : 'border-[var(--color-border-light)] text-[var(--color-muted)] cursor-not-allowed opacity-40'
               )}
             >
@@ -342,8 +342,8 @@ export const OpenWhenDetailModal: React.FC<OpenWhenDetailModalProps> = ({
                 'inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded border flex-1 sm:flex-initial transition-colors touch-manipulation',
                 hasNext
                   ? isScrapbook
-                    ? 'border-[rgba(216,184,106,0.3)] text-[var(--color-text-secondary)] hover:bg-[rgba(79,107,72,0.3)] hover:text-[var(--color-text)]'
-                    : 'border-[rgba(201,155,88,0.3)] text-[var(--color-text-secondary)] hover:bg-[rgba(201,155,88,0.18)] hover:text-[var(--color-text)]'
+                    ? 'border-[rgba(120,140,107,0.35)] text-[#6D655B] hover:bg-[#E5D1B0]/60 hover:text-[#4A4038]'
+                    : 'border-[#344761] text-[#9EADC2] hover:bg-[#18273B] hover:text-[#E9EDF4]'
                   : 'border-[var(--color-border-light)] text-[var(--color-muted)] cursor-not-allowed opacity-40'
               )}
             >

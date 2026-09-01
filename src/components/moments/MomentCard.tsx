@@ -36,8 +36,8 @@ export const MomentCard: React.FC<MomentCardProps> = ({
         isLetterArchive
           ? 'bg-[#FAF5EC] border border-[rgba(138,110,89,0.32)] shadow-[0_6px_20px_-4px_rgba(60,42,33,0.12),0_2px_6px_rgba(60,42,33,0.04)] hover:border-[rgba(122,46,59,0.55)] hover:shadow-[0_12px_28px_-6px_rgba(60,42,33,0.2)] focus-visible:ring-[#7A2E3B] focus-visible:ring-offset-[#FAF5EC]'
           : isScrapbook
-          ? 'bg-[linear-gradient(155deg,rgba(16,30,20,0.92)_0%,rgba(10,22,13,0.96)_100%)] border border-[rgba(216,184,106,0.25)] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.5)] hover:border-[rgba(216,184,106,0.5)] focus-visible:ring-[#D8B86A] focus-visible:ring-offset-[#0A160D]'
-          : 'bg-[linear-gradient(155deg,rgba(13,23,40,0.92)_0%,rgba(7,14,26,0.96)_100%)] border border-[rgba(201,155,88,0.28)] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.6)] hover:border-[rgba(201,155,88,0.55)] focus-visible:ring-[#C99B58] focus-visible:ring-offset-[#070E1A]',
+          ? 'bg-[#FAF1DF] border border-[rgba(120,140,107,0.35)] shadow-[0_6px_20px_-4px_rgba(74,64,56,0.12)] hover:border-[#788C6B] hover:shadow-[0_12px_28px_-6px_rgba(74,64,56,0.18)] focus-visible:ring-[#788C6B] focus-visible:ring-offset-[#F5E8D0]'
+          : 'bg-[#101A2B] border border-[#344761] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.7)] hover:border-[#D6B56C] hover:shadow-[0_12px_28px_-6px_rgba(0,0,0,0.85)] focus-visible:ring-[#D6B56C] focus-visible:ring-offset-[#070D18]',
         className
       )}
       onClick={() => onSelect(moment)}
@@ -56,7 +56,7 @@ export const MomentCard: React.FC<MomentCardProps> = ({
       <div
         className={cn(
           'p-3 pb-0 relative overflow-hidden',
-          isLetterArchive ? 'bg-[#F4ECE0]/50' : 'bg-black/20'
+          isLetterArchive ? 'bg-[#F4ECE0]/50' : isScrapbook ? 'bg-[#F5E8D0]/60' : 'bg-[#0B1424]/60'
         )}
       >
         <div
@@ -66,8 +66,8 @@ export const MomentCard: React.FC<MomentCardProps> = ({
             isLetterArchive
               ? 'p-1.5 bg-[#FAF5EC] border border-[rgba(138,110,89,0.25)]'
               : isScrapbook
-              ? 'p-1.5 bg-[rgba(16,28,19,0.8)] border border-[rgba(216,184,106,0.22)]'
-              : 'p-1.5 bg-[rgba(12,22,38,0.8)] border border-[rgba(201,155,88,0.22)]'
+              ? 'p-1.5 bg-[#FAF1DF] border border-[rgba(120,140,107,0.3)]'
+              : 'p-1.5 bg-[#142238] border border-[#344761]'
           )}
         >
           {moment.image ? (
@@ -85,16 +85,11 @@ export const MomentCard: React.FC<MomentCardProps> = ({
                 isLetterArchive
                   ? 'bg-[#EDE2D2]/50 text-[#7A2E3B]'
                   : isScrapbook
-                  ? 'bg-[rgba(16,28,19,0.95)] text-[#D8B86A]'
-                  : 'bg-[rgba(12,22,38,0.95)] text-[#E2BD78]'
+                  ? 'bg-[#F5E8D0] text-[#788C6B]'
+                  : 'bg-[#101A2B] text-[#D6B56C]'
               )}
             >
               <Sparkles className="h-6 w-6 opacity-40 mb-1" />
-              {moment.momentStrength && (
-                <span className="text-[11px] font-serif opacity-80">
-                  Strength {moment.momentStrength}
-                </span>
-              )}
             </div>
           )}
           {moment.image && (
@@ -108,8 +103,8 @@ export const MomentCard: React.FC<MomentCardProps> = ({
               isLetterArchive
                 ? 'bg-[#FAF5EC]/90 text-[#7A2E3B] border border-[rgba(138,110,89,0.4)]'
                 : isScrapbook
-                ? 'bg-[rgba(16,30,20,0.85)] text-[#D8B86A] border border-[rgba(216,184,106,0.4)]'
-                : 'bg-[rgba(7,14,26,0.85)] text-[#E2BD78] border border-[rgba(201,155,88,0.4)]'
+                ? 'bg-[#FAF1DF]/90 text-[#788C6B] border border-[rgba(120,140,107,0.4)]'
+                : 'bg-[#101A2B]/90 text-[#D6B56C] border border-[#344761]'
             )}
           >
             № {String(moment.order).padStart(2, '0')}
@@ -127,8 +122,8 @@ export const MomentCard: React.FC<MomentCardProps> = ({
               isLetterArchive
                 ? 'text-[#6B5547]'
                 : isScrapbook
-                ? 'text-[#B8C0AE]'
-                : 'text-[#C2AF99]'
+                ? 'text-[#6D655B]'
+                : 'text-[#9EADC2]'
             )}
           >
             <span
@@ -137,8 +132,8 @@ export const MomentCard: React.FC<MomentCardProps> = ({
                 isLetterArchive
                   ? 'text-[#7A2E3B]'
                   : isScrapbook
-                  ? 'text-[#D8B86A]'
-                  : 'text-[#E2BD78]'
+                  ? 'text-[#788C6B]'
+                  : 'text-[#D6B56C]'
               )}
             >
               <Calendar className="h-3 w-3" />
@@ -153,24 +148,6 @@ export const MomentCard: React.FC<MomentCardProps> = ({
                 </span>
               </>
             )}
-            {moment.momentStrength && (
-              <>
-                <span className="opacity-40">•</span>
-                <span
-                  className={cn(
-                    'inline-flex items-center gap-1 font-medium',
-                    isLetterArchive
-                      ? 'text-[#7A2E3B]'
-                      : isScrapbook
-                      ? 'text-[#D8B86A]'
-                      : 'text-[#E2BD78]'
-                  )}
-                >
-                  <Sparkles className="h-2.5 w-2.5" />
-                  {moment.momentStrength}
-                </span>
-              </>
-            )}
           </div>
 
           {/* Title */}
@@ -180,8 +157,8 @@ export const MomentCard: React.FC<MomentCardProps> = ({
               isLetterArchive
                 ? 'text-[#3B2A20] group-hover:text-[#7A2E3B]'
                 : isScrapbook
-                ? 'text-[#F7F1DF] group-hover:text-[#D8B86A]'
-                : 'text-[#F2E4CF] group-hover:text-[#E2BD78]'
+                ? 'text-[#4A4038] group-hover:text-[#788C6B]'
+                : 'text-[#E9EDF4] group-hover:text-[#D6B56C]'
             )}
           >
             {moment.title}
@@ -194,8 +171,8 @@ export const MomentCard: React.FC<MomentCardProps> = ({
               isLetterArchive
                 ? 'text-[#5C4A42]'
                 : isScrapbook
-                ? 'text-[#B8C0AE]'
-                : 'text-[#C2AF99]'
+                ? 'text-[#6D655B]'
+                : 'text-[#9EADC2]'
             )}
           >
             "{moment.shortDescription}"
@@ -209,8 +186,8 @@ export const MomentCard: React.FC<MomentCardProps> = ({
             isLetterArchive
               ? 'border-[rgba(138,110,89,0.2)] text-[#7A6253] group-hover:text-[#7A2E3B]'
               : isScrapbook
-              ? 'border-[rgba(216,184,106,0.18)] text-[#7F8B78] group-hover:text-[#D8B86A]'
-              : 'border-[rgba(201,155,88,0.18)] text-[#817568] group-hover:text-[#E2BD78]'
+              ? 'border-[rgba(120,140,107,0.25)] text-[#6D655B] group-hover:text-[#788C6B]'
+              : 'border-[#273951] text-[#74859D] group-hover:text-[#D6B56C]'
           )}
         >
           <span className="italic text-[11px]">View memory story</span>

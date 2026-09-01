@@ -31,8 +31,8 @@ export const AdoreCard: React.FC<AdoreCardProps> = ({
         isLetterArchive
           ? 'bg-[#FAF5EC] border border-[rgba(138,110,89,0.32)] shadow-[0_6px_20px_-4px_rgba(60,42,33,0.12),0_2px_6px_rgba(60,42,33,0.04)] [@media(hover:hover)]:hover:border-[rgba(122,46,59,0.55)] [@media(hover:hover)]:hover:shadow-[0_14px_30px_-6px_rgba(60,42,33,0.22),0_4px_10px_rgba(60,42,33,0.06)] focus-visible:ring-[#7A2E3B] focus-visible:ring-offset-[#FAF5EC]'
           : isScrapbook
-          ? 'bg-[linear-gradient(155deg,rgba(16,30,20,0.92)_0%,rgba(10,22,13,0.96)_100%)] border border-[rgba(216,184,106,0.25)] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.5)] [@media(hover:hover)]:hover:border-[rgba(216,184,106,0.55)] [@media(hover:hover)]:hover:shadow-[0_14px_30px_-6px_rgba(0,0,0,0.65),0_0_16px_rgba(216,184,106,0.14)] focus-visible:ring-[#D8B86A] focus-visible:ring-offset-[#0A160D]'
-          : 'bg-[linear-gradient(155deg,rgba(13,23,40,0.92)_0%,rgba(7,14,26,0.96)_100%)] border border-[rgba(201,155,88,0.28)] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.6)] [@media(hover:hover)]:hover:border-[rgba(201,155,88,0.58)] [@media(hover:hover)]:hover:shadow-[0_14px_32px_-6px_rgba(0,0,0,0.75),0_0_18px_rgba(243,213,138,0.16)] focus-visible:ring-[#C99B58] focus-visible:ring-offset-[#070E1A]',
+          ? 'bg-[#FAF1DF] border border-[rgba(120,140,107,0.35)] shadow-[0_6px_20px_-4px_rgba(74,64,56,0.12),0_2px_6px_rgba(74,64,56,0.04)] [@media(hover:hover)]:hover:border-[rgba(120,140,107,0.65)] [@media(hover:hover)]:hover:shadow-[0_14px_30px_-6px_rgba(74,64,56,0.2),0_0_16px_rgba(210,168,74,0.15)] focus-visible:ring-[#788C6B] focus-visible:ring-offset-[#FAF1DF]'
+          : 'bg-[#101A2B] border border-[#344761] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.7)] [@media(hover:hover)]:hover:border-[#D6B56C]/60 [@media(hover:hover)]:hover:shadow-[0_14px_32px_-6px_rgba(0,0,0,0.85),0_0_18px_rgba(214,181,108,0.15)] focus-visible:ring-[#D6B56C] focus-visible:ring-offset-[#070D18]',
         className
       )}
       onClick={() => onSelect(item)}
@@ -54,8 +54,8 @@ export const AdoreCard: React.FC<AdoreCardProps> = ({
           isLetterArchive
             ? 'bg-gradient-to-r from-transparent via-[#B58A45]/45 to-transparent'
             : isScrapbook
-            ? 'bg-gradient-to-r from-transparent via-[#D8B86A]/50 to-transparent'
-            : 'bg-gradient-to-r from-transparent via-[#F3D58A]/55 to-transparent'
+            ? 'bg-gradient-to-r from-transparent via-[#788C6B]/50 to-transparent'
+            : 'bg-gradient-to-r from-transparent via-[#D6B56C]/55 to-transparent'
         )}
         aria-hidden="true"
       />
@@ -70,8 +70,8 @@ export const AdoreCard: React.FC<AdoreCardProps> = ({
                 isLetterArchive
                   ? 'bg-[#F2E8DC] text-[#7A2E3B] border border-[rgba(138,110,89,0.4)] group-hover:border-[#7A2E3B]/60'
                   : isScrapbook
-                  ? 'bg-[rgba(79,107,72,0.3)] text-[#D8B86A] border border-[rgba(216,184,106,0.35)] group-hover:border-[#D8B86A]/60'
-                  : 'bg-[rgba(201,155,88,0.14)] text-[#E2BD78] border border-[rgba(201,155,88,0.35)] group-hover:border-[#E2BD78]/60'
+                  ? 'bg-[#788C6B]/15 text-[#788C6B] border border-[rgba(120,140,107,0.35)] group-hover:border-[#788C6B]/60'
+                  : 'bg-[#18273B] text-[#D6B56C] border border-[#344761] group-hover:border-[#D6B56C]/60'
               )}
             >
               № {String(item.order).padStart(2, '0')}
@@ -84,8 +84,8 @@ export const AdoreCard: React.FC<AdoreCardProps> = ({
                   isLetterArchive
                     ? 'bg-[#FAF5EC] text-[#6B5547] border-[rgba(138,110,89,0.3)]'
                     : isScrapbook
-                    ? 'bg-[rgba(16,28,19,0.6)] text-[#B8C0AE] border-[rgba(216,184,106,0.22)]'
-                    : 'bg-[rgba(12,22,38,0.6)] text-[#C2AF99] border-[rgba(201,155,88,0.22)]'
+                    ? 'bg-[#FAF1DF] text-[#6D655B] border-[rgba(120,140,107,0.25)]'
+                    : 'bg-[#142238] text-[#91A9C8] border-[#344761]'
                 )}
               >
                 {item.category}
@@ -101,8 +101,8 @@ export const AdoreCard: React.FC<AdoreCardProps> = ({
                 isLetterArchive
                   ? 'p-1.5 bg-[#FAF5EC] border border-[rgba(138,110,89,0.28)]'
                   : isScrapbook
-                  ? 'p-1.5 bg-[rgba(16,28,19,0.8)] border border-[rgba(216,184,106,0.22)]'
-                  : 'p-1.5 bg-[rgba(12,22,38,0.8)] border border-[rgba(201,155,88,0.22)]'
+                  ? 'p-1.5 bg-[#FAF1DF] border border-[rgba(120,140,107,0.25)]'
+                  : 'p-1.5 bg-[#142238] border border-[#344761]'
               )}
             >
               <img
@@ -126,8 +126,8 @@ export const AdoreCard: React.FC<AdoreCardProps> = ({
               isLetterArchive
                 ? 'text-[#3B2A20] group-hover:text-[#7A2E3B]'
                 : isScrapbook
-                ? 'text-[#F7F1DF] group-hover:text-[#D8B86A]'
-                : 'text-[#F2E4CF] group-hover:text-[#E2BD78]'
+                ? 'text-[#4A4038] group-hover:text-[#788C6B]'
+                : 'text-[#E9EDF4] group-hover:text-[#D6B56C]'
             )}
           >
             {item.title}
@@ -140,8 +140,8 @@ export const AdoreCard: React.FC<AdoreCardProps> = ({
               isLetterArchive
                 ? 'text-[#5C4A42]'
                 : isScrapbook
-                ? 'text-[#B8C0AE]'
-                : 'text-[#C2AF99]'
+                ? 'text-[#6D655B]'
+                : 'text-[#9EADC2]'
             )}
           >
             "{item.shortDescription}"
@@ -155,8 +155,8 @@ export const AdoreCard: React.FC<AdoreCardProps> = ({
             isLetterArchive
               ? 'border-[rgba(138,110,89,0.2)] text-[#7A6253] group-hover:text-[#7A2E3B]'
               : isScrapbook
-              ? 'border-[rgba(216,184,106,0.18)] text-[#7F8B78] group-hover:text-[#D8B86A]'
-              : 'border-[rgba(201,155,88,0.18)] text-[#817568] group-hover:text-[#E2BD78]'
+              ? 'border-[rgba(120,140,107,0.25)] text-[#8C8376] group-hover:text-[#788C6B]'
+              : 'border-[#273951] text-[#74859D] group-hover:text-[#D6B56C]'
           )}
         >
           <span className="font-medium inline-flex items-center gap-1.5 text-[11.5px]">

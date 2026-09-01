@@ -107,53 +107,56 @@
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   /* Primary Backgrounds */
-  --background: #050A16;
-  --bg-primary: #050A16;
-  --bg-secondary: #07101F;
-  --bg-tertiary: #0A1220;
+  --background: #070D18;
+  --bg-primary: #070D18;
+  --bg-secondary: #0B1424;
+  --bg-tertiary: #101A2B;
 
   /* Secondary Navy */
-  --navy-100: #0B1428;
-  --navy-200: #101B32;
-  --navy-300: #142035;
+  --navy-100: #0B1424;
+  --navy-200: #101A2B;
+  --navy-300: #142238;
 
   /* Card Surfaces */
-  --surface: rgba(11, 20, 40, 0.85);
-  --surface-secondary: rgba(16, 27, 50, 0.88);
-  --surface-elevated: rgba(11, 20, 40, 0.90);
-  --card: rgba(11, 20, 40, 0.82);
-  --card-hover: rgba(16, 27, 50, 0.90);
-  --paper: rgba(11, 20, 40, 0.85);
+  --surface: #101A2B;
+  --surface-secondary: #142238;
+  --surface-elevated: #142238;
+  --surface-subtle: #18273B;
+  --card: #101A2B;
+  --card-hover: #142238;
+  --paper: #101A2B;
 
   /* Primary & Accent Tones */
-  --primary: #D8B866; /* Soft Moon Gold */
-  --primary-foreground: #050A16;
-  --secondary: #8897B0; /* Muted Moonlit Blue-Gray */
-  --accent: #F3D58A; /* Moon Gold Highlight */
-  --accent-gold: #D8B866;
-  --accent-light-gold: #F3D58A;
+  --primary: #D6B56C; /* Antique Gold */
+  --primary-foreground: #070D18;
+  --secondary: #9EADC2; /* Muted Celestial Blue-Gray */
+  --accent: #D6B56C; /* Antique Gold Highlight */
+  --accent-gold: #D6B56C;
+  --accent-light-gold: #E5CD94;
   --accent-candlelight: #F3D58A;
-  --accent-lavender: #9BAEC8;
+  --accent-celestial: #91A9C8;
+  --accent-lavender: #9B96B8;
   --accent-dusty-purple: #5A6D88;
 
   /* Typography Hierarchy */
-  --text-primary: #F0E8D8; /* Soft Moonlit Highlight */
-  --text-secondary: #B8C3D8; /* Muted Moonlit Silver/Blue */
-  --text-muted: #8897B0; /* Faded Night Silver */
+  --text-primary: #E9EDF4; /* Moonlight Ivory */
+  --text-body: #C5D0DF; /* Soft Moonlight Text */
+  --text-secondary: #9EADC2; /* Muted Celestial Blue-Gray */
+  --text-muted: #74859D; /* Muted Blue-Gray */
 
   /* Borders & Shadows */
-  --border: rgba(243, 213, 138, 0.20);
-  --border-light: rgba(243, 213, 138, 0.12);
-  --shadow-color: rgba(2, 6, 18, 0.65);
-  --shadow-soft: 0 12px 35px rgba(2, 6, 18, 0.65);
+  --border: #344761;
+  --border-light: #273951;
+  --shadow-color: rgba(3, 7, 18, 0.75);
+  --shadow-soft: 0 12px 35px rgba(3, 7, 18, 0.75);
 
   --success: #4E9A70;
-  --warning: #F3D58A;
+  --warning: #D6B56C;
   --error: #D96B6B;
-  --info: #8897B0;
+  --info: #91A9C8;
 
   /* Legacy & Helper Aliases */
-  --color-background: #050A16;
+  --color-background: #070D18;
   --color-surface: var(--surface);
   --color-surface-secondary: var(--surface-secondary);
   --color-card: var(--card);
@@ -174,12 +177,12 @@
   --color-shadow: var(--shadow-color);
 
   /* Scrollbar & Progress Tokens */
-  --scrollbar-track: rgba(5, 10, 22, 0.85);
-  --scrollbar-thumb: rgba(136, 151, 176, 0.32);
-  --scrollbar-thumb-hover: rgba(243, 213, 138, 0.52);
-  --scrollbar-thumb-active: rgba(243, 213, 138, 0.72);
-  --scroll-progress-color: #F3D58A;
-  --scroll-progress-glow: rgba(243, 213, 138, 0.4);
+  --scrollbar-track: #070D18;
+  --scrollbar-thumb: #344761;
+  --scrollbar-thumb-hover: #91A9C8;
+  --scrollbar-thumb-active: #D6B56C;
+  --scroll-progress-color: #D6B56C;
+  --scroll-progress-glow: rgba(214, 181, 108, 0.4);
 }
 
 [data-theme="whimsical-scrapbook"] {
@@ -192,47 +195,57 @@
   --font-serif: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-  /* Semantic Color Tokens - Enchanted Night Forest */
-  --background: #0B100D;
-  --surface: rgba(8, 20, 11, 0.68);
-  --surface-secondary: rgba(12, 26, 15, 0.58);
-  --surface-elevated: rgba(8, 20, 11, 0.72);
-  --paper: rgba(8, 20, 11, 0.68);
-  --card: rgba(8, 20, 11, 0.68);
-  --card-hover: rgba(12, 28, 16, 0.78);
+  /* Semantic Color Tokens - Rich Warm Scrapbook */
+  --background: #F5E8D0;
+  --bg-primary: #F5E8D0;
+  --bg-secondary: #FAF1DF;
+  --bg-tertiary: #E5D1B0;
+
+  --paper: #F5E8D0;
+  --paper-highlight: #FAF1DF;
+  --paper-shadow: #E5D1B0;
+  --surface: #FAF1DF;
+  --surface-secondary: #F5E8D0;
+  --surface-elevated: #FAF1DF;
+  --card: #FAF1DF;
+  --card-hover: #FFF8E8;
 
   /* Primary Button / Active State */
-  --primary: #344A32;
-  --primary-foreground: #F7F1DF;
-  --secondary: #4A6346;
+  --primary: #788C6B; /* Sage */
+  --primary-foreground: #FAF1DF;
+  --secondary: #6D655B; /* Secondary ink */
 
   /* Magical Accents */
-  --accent: #D8B86A;
-  --accent-gold: #D8B86A;
+  --accent: #D2A84A; /* Sunflower */
+  --accent-gold: #D2A84A;
+  --accent-sunflower: #D2A84A;
+  --accent-sage: #788C6B;
+  --accent-terracotta: #B86F5A;
+  --accent-rose: #C98C91;
+  --accent-dusty-rose: #C98C91;
+  --accent-lavender: #9A88A8;
+  --accent-sky: #7E9DB8;
   --accent-soft-gold: #FFF8E8;
-  --accent-dark-green: #172218;
-  --accent-lavender: #C6A6D8;
-  --accent-rose: #E6A0C4;
-  --accent-pink: #E6A0C4;
 
   /* Typography Hierarchy */
-  --text-primary: #F7F1DF;
-  --text-secondary: #B8C0AE;
-  --text-muted: #7F8B78;
+  --text-primary: #4A4038; /* Warm Dark Ink */
+  --text-body: #4A4038; /* Warm Readable Ink */
+  --text-secondary: #6D655B; /* Secondary Ink */
+  --text-muted: #8C8376; /* Muted Ink */
 
-  /* Subtle Low-Opacity Borders & Shadows */
-  --border: rgba(240, 230, 190, 0.12);
-  --border-light: rgba(240, 230, 190, 0.08);
-  --shadow-color: rgba(0, 0, 0, 0.38);
-  --shadow-soft: 0 8px 28px rgba(0, 0, 0, 0.35);
+  /* Subtle Borders & Shadows */
+  --border: rgba(120, 140, 107, 0.35);
+  --border-light: rgba(120, 140, 107, 0.20);
+  --shadow-color: rgba(74, 64, 56, 0.15);
+  --shadow-soft: 0 8px 24px rgba(74, 64, 56, 0.12);
 
-  --success: #4F6B48;
-  --warning: #D8B86A;
-  --error: #E6A0C4;
-  --info: #C6A6D8;
+  --success: #788C6B;
+  --warning: #D2A84A;
+  --error: #B86F5A;
+  --info: #7E9DB8;
 
   /* Legacy & Helper Aliases */
-  --color-background: transparent;
+  --color-background: var(--background);
   --color-surface: var(--surface);
   --color-surface-secondary: var(--surface-secondary);
   --color-card: var(--card);
@@ -253,12 +266,12 @@
   --color-shadow: var(--shadow-color);
 
   /* Scrollbar & Progress Tokens */
-  --scrollbar-track: rgba(8, 20, 11, 0.55);
-  --scrollbar-thumb: rgba(216, 184, 106, 0.32);
-  --scrollbar-thumb-hover: rgba(216, 184, 106, 0.52);
-  --scrollbar-thumb-active: rgba(216, 184, 106, 0.72);
-  --scroll-progress-color: #D8B86A;
-  --scroll-progress-glow: rgba(216, 184, 106, 0.35);
+  --scrollbar-track: #F5E8D0;
+  --scrollbar-thumb: #8C8376;
+  --scrollbar-thumb-hover: #788C6B;
+  --scrollbar-thumb-active: #D2A84A;
+  --scroll-progress-color: #D2A84A;
+  --scroll-progress-glow: rgba(210, 168, 74, 0.35);
 }
 
 /* Whimsical Environmental Background Artwork - Static Full-Page SVG */

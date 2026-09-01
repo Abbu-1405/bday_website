@@ -46,56 +46,70 @@ export const WishDetailModal: React.FC<WishDetailModalProps> = ({
         buttonIcon: 'text-[#7A2E3B]',
         closeBtn: 'text-[#7A2E3B]/70 hover:text-[#2D1E1B] hover:bg-[#7A2E3B]/10',
         glowAura: 'bg-[#E5B578]/25',
+        boxShadow: `
+          0 24px 70px -15px rgba(0, 0, 0, 0.75),
+          0 0 50px rgba(245, 195, 100, 0.25),
+          inset 0 0 45px rgba(210, 170, 115, 0.22),
+          inset 0 1px 2px rgba(255, 255, 255, 0.75)
+        `,
       };
     }
     if (theme === 'whimsical-scrapbook') {
       return {
-        bg: '#F6F2E2',
+        bg: '#F5E8D0',
         bgGradient: `
-          radial-gradient(ellipse at 50% 0%, rgba(255, 254, 248, 0.96) 0%, rgba(246, 242, 226, 0.88) 50%, rgba(235, 230, 210, 0.96) 100%),
-          radial-gradient(circle at 10% 20%, rgba(180, 205, 160, 0.16) 0%, transparent 40%),
-          radial-gradient(circle at 90% 80%, rgba(180, 205, 160, 0.18) 0%, transparent 40%)
+          radial-gradient(ellipse at 50% 0%, rgba(250, 241, 223, 0.98) 0%, rgba(245, 232, 208, 0.92) 50%, rgba(229, 209, 176, 0.98) 100%)
         `,
-        border: '1px solid rgba(130, 160, 115, 0.45)',
-        innerBorder: 'border-[#92B580]/30',
-        cornerStar: 'text-[#4D6E42]/55',
-        headerText: 'text-[#2E452C]',
-        titleText: 'text-[#182618]',
-        bodyText: 'text-[#263626]',
-        divider: 'border-[#A2C293]/35',
-        heart: 'text-[#2E452C]',
-        statusText: 'text-[#455E42]',
-        navText: 'text-[#455E42] hover:text-[#182618]',
-        navDisabled: 'text-[#455E42]/35',
-        buttonBg: 'bg-[#2E452C]/10 hover:bg-[#2E452C]/20 text-[#223520] hover:text-[#132212] border-[#2E452C]/30',
-        buttonIcon: 'text-[#2E452C]',
-        closeBtn: 'text-[#2E452C]/70 hover:text-[#182618] hover:bg-[#2E452C]/10',
-        glowAura: 'bg-[#BFE096]/20',
+        border: '1px solid rgba(120, 140, 107, 0.45)',
+        innerBorder: 'border-[#788C6B]/25',
+        cornerStar: 'text-[#D2A84A]',
+        headerText: 'text-[#788C6B]',
+        titleText: 'text-[#4A4038]',
+        bodyText: 'text-[#4A4038]',
+        divider: 'border-[#E5D1B0]',
+        heart: 'text-[#B86F5A]',
+        statusText: 'text-[#788C6B]',
+        navText: 'text-[#6D655B] hover:text-[#4A4038]',
+        navDisabled: 'text-[#8C8376]/40',
+        buttonBg: 'bg-[#788C6B]/15 hover:bg-[#788C6B]/25 text-[#4A4038] border-[#788C6B]/40',
+        buttonIcon: 'text-[#788C6B]',
+        closeBtn: 'text-[#6D655B] hover:text-[#4A4038] hover:bg-[#E5D1B0]/60',
+        glowAura: 'bg-[#D2A84A]/20',
+        boxShadow: `
+          0 24px 70px -15px rgba(74, 64, 56, 0.25),
+          0 0 40px rgba(210, 168, 74, 0.15),
+          inset 0 0 30px rgba(229, 209, 176, 0.3),
+          inset 0 1px 2px rgba(255, 255, 255, 0.8)
+        `,
       };
     }
-    // Default: midnight-journal
+    // Default / midnight-journal
     return {
-      bg: '#F3E5CB',
+      bg: '#101A2B',
       bgGradient: `
-        radial-gradient(ellipse at 50% 0%, rgba(255, 252, 240, 0.95) 0%, rgba(244, 230, 202, 0.85) 50%, rgba(230, 210, 175, 0.95) 100%),
-        radial-gradient(circle at 10% 20%, rgba(217, 190, 145, 0.15) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(217, 190, 145, 0.18) 0%, transparent 40%)
+        linear-gradient(160deg, #142238 0%, #101A2B 60%, #0B1424 100%)
       `,
-      border: '1px solid rgba(190, 145, 85, 0.5)',
-      innerBorder: 'border-[#C8A26A]/30',
-      cornerStar: 'text-[#A67C38]/55',
-      headerText: 'text-[#7A5C3E]',
-      titleText: 'text-[#2F1D0E]',
-      bodyText: 'text-[#3B2A20]',
-      divider: 'border-[#C8A060]/30',
-      heart: 'text-[#9A422D]',
-      statusText: 'text-[#7A5C3E]',
-      navText: 'text-[#7A5C3E] hover:text-[#3B2A20]',
-      navDisabled: 'text-[#7A5C3E]/35',
-      buttonBg: 'bg-[#D4A760]/20 hover:bg-[#D4A760]/35 text-[#5A3314] hover:text-[#2E1606] border-[#B58A45]/40',
-      buttonIcon: 'text-[#7A5C3E]',
-      closeBtn: 'text-[#7A4F28]/70 hover:text-[#3B2A20] hover:bg-[#B58A45]/15',
-      glowAura: 'bg-amber-400/20',
+      border: '1px solid #344761',
+      innerBorder: 'border-[#344761]/60',
+      cornerStar: 'text-[#D6B56C]/60',
+      headerText: 'text-[#9EADC2]',
+      titleText: 'text-[#E9EDF4]',
+      bodyText: 'text-[#C5D0DF]',
+      divider: 'border-[#273951]',
+      heart: 'text-[#D6B56C]',
+      statusText: 'text-[#9EADC2]',
+      navText: 'text-[#C8D2E0] hover:text-[#E9EDF4]',
+      navDisabled: 'text-[#74859D]/40',
+      buttonBg: 'bg-[#18273B] hover:bg-[#273951] text-[#E9EDF4] border-[#344761]',
+      buttonIcon: 'text-[#91A9C8]',
+      closeBtn: 'text-[#9EADC2] hover:text-[#E9EDF4] hover:bg-[#18273B]',
+      glowAura: 'bg-[#D6B56C]/15',
+      boxShadow: `
+        0 24px 70px -15px rgba(0, 0, 0, 0.85),
+        0 0 40px rgba(145, 169, 200, 0.12),
+        inset 0 0 30px rgba(11, 20, 36, 0.5),
+        inset 0 1px 1px rgba(233, 237, 244, 0.1)
+      `,
     };
   }, [theme]);
 
@@ -255,12 +269,7 @@ export const WishDetailModal: React.FC<WishDetailModalProps> = ({
           style={{
             backgroundColor: themeParchment.bg,
             backgroundImage: themeParchment.bgGradient,
-            boxShadow: `
-              0 24px 70px -15px rgba(0, 0, 0, 0.75),
-              0 0 50px rgba(245, 195, 100, 0.25),
-              inset 0 0 45px rgba(210, 170, 115, 0.22),
-              inset 0 1px 2px rgba(255, 255, 255, 0.75)
-            `,
+            boxShadow: themeParchment.boxShadow,
             border: themeParchment.border,
           }}
         >

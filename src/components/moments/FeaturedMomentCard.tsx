@@ -28,8 +28,8 @@ export const FeaturedMomentCard: React.FC<FeaturedMomentCardProps> = ({
         isLetterArchive
           ? 'bg-[#FAF5EC] border border-[rgba(138,110,89,0.38)] shadow-[0_10px_30px_-6px_rgba(60,42,33,0.14),0_2px_8px_rgba(60,42,33,0.06)] hover:border-[rgba(122,46,59,0.6)] hover:shadow-[0_18px_40px_-6px_rgba(60,42,33,0.22)] focus-visible:ring-[#7A2E3B] focus-visible:ring-offset-[#FAF5EC]'
           : isScrapbook
-          ? 'bg-[linear-gradient(145deg,rgba(16,30,20,0.92)_0%,rgba(10,22,13,0.96)_100%)] border border-[rgba(216,184,106,0.3)] shadow-[0_12px_36px_-6px_rgba(0,0,0,0.55),0_0_24px_rgba(79,107,72,0.2)] hover:border-[rgba(216,184,106,0.55)] focus-visible:ring-[#D8B86A] focus-visible:ring-offset-[#0A160D]'
-          : 'bg-[linear-gradient(145deg,rgba(13,23,40,0.92)_0%,rgba(7,14,26,0.96)_100%)] border border-[rgba(201,155,88,0.32)] shadow-[0_12px_36px_-6px_rgba(0,0,0,0.65),0_0_24px_rgba(201,155,88,0.18)] hover:border-[rgba(201,155,88,0.58)] focus-visible:ring-[#C99B58] focus-visible:ring-offset-[#070E1A]',
+          ? 'bg-[#FAF1DF] border border-[rgba(120,140,107,0.38)] shadow-[0_10px_30px_-6px_rgba(74,64,56,0.14)] hover:border-[#788C6B] hover:shadow-[0_18px_40px_-6px_rgba(74,64,56,0.2)] focus-visible:ring-[#788C6B] focus-visible:ring-offset-[#F5E8D0]'
+          : 'bg-[#101A2B] border border-[#344761] shadow-[0_12px_36px_-6px_rgba(0,0,0,0.85)] hover:border-[#D6B56C] hover:shadow-[0_18px_40px_-6px_rgba(0,0,0,0.9)] focus-visible:ring-[#D6B56C] focus-visible:ring-offset-[#070D18]',
         className
       )}
       onClick={() => onSelect(moment)}
@@ -51,8 +51,8 @@ export const FeaturedMomentCard: React.FC<FeaturedMomentCardProps> = ({
             isLetterArchive
               ? 'bg-[#F2E8DC]/70 border-b lg:border-b-0 lg:border-r border-[rgba(138,110,89,0.25)]'
               : isScrapbook
-              ? 'bg-black/30 border-b lg:border-b-0 lg:border-r border-[rgba(216,184,106,0.2)]'
-              : 'bg-black/40 border-b lg:border-b-0 lg:border-r border-[rgba(201,155,88,0.2)]'
+              ? 'bg-[#F5E8D0]/70 border-b lg:border-b-0 lg:border-r border-[rgba(120,140,107,0.25)]'
+              : 'bg-[#0B1424]/80 border-b lg:border-b-0 lg:border-r border-[#344761]'
           )}
         >
           {/* Inner Photo Frame with Matte Border */}
@@ -62,8 +62,8 @@ export const FeaturedMomentCard: React.FC<FeaturedMomentCardProps> = ({
               isLetterArchive
                 ? 'p-1.5 sm:p-2 bg-[#FAF5EC] border border-[rgba(138,110,89,0.3)]'
                 : isScrapbook
-                ? 'p-1.5 sm:p-2 bg-[rgba(16,28,19,0.8)] border border-[rgba(216,184,106,0.25)]'
-                : 'p-1.5 sm:p-2 bg-[rgba(12,22,38,0.8)] border border-[rgba(201,155,88,0.25)]'
+                ? 'p-1.5 sm:p-2 bg-[#FAF1DF] border border-[rgba(120,140,107,0.3)]'
+                : 'p-1.5 sm:p-2 bg-[#142238] border border-[#344761]'
             )}
           >
             {moment.image ? (
@@ -81,19 +81,14 @@ export const FeaturedMomentCard: React.FC<FeaturedMomentCardProps> = ({
                   isLetterArchive
                     ? 'bg-[#EDE2D2]/50 text-[#7A2E3B]'
                     : isScrapbook
-                    ? 'bg-[rgba(16,28,19,0.95)] text-[#D8B86A]'
-                    : 'bg-[rgba(12,22,38,0.95)] text-[#E2BD78]'
+                    ? 'bg-[#F5E8D0] text-[#788C6B]'
+                    : 'bg-[#101A2B] text-[#D6B56C]'
                 )}
               >
                 <Camera className="h-10 w-10 opacity-40 mb-2" />
                 <span className="text-xs font-serif italic opacity-70">
                   Memory № {String(moment.order).padStart(2, '0')}
                 </span>
-                {moment.momentStrength && (
-                  <span className="text-[11px] font-serif font-medium mt-1 opacity-85">
-                    Strength {moment.momentStrength}
-                  </span>
-                )}
               </div>
             )}
             {/* Subtle soft gradient over image */}
@@ -119,8 +114,8 @@ export const FeaturedMomentCard: React.FC<FeaturedMomentCardProps> = ({
                   isLetterArchive
                     ? 'bg-[#FAF5EC]/90 text-[#7A2E3B] border border-[rgba(138,110,89,0.4)]'
                     : isScrapbook
-                    ? 'bg-[rgba(16,30,20,0.85)] text-[#D8B86A] border border-[rgba(216,184,106,0.4)]'
-                    : 'bg-[rgba(7,14,26,0.85)] text-[#E2BD78] border border-[rgba(201,155,88,0.4)]'
+                    ? 'bg-[#FAF1DF]/90 text-[#788C6B] border border-[rgba(120,140,107,0.4)]'
+                    : 'bg-[#101A2B]/90 text-[#D6B56C] border border-[#344761]'
                 )}
               >
                 <Sparkles className="h-3 w-3" />
@@ -140,8 +135,8 @@ export const FeaturedMomentCard: React.FC<FeaturedMomentCardProps> = ({
                 isLetterArchive
                   ? 'text-[#6B5547]'
                   : isScrapbook
-                  ? 'text-[#B8C0AE]'
-                  : 'text-[#C2AF99]'
+                  ? 'text-[#6D655B]'
+                  : 'text-[#9EADC2]'
               )}
             >
               <span
@@ -150,8 +145,8 @@ export const FeaturedMomentCard: React.FC<FeaturedMomentCardProps> = ({
                   isLetterArchive
                     ? 'text-[#7A2E3B]'
                     : isScrapbook
-                    ? 'text-[#D8B86A]'
-                    : 'text-[#E2BD78]'
+                    ? 'text-[#788C6B]'
+                    : 'text-[#D6B56C]'
                 )}
               >
                 <Calendar className="h-3.5 w-3.5" />
@@ -166,24 +161,6 @@ export const FeaturedMomentCard: React.FC<FeaturedMomentCardProps> = ({
                   </span>
                 </>
               )}
-              {moment.momentStrength && (
-                <>
-                  <span className="opacity-40">•</span>
-                  <span
-                    className={cn(
-                      'inline-flex items-center gap-1 font-medium',
-                      isLetterArchive
-                        ? 'text-[#7A2E3B]'
-                        : isScrapbook
-                        ? 'text-[#D8B86A]'
-                        : 'text-[#E2BD78]'
-                    )}
-                  >
-                    <Sparkles className="h-3 w-3" />
-                    Strength {moment.momentStrength}
-                  </span>
-                </>
-              )}
             </div>
 
             {/* Title */}
@@ -193,8 +170,8 @@ export const FeaturedMomentCard: React.FC<FeaturedMomentCardProps> = ({
                 isLetterArchive
                   ? 'text-[#3B2A20] group-hover:text-[#7A2E3B]'
                   : isScrapbook
-                  ? 'text-[#F7F1DF] group-hover:text-[#D8B86A]'
-                  : 'text-[#F2E4CF] group-hover:text-[#E2BD78]'
+                  ? 'text-[#4A4038] group-hover:text-[#788C6B]'
+                  : 'text-[#E9EDF4] group-hover:text-[#D6B56C]'
               )}
             >
               {moment.title}
@@ -207,8 +184,8 @@ export const FeaturedMomentCard: React.FC<FeaturedMomentCardProps> = ({
                 isLetterArchive
                   ? 'text-[#5C4A42] border-[#7A2E3B]/40'
                   : isScrapbook
-                  ? 'text-[#B8C0AE] border-[#D8B86A]/40'
-                  : 'text-[#C2AF99] border-[#E2BD78]/40'
+                  ? 'text-[#6D655B] border-[#788C6B]/40'
+                  : 'text-[#C5D0DF] border-[#344761]'
               )}
             >
               "{moment.shortDescription}"
@@ -222,8 +199,8 @@ export const FeaturedMomentCard: React.FC<FeaturedMomentCardProps> = ({
               isLetterArchive
                 ? 'border-[rgba(138,110,89,0.25)] text-[#7A6253]'
                 : isScrapbook
-                ? 'border-[rgba(216,184,106,0.2)] text-[#7F8B78]'
-                : 'border-[rgba(201,155,88,0.2)] text-[#817568]'
+                ? 'border-[rgba(120,140,107,0.25)] text-[#6D655B]'
+                : 'border-[#273951] text-[#74859D]'
             )}
           >
             <span className="text-xs font-serif italic">
@@ -236,8 +213,8 @@ export const FeaturedMomentCard: React.FC<FeaturedMomentCardProps> = ({
                 isLetterArchive
                   ? 'bg-[#F2E8DC]/80 text-[#7A2E3B] border-[rgba(138,110,89,0.35)] group-hover:bg-[#7A2E3B] group-hover:text-[#FFF9F0]'
                   : isScrapbook
-                  ? 'bg-[rgba(79,107,72,0.22)] text-[#D8B86A] border-[rgba(216,184,106,0.3)] group-hover:bg-[rgba(79,107,72,0.45)]'
-                  : 'bg-[rgba(201,155,88,0.14)] text-[#E2BD78] border-[rgba(201,155,88,0.3)] group-hover:bg-[rgba(201,155,88,0.25)]'
+                  ? 'bg-[#FAF1DF] text-[#788C6B] border-[rgba(120,140,107,0.35)] group-hover:bg-[#788C6B] group-hover:text-[#FAF1DF]'
+                  : 'bg-[#142238] text-[#D6B56C] border-[#344761] group-hover:bg-[#18273B]'
               )}
             >
               <span>View Memory</span>

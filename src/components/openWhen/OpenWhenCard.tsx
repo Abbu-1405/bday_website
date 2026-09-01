@@ -89,55 +89,55 @@ const getThemedEnvelopeStyle = (
       sealGradient = 'radial-gradient(circle at 35% 35%, #8D6DA2 0%, #5B3F6E 60%, #322040 100%)';
       sealBorder = 'rgba(198, 166, 216, 0.6)';
       sealTextColor = '#F5ECFA';
-      stampBg = 'rgba(141, 109, 162, 0.25)';
+      stampBg = 'rgba(141, 109, 162, 0.18)';
       stampBorder = 'rgba(198, 166, 216, 0.4)';
-      stampTextColor = '#C6A6D8';
+      stampTextColor = '#8D6DA2';
       stampLabel = 'SLUMBER';
-      accentBadgeBg = 'rgba(141, 109, 162, 0.18)';
+      accentBadgeBg = 'rgba(141, 109, 162, 0.15)';
       accentBadgeBorder = 'rgba(198, 166, 216, 0.3)';
-      accentBadgeText = '#C6A6D8';
+      accentBadgeText = '#8D6DA2';
     } else if (icon === 'Smile' || icon === 'Sun' || title.includes('smile') || title.includes('celebrating') || title.includes('special')) {
-      sealGradient = 'radial-gradient(circle at 35% 35%, #D8B86A 0%, #A48439 60%, #5C4416 100%)';
+      sealGradient = 'radial-gradient(circle at 35% 35%, #D2A84A 0%, #A48439 60%, #5C4416 100%)';
       sealBorder = 'rgba(255, 235, 175, 0.65)';
       sealTextColor = '#FFFDF5';
-      stampBg = 'rgba(216, 184, 106, 0.22)';
-      stampBorder = 'rgba(216, 184, 106, 0.45)';
-      stampTextColor = '#D8B86A';
+      stampBg = 'rgba(210, 168, 74, 0.18)';
+      stampBorder = 'rgba(210, 168, 74, 0.45)';
+      stampTextColor = '#D2A84A';
       stampLabel = 'SUNLIGHT';
-      accentBadgeBg = 'rgba(216, 184, 106, 0.18)';
-      accentBadgeBorder = 'rgba(216, 184, 106, 0.35)';
-      accentBadgeText = '#D8B86A';
+      accentBadgeBg = 'rgba(210, 168, 74, 0.15)';
+      accentBadgeBorder = 'rgba(210, 168, 74, 0.35)';
+      accentBadgeText = '#D2A84A';
     } else if (icon === 'Flame' || icon === 'Shield' || title.includes('motivation') || title.includes('courage')) {
-      sealGradient = 'radial-gradient(circle at 35% 35%, #9E5B3D 0%, #763F28 60%, #462214 100%)';
+      sealGradient = 'radial-gradient(circle at 35% 35%, #B86F5A 0%, #8E4C38 60%, #462214 100%)';
       sealBorder = 'rgba(230, 160, 120, 0.55)';
       sealTextColor = '#FDF0E9';
-      stampBg = 'rgba(158, 91, 61, 0.25)';
+      stampBg = 'rgba(184, 111, 90, 0.18)';
       stampBorder = 'rgba(230, 160, 120, 0.4)';
-      stampTextColor = '#E89C76';
+      stampTextColor = '#B86F5A';
       stampLabel = 'COURAGE';
-      accentBadgeBg = 'rgba(158, 91, 61, 0.18)';
+      accentBadgeBg = 'rgba(184, 111, 90, 0.15)';
       accentBadgeBorder = 'rgba(230, 160, 120, 0.3)';
-      accentBadgeText = '#E89C76';
+      accentBadgeText = '#B86F5A';
     } else if (icon === 'Heart' || title.includes('miss') || title.includes('loved')) {
-      sealGradient = 'radial-gradient(circle at 35% 35%, #A65476 0%, #7A3653 60%, #471C2E 100%)';
+      sealGradient = 'radial-gradient(circle at 35% 35%, #B86F5A 0%, #8E4C38 60%, #471C2E 100%)';
       sealBorder = 'rgba(230, 160, 196, 0.55)';
       sealTextColor = '#FDEBF2';
-      stampBg = 'rgba(166, 84, 118, 0.22)';
+      stampBg = 'rgba(184, 111, 90, 0.18)';
       stampBorder = 'rgba(230, 160, 196, 0.4)';
-      stampTextColor = '#E6A0C4';
+      stampTextColor = '#B86F5A';
       stampLabel = 'HEART';
-      accentBadgeBg = 'rgba(166, 84, 118, 0.18)';
+      accentBadgeBg = 'rgba(184, 111, 90, 0.15)';
       accentBadgeBorder = 'rgba(230, 160, 196, 0.3)';
-      accentBadgeText = '#E6A0C4';
+      accentBadgeText = '#B86F5A';
     }
 
     return {
-      envelopeBg: 'linear-gradient(145deg, rgba(16, 30, 20, 0.85) 0%, rgba(10, 22, 13, 0.92) 100%)',
-      envelopeBorder: 'rgba(216, 184, 106, 0.22)',
-      envelopeShadow: '0 8px 24px -4px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.25)',
-      envelopeHoverShadow: '0 16px 36px -6px rgba(0, 0, 0, 0.65), 0 0 20px rgba(79, 107, 72, 0.25)',
-      envelopeHoverBorder: 'rgba(216, 184, 106, 0.45)',
-      flapStroke: 'rgba(216, 184, 106, 0.22)',
+      envelopeBg: 'linear-gradient(145deg, #FAF1DF 0%, #F5E8D0 100%)',
+      envelopeBorder: 'rgba(120, 140, 107, 0.35)',
+      envelopeShadow: '0 6px 20px -4px rgba(74, 64, 56, 0.12), 0 2px 6px rgba(74, 64, 56, 0.04)',
+      envelopeHoverShadow: '0 14px 30px -6px rgba(74, 64, 56, 0.2), 0 0 16px rgba(210, 168, 74, 0.15)',
+      envelopeHoverBorder: 'rgba(120, 140, 107, 0.65)',
+      flapStroke: 'rgba(120, 140, 107, 0.3)',
       sealGradient,
       sealBorder,
       sealTextColor,
@@ -148,83 +148,83 @@ const getThemedEnvelopeStyle = (
       accentBadgeBg,
       accentBadgeBorder,
       accentBadgeText,
-      titleColor: '#F7F1DF',
-      titleHoverColor: '#D8B86A',
-      triggerBg: 'rgba(79, 107, 72, 0.22)',
-      triggerBorder: 'rgba(216, 184, 106, 0.25)',
-      triggerTextColor: '#D8B86A',
-      descColor: '#B8C0AE',
-      footerTextColor: '#7F8B78',
-      footerActionColor: '#D8B86A',
-      focusRingColor: '#D8B86A',
+      titleColor: '#4A4038',
+      titleHoverColor: '#788C6B',
+      triggerBg: '#F5E8D0',
+      triggerBorder: 'rgba(120, 140, 107, 0.25)',
+      triggerTextColor: '#788C6B',
+      descColor: '#6D655B',
+      footerTextColor: '#8C8376',
+      footerActionColor: '#788C6B',
+      focusRingColor: '#788C6B',
     };
   }
 
   // Midnight Journal: Celestial Night Envelopes with Antique Gold Accents
-  let sealGradient = 'radial-gradient(circle at 35% 35%, #C99B58 0%, #9E7432 60%, #4D330E 100%)';
-  let sealBorder = 'rgba(226, 189, 120, 0.65)';
+  let sealGradient = 'radial-gradient(circle at 35% 35%, #D6B56C 0%, #9E7432 60%, #4D330E 100%)';
+  let sealBorder = 'rgba(214, 181, 108, 0.65)';
   let sealTextColor = '#FFF8E8';
-  let stampBg = 'rgba(201, 155, 88, 0.15)';
-  let stampBorder = 'rgba(201, 155, 88, 0.35)';
-  let stampTextColor = '#E2BD78';
+  let stampBg = 'rgba(214, 181, 108, 0.12)';
+  let stampBorder = '#344761';
+  let stampTextColor = '#D6B56C';
   let stampLabel = 'MIDNIGHT';
-  let accentBadgeBg = 'rgba(201, 155, 88, 0.14)';
-  let accentBadgeBorder = 'rgba(201, 155, 88, 0.3)';
-  let accentBadgeText = '#E2BD78';
+  let accentBadgeBg = 'rgba(214, 181, 108, 0.12)';
+  let accentBadgeBorder = '#344761';
+  let accentBadgeText = '#D6B56C';
 
   if (icon === 'Moon' || title.includes('sleep') || title.includes('night')) {
     sealGradient = 'radial-gradient(circle at 35% 35%, #6D526F 0%, #4B364D 60%, #2A1A2C 100%)';
     sealBorder = 'rgba(180, 145, 185, 0.6)';
     sealTextColor = '#F3EAF5';
     stampBg = 'rgba(109, 82, 111, 0.25)';
-    stampBorder = 'rgba(180, 145, 185, 0.4)';
-    stampTextColor = '#9A789C';
+    stampBorder = '#344761';
+    stampTextColor = '#B49BB5';
     stampLabel = 'SLUMBER';
     accentBadgeBg = 'rgba(109, 82, 111, 0.18)';
-    accentBadgeBorder = 'rgba(180, 145, 185, 0.3)';
-    accentBadgeText = '#9A789C';
+    accentBadgeBorder = '#344761';
+    accentBadgeText = '#B49BB5';
   } else if (icon === 'Compass' || icon === 'CloudRain' || title.includes('lost') || title.includes('bad day')) {
     sealGradient = 'radial-gradient(circle at 35% 35%, #3B5B7E 0%, #243D59 60%, #122233 100%)';
     sealBorder = 'rgba(140, 175, 215, 0.55)';
     sealTextColor = '#E0EDFA';
     stampBg = 'rgba(59, 91, 126, 0.25)';
-    stampBorder = 'rgba(140, 175, 215, 0.4)';
-    stampTextColor = '#8EB8E5';
+    stampBorder = '#344761';
+    stampTextColor = '#91A9C8';
     stampLabel = 'SOLACE';
     accentBadgeBg = 'rgba(59, 91, 126, 0.18)';
-    accentBadgeBorder = 'rgba(140, 175, 215, 0.3)';
-    accentBadgeText = '#8EB8E5';
+    accentBadgeBorder = '#344761';
+    accentBadgeText = '#91A9C8';
   } else if (icon === 'Flame' || icon === 'Shield' || title.includes('motivation') || title.includes('courage')) {
-    sealGradient = 'radial-gradient(circle at 35% 35%, #C99B58 0%, #9A6F30 60%, #543912 100%)';
-    sealBorder = 'rgba(244, 209, 138, 0.65)';
+    sealGradient = 'radial-gradient(circle at 35% 35%, #D6B56C 0%, #9A6F30 60%, #543912 100%)';
+    sealBorder = 'rgba(214, 181, 108, 0.65)';
     sealTextColor = '#FFFDF5';
-    stampBg = 'rgba(201, 155, 88, 0.2)';
-    stampBorder = 'rgba(244, 209, 138, 0.45)';
-    stampTextColor = '#F4D18A';
+    stampBg = 'rgba(214, 181, 108, 0.15)';
+    stampBorder = '#344761';
+    stampTextColor = '#D6B56C';
     stampLabel = 'COURAGE';
-    accentBadgeBg = 'rgba(201, 155, 88, 0.16)';
-    accentBadgeBorder = 'rgba(244, 209, 138, 0.35)';
-    accentBadgeText = '#F4D18A';
+    accentBadgeBg = 'rgba(214, 181, 108, 0.12)';
+    accentBadgeBorder = '#344761';
+    accentBadgeText = '#D6B56C';
   } else if (icon === 'Heart' || title.includes('miss') || title.includes('loved')) {
     sealGradient = 'radial-gradient(circle at 35% 35%, #8B4459 0%, #632C3D 60%, #3B1623 100%)';
     sealBorder = 'rgba(215, 145, 168, 0.55)';
     sealTextColor = '#FCEBF1';
     stampBg = 'rgba(139, 68, 89, 0.22)';
-    stampBorder = 'rgba(215, 145, 168, 0.4)';
-    stampTextColor = '#E59FB6';
+    stampBorder = '#344761';
+    stampTextColor = '#D791A8';
     stampLabel = 'DEVOTION';
     accentBadgeBg = 'rgba(139, 68, 89, 0.18)';
-    accentBadgeBorder = 'rgba(215, 145, 168, 0.3)';
-    accentBadgeText = '#E59FB6';
+    accentBadgeBorder = '#344761';
+    accentBadgeText = '#D791A8';
   }
 
   return {
-    envelopeBg: 'linear-gradient(145deg, rgba(13, 23, 40, 0.85) 0%, rgba(7, 14, 26, 0.94) 100%)',
-    envelopeBorder: 'rgba(201, 155, 88, 0.25)',
-    envelopeShadow: '0 8px 24px -4px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.3)',
-    envelopeHoverShadow: '0 16px 36px -6px rgba(0, 0, 0, 0.75), 0 0 22px rgba(201, 155, 88, 0.2)',
-    envelopeHoverBorder: 'rgba(201, 155, 88, 0.5)',
-    flapStroke: 'rgba(201, 155, 88, 0.22)',
+    envelopeBg: '#101A2B',
+    envelopeBorder: '#344761',
+    envelopeShadow: '0 8px 24px -4px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.3)',
+    envelopeHoverShadow: '0 16px 36px -6px rgba(0, 0, 0, 0.85), 0 0 22px rgba(214, 181, 108, 0.15)',
+    envelopeHoverBorder: 'rgba(214, 181, 108, 0.6)',
+    flapStroke: '#273951',
     sealGradient,
     sealBorder,
     sealTextColor,
@@ -235,15 +235,15 @@ const getThemedEnvelopeStyle = (
     accentBadgeBg,
     accentBadgeBorder,
     accentBadgeText,
-    titleColor: '#F2E4CF',
-    titleHoverColor: '#E2BD78',
-    triggerBg: 'rgba(201, 155, 88, 0.1)',
-    triggerBorder: 'rgba(201, 155, 88, 0.22)',
-    triggerTextColor: '#E2BD78',
-    descColor: '#C2AF99',
-    footerTextColor: '#817568',
-    footerActionColor: '#E2BD78',
-    focusRingColor: '#C99B58',
+    titleColor: '#E9EDF4',
+    titleHoverColor: '#D6B56C',
+    triggerBg: '#142238',
+    triggerBorder: '#344761',
+    triggerTextColor: '#D6B56C',
+    descColor: '#9EADC2',
+    footerTextColor: '#74859D',
+    footerActionColor: '#D6B56C',
+    focusRingColor: '#D6B56C',
   };
 };
 
