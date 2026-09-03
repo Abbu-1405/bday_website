@@ -300,16 +300,16 @@ You don't need to fight every imaginary battle tonight, **SSSSSSSSSSSSTTTTTTTTTR
       {
         id: 'day-136-photo-1',
         type: 'image',
-        src: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1200&q=80',
-        title: 'Kapila Theertham Temple Courtyard',
+        src: '/media/kapil teertam_1.jpg',
+        title: 'Kapila Theertham Surprise Meet 1',
         description: 'Quiet moments after darshan on 02/02/2026.',
       },
       {
         id: 'day-136-photo-2',
         type: 'image',
-        src: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80',
-        title: 'Sitting & Talking by the Temple Steps',
-        description: 'Spontaneous meet and endless conversations.',
+        src: '/media/kapil teertam_2.jpg',
+        title: 'Kapila Theertham Surprise Meet 2',
+        description: 'Spontaneous meet and endless conversations by the temple.',
       },
     ],
   },
@@ -387,6 +387,29 @@ There she is.`,
     kaadiki madhyalo nuv nee phone screen gaurd change cheskunaav nd naa
     dandruff ki curd dhi solution chepaav ika bus stand nunchi nuv
     intiki poyaav nen hostel ki elli poyaa`,
+    mediaItems: [
+      {
+        id: 'day-141-photo-1',
+        type: 'image',
+        src: '/media/Gufha Restaurant Chao_1.jpg',
+        title: 'Gufha Restaurant Chaos 1',
+        description: 'Kids play area chaos and fun on 02/02/2026.',
+      },
+      {
+        id: 'day-141-photo-2',
+        type: 'image',
+        src: '/media/Gufha Restaurant Chao_2.jpg',
+        title: 'Gufha Restaurant Chaos 2',
+        description: 'Lunch at Gufha Restaurant and ball games.',
+      },
+      {
+        id: 'day-141-photo-3',
+        type: 'image',
+        src: '/media/Gufha Restaurant Chao_3.jpg',
+        title: 'Gufha Restaurant Chaos 3',
+        description: 'Walking to the bus stand afterwards.',
+      },
+    ],
   },
   {
     dayIndex: 142,
@@ -488,6 +511,15 @@ This isn't Google Maps, but somehow you'll still find another road.`,
     ground lo book expo pettindhe apudu aa roju svims medical clg adanta
     bandlo tirukoni book expo ki elaam akada konni books chusaam
     tirigaam daantlo(video will be attached)`,
+    mediaItems: [
+      {
+        id: 'day-149-video-1',
+        type: 'video',
+        src: '/media/Book Expo Day.mp4',
+        title: 'Book Expo Day Video',
+        description: 'Exploring books and riding through SVIMS on 06/02/2026.',
+      },
+    ],
   },
   {
     dayIndex: 150,
@@ -693,6 +725,29 @@ Sometimes it's nice to notice it.`,
     nunchi Ramzan month start aa roj afternoon class ettesi nuvvu nen
     Chandragiri fort ki elaam (photos will be attached) aa tarvaata
     Ramzan lo anthaga kalavaledhu`,
+    mediaItems: [
+      {
+        id: 'day-166-photo-1',
+        type: 'image',
+        src: '/media/Chandragiri Fort Before Ramadan_1.jpg',
+        title: 'Chandragiri Fort Before Ramadan 1',
+        description: 'Visiting Chandragiri fort before Ramzan month began.',
+      },
+      {
+        id: 'day-166-photo-2',
+        type: 'image',
+        src: '/media/Chandragiri Fort Before Ramadan_2.jpg',
+        title: 'Chandragiri Fort Before Ramadan 2',
+        description: 'Bunking afternoon class for Chandragiri fort.',
+      },
+      {
+        id: 'day-166-photo-3',
+        type: 'image',
+        src: '/media/Chandragiri Fort Before Ramadan_3.jpg',
+        title: 'Chandragiri Fort Before Ramadan 3',
+        description: 'Historic architecture and walks around the fort grounds.',
+      },
+    ],
   },
   {
     dayIndex: 167,

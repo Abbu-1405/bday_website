@@ -5,6 +5,7 @@ export interface Moment {
   date: string;
   location?: string;
   image?: string;
+  video?: string;
   shortDescription: string;
   story: string;
   featured?: boolean;

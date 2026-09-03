@@ -12,6 +12,29 @@ ika 27/12/2025 na
     tavaata akad nunchi maskabun tineki elaam adhii em antahga bale
     anuko ahdi vere vishayam nuv akada kudha daan ni koncham kinda
     paadeskunaav.(photos will be attached)`,
+    mediaItems: [
+      {
+        id: 'day-061-video-1',
+        type: 'video',
+        src: '/media/Maska bun_1.mp4',
+        title: 'Maska Bun Outing Video',
+        description: 'Outing for maskabun on 27/12/2025 after walking around university.',
+      },
+      {
+        id: 'day-061-photo-2',
+        type: 'image',
+        src: '/media/Maska bun_2.jpg',
+        title: 'University Walk & Maska Bun 1',
+        description: 'Walking around agriculture and veterinary university side.',
+      },
+      {
+        id: 'day-061-photo-3',
+        type: 'image',
+        src: '/media/Maska bun_3.jpg',
+        title: 'University Walk & Maska Bun 2',
+        description: 'Maska bun memories.',
+      },
+    ],
   },
   {
     dayIndex: 62,
@@ -405,6 +428,22 @@ You're just taking your own route.`,
     ganta ki paina koorchoni muchatlu petaam(photos will be attached) aa
     roju literally enchukunna enni hours unna neetho anedhi naak kudha
     teldhu nduko adhi`,
+    mediaItems: [
+      {
+        id: 'day-083-photo-1',
+        type: 'image',
+        src: '/media/Cream stone.jpg',
+        title: 'Cream Stone Ice Cream & First Photos',
+        description: 'Sitting and talking for more than an hour on 01/01/2026.',
+      },
+      {
+        id: 'day-083-photo-2',
+        type: 'image',
+        src: '/media/Cream stone2.jpg',
+        title: 'Cream Stone Memories',
+        description: 'Endless talks at Cream Stone.',
+      },
+    ],
   },
   {
     dayIndex: 84,
@@ -563,6 +602,29 @@ You are a human being, not a Nokia phone.`,
     bus stand ki elaam mee atta kosam wait chestaa unaam apudu nuv mee
     atta ochaaka elaav nd nen hostel elli pack cheskoni intiki elli
     poyaa adhe night train lo(photos will be attached)`,
+    mediaItems: [
+      {
+        id: 'day-092-photo-1',
+        type: 'image',
+        src: '/media/First shawarma.jpg',
+        title: 'First Shawarma Outing 1',
+        description: 'First time shawarma on 07/01/2026 on old municipality road.',
+      },
+      {
+        id: 'day-092-photo-2',
+        type: 'image',
+        src: '/media/First shawarma 2.jpg',
+        title: 'First Shawarma Outing 2',
+        description: 'Eating shawarma together after exams.',
+      },
+      {
+        id: 'day-092-photo-3',
+        type: 'image',
+        src: '/media/First shawarma 3.jpg',
+        title: 'First Shawarma Outing 3',
+        description: 'Ice cream and moments before waiting at the bus stand.',
+      },
+    ],
   },
   {
     dayIndex: 93,
@@ -663,6 +725,15 @@ Mission successful every single time.`,
 09/01/2026 photos petaav dosa dhi
     adedho nuvve vesaa ani chepaav first next kaaseo aagu me mummy
     vesaaru ani chepaav (photos will be attached)`,
+    mediaItems: [
+      {
+        id: 'day-097-photo-1',
+        type: 'image',
+        src: '/media/Dosa story.jpg',
+        title: 'The Dosa Story',
+        description: 'The famous dosa you claimed you made first before saying mummy made it 😂',
+      },
+    ],
   },
   {
     dayIndex: 98,
@@ -978,6 +1049,36 @@ Just mentioning that for historical accuracy.`,
     adhi nd aa roju nuvvu mee native ki elaav nd akada polam photoss
     petaav meeru festival ki apudu semiya paayasam chesaaru (photos will
     be attached)`,
+    mediaItems: [
+      {
+        id: 'day-118-photo-1',
+        type: 'image',
+        src: '/media/Dussehra Dress & Village Memories_1.jpg',
+        title: 'Dussehra Dress & Village 1',
+        description: 'Festival dress and village photos from 15/01/2026.',
+      },
+      {
+        id: 'day-118-photo-2',
+        type: 'image',
+        src: '/media/Dussehra Dress & Village Memories_2.jpg',
+        title: 'Dussehra Dress & Village 2',
+        description: 'Village polam and festival memories.',
+      },
+      {
+        id: 'day-118-photo-3',
+        type: 'image',
+        src: '/media/Dussehra Dress & Village Memories_3.jpg',
+        title: 'Dussehra Dress & Village 3',
+        description: 'Festival moments.',
+      },
+      {
+        id: 'day-118-photo-4',
+        type: 'image',
+        src: '/media/Dussehra Dress & Village Memories_4.jpg',
+        title: 'Dussehra Dress & Village 4',
+        description: 'Semiya payasam and celebrations.',
+      },
+    ],
   },
   {
     dayIndex: 119,

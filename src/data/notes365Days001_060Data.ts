@@ -509,6 +509,22 @@ first time bayatiki ellindhi
     return elle tapudu full varsham start ayindhi sudden ga so padmavati
     side mom’s kitchen lo aagam varsham aagenta varku(photo will be
     attached if possible)`,
+    mediaItems: [
+      {
+        id: 'day-034-video-1',
+        type: 'video',
+        src: '/media/First outing_1.mp4',
+        title: 'First Outing - The Ride',
+        description: 'Our very first outing and ride together on 03/12/2025.',
+      },
+      {
+        id: 'day-034-video-2',
+        type: 'video',
+        src: '/media/First outing_2.mp4',
+        title: 'First Outing - In the Rain',
+        description: 'Waiting at Mom\'s Kitchen while it rained.',
+      },
+    ],
   },
   {
     dayIndex: 35,
@@ -823,6 +839,15 @@ Highly unfair.`,
     padmavati side elaam kulfi teeskunaam raayi ki kaalu tagili nuv
     kinda padaalsindhi but only ice cream ni Kinda padesaav🤣🤣(video
     will be attached)`,
+    mediaItems: [
+      {
+        id: 'day-054-video-1',
+        type: 'video',
+        src: '/media/Ice cream fall.mp4',
+        title: 'The Ice Cream Fall',
+        description: 'Saving yourself while the kulfi took the hit on 19/12/2025 😂',
+      },
+    ],
   },
   {
     dayIndex: 55,
@@ -858,6 +883,15 @@ ika malli first time waffles tineki
     elaam padmavati side vellindhi 24/12/2025 na ee dress ye nen
     cheppindhi light blue color blue frock baaguntaadhi chudu ani(photos
     will be attached)`,
+    mediaItems: [
+      {
+        id: 'day-057-photo-1',
+        type: 'image',
+        src: '/media/First waffles.jpg',
+        title: 'First Waffles Outing',
+        description: 'Eating waffles on 24/12/2025 in the light blue frock.',
+      },
+    ],
   },
   {
     dayIndex: 58,

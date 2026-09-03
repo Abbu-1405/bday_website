@@ -266,6 +266,15 @@ I wonder which moment you'd protect forever.`,
     elaam birds tho baa aadukunaam last lo nuv scarf kattukunapudu
     chusaa nee kallu chaala anthe chaala baagunaayi (photos,videos will
     be attached)`,
+    mediaItems: [
+      {
+        id: 'day-195-photo-1',
+        type: 'image',
+        src: '/media/Exotic Park & Your Eyes_1.jpg',
+        title: 'Exotic Park & Your Eyes',
+        description: 'Playing with birds at Exotic Park on 28/02/2026.',
+      },
+    ],
   },
   {
     dayIndex: 196,
@@ -646,6 +655,50 @@ Thanks for cooperating with my experiments.`,
     malli kalisaam photoss digaam makeup time lo ekkuva photoss digaam
     juniors ki baa makeup vesaam nd last lo nen vachi neetho last pic of
     the day digi ellipoyaa(photos will be attached)`,
+    mediaItems: [
+      {
+        id: 'day-217-video-1',
+        type: 'video',
+        src: '/media/GETZ_1.mp4',
+        title: 'GETZ Celebration Video',
+        description: 'Moments at GETZ event on 20/04/2026.',
+      },
+      {
+        id: 'day-217-photo-2',
+        type: 'image',
+        src: '/media/GETZ_2.jpg',
+        title: 'GETZ Photo 1',
+        description: 'GETZ memories and makeup time photos.',
+      },
+      {
+        id: 'day-217-photo-3',
+        type: 'image',
+        src: '/media/GETZ_3.jpg',
+        title: 'GETZ Photo 2',
+        description: 'Photos together at GETZ.',
+      },
+      {
+        id: 'day-217-photo-4',
+        type: 'image',
+        src: '/media/GETZ_4.jpg',
+        title: 'GETZ Photo 3',
+        description: 'Helping juniors with makeup and taking photos.',
+      },
+      {
+        id: 'day-217-photo-5',
+        type: 'image',
+        src: '/media/GETZ_5.jpg',
+        title: 'GETZ Photo 4',
+        description: 'Cherished memories from GETZ event.',
+      },
+      {
+        id: 'day-217-photo-6',
+        type: 'image',
+        src: '/media/GETZ_6.JPG',
+        title: 'GETZ Last Photo of the Day',
+        description: 'The final picture of the day before leaving.',
+      },
+    ],
   },
   {
     dayIndex: 218,

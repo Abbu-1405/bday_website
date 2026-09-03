@@ -74,6 +74,14 @@ export const FeaturedMomentCard: React.FC<FeaturedMomentCardProps> = ({
                 loading="lazy"
                 referrerPolicy="no-referrer"
               />
+            ) : moment.video ? (
+              <video
+                src={moment.video}
+                muted
+                playsInline
+                preload="metadata"
+                className="w-full h-full object-cover rounded-[8px]"
+              />
             ) : (
               <div
                 className={cn(

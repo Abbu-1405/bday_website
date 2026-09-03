@@ -238,6 +238,29 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
               </div>
             </div>
           </div>
+        ) : moment.video ? (
+          <div className="relative z-10 pt-4">
+            <div
+              className={cn(
+                'relative rounded-[14px] overflow-hidden max-h-[360px] sm:max-h-[420px] w-full flex items-center justify-center shadow-lg bg-black',
+                isLetterArchive
+                  ? 'p-2 border border-[rgba(138,110,89,0.32)]'
+                  : isScrapbook
+                  ? 'p-2 border border-[rgba(120,140,107,0.35)]'
+                  : 'p-2 border border-[#344761]'
+              )}
+            >
+              <video
+                src={moment.video}
+                controls
+                playsInline
+                preload="metadata"
+                className="w-full max-h-[340px] sm:max-h-[400px] object-contain rounded-[10px]"
+              >
+                Your browser does not support HTML5 video playback.
+              </video>
+            </div>
+          </div>
         ) : null}
 
         {/* Header Metadata & Title */}

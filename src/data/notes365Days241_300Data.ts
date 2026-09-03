@@ -62,6 +62,22 @@ Keep meeting new versions of yourself.`,
     chepaav nuv apud vachi nee kaadiki padmavati side elaam iddaram ice
     cream tinaam first time antha sepu bayata undadam adhi(photos will
     be attached)`,
+    mediaItems: [
+      {
+        id: 'day-245-photo-1',
+        type: 'image',
+        src: '/media/First Long Evening Outside_3.jpg',
+        title: 'First Long Evening Outside 1',
+        description: 'Staying out until 7:30 having ice cream at Padmavati.',
+      },
+      {
+        id: 'day-245-photo-2',
+        type: 'image',
+        src: '/media/First Long Evening Outside_4.jpg',
+        title: 'First Long Evening Outside 2',
+        description: 'First time staying out that long together on 27/04/2026.',
+      },
+    ],
   },
   {
     dayIndex: 246,
@@ -102,6 +118,15 @@ Na mistakes ekkuva funny anukunta.`,
 01/05/2026 aa roj bayatiki elaam
     iddaram punugulu tinaam first time adhi apud nuv punugulu kinda
     padesaav(video will be attached)`,
+    mediaItems: [
+      {
+        id: 'day-248-video-1',
+        type: 'video',
+        src: '/media/First Punugulu.mp4',
+        title: 'First Punugulu Video',
+        description: 'Eating punugulu for the first time together on 01/05/2026 and dropping them 😂',
+      },
+    ],
   },
   {
     dayIndex: 249,
@@ -203,6 +228,29 @@ Last three days conversations anni rewind chestha.
     eltaa undhe ika exams anni ayipoyaayi rendu exams unaayi anthe day
     scholar chestaa ani poyaav mee taata vachi pickup cheskunaaru ninnu
     (photos will be attached)`,
+    mediaItems: [
+      {
+        id: 'day-254-photo-1',
+        type: 'image',
+        src: '/media/Matching Red & The Random Movie_1.jpg',
+        title: 'Matching Red & The Random Movie 1',
+        description: 'Matching red outfits at Govindaraj Swamy temple on 09/05/2026.',
+      },
+      {
+        id: 'day-254-photo-2',
+        type: 'image',
+        src: '/media/Matching Red & The Random Movie_2.jpg',
+        title: 'Matching Red & The Random Movie 2',
+        description: 'Spontaneously going to the movie straight from the temple line.',
+      },
+      {
+        id: 'day-254-photo-3',
+        type: 'image',
+        src: '/media/Matching Red & The Random Movie_3.jpg',
+        title: 'Matching Red & The Random Movie 3',
+        description: 'The most random and fun day together.',
+      },
+    ],
   },
   {
     dayIndex: 255,
@@ -294,6 +342,43 @@ One-word ending.`,
     party aa roju exam tarvaata meeru tineki elaaru tinaaka tirigaaru
     full ga aa tarvaata return vachaaka manam kalisaam muchatlu petaam
     nd nuv aa roj aa dress lo bhale undhe (photos will be attached)`,
+    mediaItems: [
+      {
+        id: 'day-259-photo-1',
+        type: 'image',
+        src: '/media/Meghana’s Birthday Party_1.jpg',
+        title: 'Meghana’s Birthday Party 1',
+        description: 'Meeting up and chatting after Meghana\'s birthday party on 11/05/2026.',
+      },
+      {
+        id: 'day-259-photo-2',
+        type: 'image',
+        src: '/media/Meghana’s Birthday Party_2.jpg',
+        title: 'Meghana’s Birthday Party 2',
+        description: 'You looked so lovely in that dress that day.',
+      },
+      {
+        id: 'day-259-photo-3',
+        type: 'image',
+        src: '/media/Meghana’s Birthday Party_3.jpg',
+        title: 'Meghana’s Birthday Party 3',
+        description: 'Celebration photos and memories.',
+      },
+      {
+        id: 'day-259-photo-4',
+        type: 'image',
+        src: '/media/Meghana’s Birthday Party_4.jpg',
+        title: 'Meghana’s Birthday Party 4',
+        description: 'Moments from the party.',
+      },
+      {
+        id: 'day-259-photo-5',
+        type: 'image',
+        src: '/media/Meghana’s Birthday Party_5.jpg',
+        title: 'Meghana’s Birthday Party 5',
+        description: 'Endless talks and fun after exams.',
+      },
+    ],
   },
   {
     dayIndex: 260,

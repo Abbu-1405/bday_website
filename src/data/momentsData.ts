@@ -45,6 +45,7 @@ I don't think either of us planned for those two things to happen together, whic
     order: 4,
     title: 'Our First Photos & Endless Talks',
     date: '01/01/2026',
+    image: '/media/Cream stone.jpg',
     momentStrength: '9.8/10',
     shortDescription:
       "After BNR Mall, we went to Table 9 for lunch and had biryani. That's where we took our first photos together.",
@@ -57,6 +58,7 @@ After that we went to Cream Stone, ordered ice cream, and somehow ended up sitti
     order: 5,
     title: 'Our First Outing',
     date: '03/12/2025',
+    video: '/media/First outing_1.mp4',
     momentStrength: '9.7/10',
     shortDescription:
       'This was the first time we actually went out together. We went to eat roll, walked around for a while, then went for a random drive.',
@@ -99,6 +101,8 @@ Honestly, this is still one of the most memorable days of my life.`,
     order: 8,
     title: 'GETZ & The Almost Proposal',
     date: '20/04/2026',
+    image: '/media/GETZ_2.jpg',
+    video: '/media/GETZ_1.mp4',
     momentStrength: '9.5/10',
     shortDescription:
       'I went to GETZ with one thing in my mind — I was actually planning to propose to you if I got the chance.',
@@ -129,6 +133,7 @@ That whole day had so many little moments packed into it.`,
     order: 10,
     title: 'The Kapila Theertham Surprise Meet',
     date: '02/02/2026',
+    image: '/media/kapil teertam_1.jpg',
     momentStrength: '9.2/10',
     shortDescription:
       'You were at Kapila Theertham with your friends, and somehow I had already gone to the temple hoping you might call me 😂.',
@@ -225,6 +230,7 @@ It wasn't some huge outing, but I liked that we were sitting together and actual
     order: 16,
     title: 'Exotic Park & Your Eyes',
     date: '28/02/2026',
+    image: '/media/Exotic Park & Your Eyes_1.jpg',
     momentStrength: '8.4/10',
     shortDescription:
       "After your doctor's appointment, we went to Exotic Park and played around with the birds.",
@@ -239,6 +245,7 @@ And yeah... your eyes looked really, really beautiful that day.`,
     order: 17,
     title: 'Our First Long Evening Outside',
     date: '27/04/2026',
+    image: '/media/First Long Evening Outside_3.jpg',
     momentStrength: '8.2/10',
     shortDescription:
       'You told me around 6 that you had permission to stay out until around 7:30. So obviously I came over 😂.',

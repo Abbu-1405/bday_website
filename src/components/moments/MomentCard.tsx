@@ -78,6 +78,14 @@ export const MomentCard: React.FC<MomentCardProps> = ({
               loading="lazy"
               referrerPolicy="no-referrer"
             />
+          ) : moment.video ? (
+            <video
+              src={moment.video}
+              muted
+              playsInline
+              preload="metadata"
+              className="w-full h-full object-cover rounded-[6px]"
+            />
           ) : (
             <div
               className={cn(

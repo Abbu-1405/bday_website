@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import backgroundGuitarAudio from '../assets/audio/background_guitar.mp3';
 
-export type AmbientTrack = 'rain' | 'piano' | 'starlit';
+export type AmbientTrack = 'starlit' | 'rain' | 'piano';
 
 export interface AudioTrackOption {
   id: AmbientTrack;
@@ -10,6 +11,12 @@ export interface AudioTrackOption {
 }
 
 export const AMBIENT_TRACKS: AudioTrackOption[] = [
+  {
+    id: 'starlit',
+    label: 'Background Guitar (Our Song)',
+    url: backgroundGuitarAudio,
+    desc: 'Gentle acoustic guitar melodies played softly in the background',
+  },
   {
     id: 'rain',
     label: 'Soft Rain Ambient',
@@ -74,9 +81,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [currentTrack, setCurrentTrackState] = useState<AmbientTrack>(() => {
     try {
       const t = localStorage.getItem(TRACK_KEY) as AmbientTrack;
-      return t && AMBIENT_TRACKS.some((item) => item.id === t) ? t : 'rain';
+      return t && AMBIENT_TRACKS.some((item) => item.id === t) ? t : 'starlit';
     } catch {
-      return 'rain';
+      return 'starlit';
     }
   });
 
