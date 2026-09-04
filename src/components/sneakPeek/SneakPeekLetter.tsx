@@ -179,15 +179,25 @@ export const SneakPeekLetter: React.FC<SneakPeekLetterProps> = ({
         }}
       >
         {/* Subtle Pressed Botanical Flora (Left: Lotus, Right: Sunflower) */}
-        <div className="absolute -top-3.5 -left-2.5 sm:-top-5 sm:-left-4 pointer-events-none transform -rotate-6">
-          <PressedLotus size={46} />
+        <div className="absolute -top-3 -left-2 sm:-top-5 sm:-left-4 pointer-events-none transform -rotate-6 z-10">
+          <div className="block sm:hidden">
+            <PressedLotus size={36} />
+          </div>
+          <div className="hidden sm:block">
+            <PressedLotus size={46} />
+          </div>
         </div>
-        <div className="absolute -top-3.5 -right-2.5 sm:-top-5 sm:-right-4 pointer-events-none transform rotate-6">
-          <PressedSunflower size={46} />
+        <div className="absolute -top-3 -right-2 sm:-top-5 sm:-right-4 pointer-events-none transform rotate-6 z-10">
+          <div className="block sm:hidden">
+            <PressedSunflower size={36} />
+          </div>
+          <div className="hidden sm:block">
+            <PressedSunflower size={46} />
+          </div>
         </div>
 
         {/* Vintage Date Header */}
-        <div className="flex items-center justify-between border-b border-[#E3D4C2] pb-2.5 mb-4 sm:mb-6 text-xs font-serif text-[#7D6B5E] shrink-0">
+        <div className="flex items-center justify-between border-b border-[#E3D4C2] pb-2.5 mb-4 sm:mb-6 text-xs font-serif text-[#7D6B5E] shrink-0 px-3 sm:px-0">
           <span className="italic tracking-wider">A letter for you</span>
           <span className="font-mono tracking-widest text-[11px] sm:text-xs text-[#8A7667] font-medium">
             27/09/2026
@@ -246,11 +256,13 @@ export const SneakPeekLetter: React.FC<SneakPeekLetterProps> = ({
             <span className="text-[12.5px]">With all my love</span>
           </div>
 
-          {/* Clean, Restrained "Get Started" Action Button */}
+          {/* Clean, Restrained "Enter Starlit Letters" Action Button */}
           <div
-            className={`transition-all duration-400 ease-out ${
+            className={`transition-all duration-500 ease-out ${
               showGetStarted
-                ? 'opacity-100 translate-y-0'
+                ? isClosing
+                  ? 'opacity-0 translate-y-1 pointer-events-none'
+                  : 'opacity-100 translate-y-0'
                 : 'opacity-0 translate-y-2 pointer-events-none'
             }`}
           >
@@ -258,10 +270,11 @@ export const SneakPeekLetter: React.FC<SneakPeekLetterProps> = ({
               type="button"
               id="sneak-peek-get-started-btn"
               onClick={onGetStarted}
-              className="group relative inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-2.5 rounded-full bg-[#FAF6EE] hover:bg-[#FFFDF9] text-[#362920] font-serif text-sm tracking-wide border border-[#DFCFC0] shadow-[0_3px_12px_rgba(70,45,30,0.1)] hover:shadow-[0_5px_16px_rgba(70,45,30,0.15)] active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8C6B5E] cursor-pointer select-none"
+              disabled={isClosing}
+              className="group relative inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-2.5 rounded-full bg-[#FAF6EE] hover:bg-[#FFFDF9] text-[#362920] font-serif text-sm tracking-wide border border-[#DFCFC0] shadow-[0_3px_12px_rgba(70,45,30,0.1)] hover:shadow-[0_5px_16px_rgba(70,45,30,0.15)] active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8C6B5E] cursor-pointer select-none disabled:opacity-70 disabled:pointer-events-none"
             >
               <span className="relative z-10 flex items-center gap-1.5 text-[#3A2D24]">
-                <span>Get Started</span>
+                <span>Enter Starlit Letters &rarr;</span>
                 <Sparkles className="w-3.5 h-3.5 text-[#8C6B5E]" />
               </span>
             </button>

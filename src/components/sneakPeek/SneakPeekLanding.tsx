@@ -24,7 +24,7 @@ export const SneakPeekLanding: React.FC<SneakPeekLandingProps> = ({
       </div>
 
       {/* Primary Greeting */}
-      <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-normal italic text-[#382B22] tracking-tight mb-8 leading-snug select-none bg-[#ff4600]">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-normal italic text-[#382B22] tracking-tight mb-8 leading-snug select-none">
         I made something for you
       </h1>
 
@@ -43,15 +43,17 @@ export const SneakPeekLanding: React.FC<SneakPeekLandingProps> = ({
         </span>
       </button>
 
-      {/* Skip Option */}
-      <button
-        type="button"
-        id="sneak-peek-skip-btn"
-        onClick={onSkip}
-        className="mt-5 text-xs font-serif italic tracking-wider text-[#7D6B5E] hover:text-[#382B22] transition-colors duration-200 py-1.5 px-3 rounded focus:outline-none focus-visible:ring-1 focus-visible:ring-[#7D6B5E] hover:underline underline-offset-4 cursor-pointer select-none"
-      >
-        Skip &rarr;
-      </button>
+      {/* Skip Option (Accessible 44px touch target with restrained styling) */}
+      <div className="mt-3 flex items-center justify-center">
+        <button
+          type="button"
+          id="sneak-peek-skip-btn"
+          onClick={onSkip}
+          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-xs font-serif italic tracking-wider text-[#7D6B5E] hover:text-[#382B22] transition-colors duration-200 px-4 rounded focus:outline-none focus-visible:ring-1 focus-visible:ring-[#7D6B5E] hover:underline underline-offset-4 cursor-pointer select-none"
+        >
+          Skip to Sign In &rarr;
+        </button>
+      </div>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { GoogleAuthProvider, signInWithPopup, signOut, User } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, signOut, User, browserPopupRedirectResolver } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, isFirebaseConfigured } from '../firebase';
 import { UserProfile } from '../types';
@@ -23,7 +23,7 @@ export const loginWithGoogle = async (): Promise<User> => {
     const googleProvider = new GoogleAuthProvider();
     googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-    const result = await signInWithPopup(auth, googleProvider);
+    const result = await signInWithPopup(auth, googleProvider, browserPopupRedirectResolver);
     console.log('[AUTH] Popup resolved successfully');
 
     const user = result.user;
@@ -78,18 +78,15 @@ export const loginWithGoogle = async (): Promise<User> => {
     if (isUserCancellation) {
       console.info('[AUTH] Popup dismissed by user.');
     } else {
-      console.error('[AUTH] Popup failed');
-      console.error('[Google Auth Error]', {
-        code: error?.code,
-        message: error?.message,
-        name: error?.name,
-        customData: error?.customData,
-      });
+      console.error('[AUTH] Popup failed with code:', error?.code || 'unknown');
     }
 
     let friendlyMessage = 'Failed to sign in with Google. Please try again.';
 
     switch (error?.code) {
+      case 'auth/argument-error':
+        friendlyMessage = 'Authentication configuration error. Please refresh the page and try again.';
+        break;
       case 'auth/popup-blocked':
         friendlyMessage = 'The sign-in popup was blocked by your browser. Please allow popups for this site and try again.';
         break;

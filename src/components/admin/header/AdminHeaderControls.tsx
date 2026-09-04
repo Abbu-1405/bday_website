@@ -98,7 +98,7 @@ export const AdminHeaderControls: React.FC<AdminHeaderControlsProps> = ({ classN
   const handleSignOut = async () => {
     try {
       await logout();
-      navigate(ROUTES.HOME);
+      navigate(ROUTES.LOGIN, { replace: true });
     } catch (err) {
       console.error('Sign out error:', err);
     }

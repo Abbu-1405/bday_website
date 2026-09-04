@@ -47,5 +47,6 @@ export * from './ambient';
 export * from './CrossFadeImage';
 export * from './AnimatedProgressNumber';
 export * from './sneakPeek';
+export * from './AuthLoadingScreen';
 
 

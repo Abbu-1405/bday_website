@@ -5,6 +5,8 @@ import {
   browserLocalPersistence,
   browserSessionPersistence,
   inMemoryPersistence,
+  indexedDBLocalPersistence,
+  browserPopupRedirectResolver,
   Auth,
 } from 'firebase/auth';
 import { getFirestore, Firestore, setLogLevel } from 'firebase/firestore';
@@ -110,7 +112,13 @@ function initAuth(): Auth {
     if (typeof window !== 'undefined') {
       try {
         return initializeAuth(app, {
-          persistence: [browserLocalPersistence, browserSessionPersistence, inMemoryPersistence],
+          persistence: [
+            indexedDBLocalPersistence,
+            browserLocalPersistence,
+            browserSessionPersistence,
+            inMemoryPersistence,
+          ],
+          popupRedirectResolver: browserPopupRedirectResolver,
         });
       } catch {
         return getAuth(app);

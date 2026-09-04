@@ -49,8 +49,12 @@ export const FloatingAuthButton: React.FC<FloatingAuthButtonProps> = ({ classNam
   };
 
   const handleLogout = async () => {
-    await logout();
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('starlit_intentional_logout', 'true');
+    }
     setIsOpen(false);
+    await logout();
+    navigate(ROUTES.LOGIN, { replace: true });
   };
 
   const isStatic = className?.includes('static');

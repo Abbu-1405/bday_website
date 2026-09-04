@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   User,
   LogIn,
@@ -68,12 +68,21 @@ const COMMON_TIMEZONES = [
 ];
 
 export default function Settings() {
+  const navigate = useNavigate();
   const { currentUser, loading, isAdmin, loginWithGoogle, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const { playSfx } = useSfx();
   const { isPlaying, volume, currentTrack, togglePlay, setVolume, setTrack } = useAudio();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+
+  const handleLogout = async () => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('starlit_intentional_logout', 'true');
+    }
+    await logout();
+    navigate(ROUTES.LOGIN, { replace: true });
+  };
 
   // Notification state
   const [pushSupported, setPushSupported] = useState<boolean>(true);
@@ -620,7 +629,7 @@ export default function Settings() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={logout}
+                    onClick={handleLogout}
                     leftIcon={<LogOut className="h-3.5 w-3.5" />}
                     className="font-serif text-xs min-h-[38px] text-rose-600 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/10 hover:border-rose-500/50"
                   >

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Activity,
@@ -16,6 +17,7 @@ import {
   Bell,
 } from 'lucide-react';
 import { useAuth } from '../hooks';
+import { ROUTES } from '../constants';
 import {
   fetchAdminOverviewStats,
   fetchAdminRecentActivity,
@@ -58,9 +60,15 @@ type AdminTab =
   | 'settings';
 
 export default function Admin() {
+  const navigate = useNavigate();
   const { currentUser, userProfile, isAdmin, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate(ROUTES.LOGIN, { replace: true });
+  };
 
   // Data states
   const [stats, setStats] = useState<AdminOverviewStats>({
@@ -284,7 +292,7 @@ export default function Admin() {
                 </a>
 
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-medium transition-colors"
                 >
                   <LogOut className="w-3.5 h-3.5" />

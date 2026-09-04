@@ -137,6 +137,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('starlit_intentional_logout', 'true');
+      }
       await logoutUser();
     } catch (err) {
       console.error('[AUTH] Logout failed:', err);

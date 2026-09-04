@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
 import { cn } from '../utils';
+import { ROUTES } from '../constants';
 
 export interface BreadcrumbItem {
   label: string;
@@ -32,7 +33,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
         {showHomeIcon && (
           <li className="inline-flex items-center">
             <Link
-              to="/"
+              to={ROUTES.HOME}
               className="inline-flex items-center gap-1 text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors"
               title="Home"
             >
