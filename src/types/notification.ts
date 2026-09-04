@@ -152,6 +152,7 @@ export interface CreateNotificationEventParams {
   cooldownCategory?: string;
   bypassPreferences?: boolean;
   bypassQuietHours?: boolean;
+  bypassDiscoveryBurst?: boolean;
 }
 
 export type NotificationTimeRange = 'today' | '7d' | '30d' | 'all';

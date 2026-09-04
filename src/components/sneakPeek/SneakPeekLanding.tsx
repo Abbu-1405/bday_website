@@ -24,7 +24,7 @@ export const SneakPeekLanding: React.FC<SneakPeekLandingProps> = ({
       </div>
 
       {/* Primary Greeting */}
-      <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-normal italic text-[#382B22] tracking-tight mb-8 leading-snug select-none">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-normal italic text-[#382B22] tracking-tight mb-8 leading-snug select-none bg-[#ff4600]">
         I made something for you
       </h1>
 

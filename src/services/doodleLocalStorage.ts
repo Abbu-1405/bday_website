@@ -100,11 +100,19 @@ function withDB<T>(
         transaction.oncomplete = () => {
           safeClose();
         };
-        transaction.onabort = () => {
+        transaction.onabort = (e: any) => {
+          try {
+            e?.preventDefault?.();
+            e?.stopPropagation?.();
+          } catch {}
           safeClose();
           resolve(null);
         };
-        transaction.onerror = () => {
+        transaction.onerror = (e: any) => {
+          try {
+            e?.preventDefault?.();
+            e?.stopPropagation?.();
+          } catch {}
           safeClose();
           resolve(null);
         };
@@ -125,10 +133,18 @@ function withDB<T>(
       }
     };
 
-    request.onerror = () => {
+    request.onerror = (e: any) => {
+      try {
+        e?.preventDefault?.();
+        e?.stopPropagation?.();
+      } catch {}
       resolve(null);
     };
-    request.onblocked = () => {
+    request.onblocked = (e: any) => {
+      try {
+        e?.preventDefault?.();
+        e?.stopPropagation?.();
+      } catch {}
       resolve(null);
     };
   });

@@ -8,19 +8,37 @@ importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js
 importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js');
 
 // Initialize Firebase in the service worker with dynamic query param support or canonical project defaults
-const urlParams = new URLSearchParams(self.location.search);
+let urlParams;
+try {
+  urlParams = new URLSearchParams(self.location.search || '');
+} catch (_) {
+  urlParams = new URLSearchParams('');
+}
+
+function getSafeParam(key, fallback) {
+  try {
+    const val = urlParams.get(key);
+    if (val && typeof val === 'string' && val.trim().length > 0) {
+      return val.trim();
+    }
+  } catch (_) {}
+  return fallback;
+}
+
 const firebaseConfig = {
-  apiKey: urlParams.get('apiKey') || 'AIzaSyCAj57KTHde1XwxXmg08zNlc4knIRmqumo',
-  authDomain: urlParams.get('authDomain') || 'gen-lang-client-0057157522.firebaseapp.com',
-  projectId: urlParams.get('projectId') || 'gen-lang-client-0057157522',
-  storageBucket: urlParams.get('storageBucket') || 'gen-lang-client-0057157522.firebasestorage.app',
-  messagingSenderId: urlParams.get('messagingSenderId') || '1040135494913',
-  appId: urlParams.get('appId') || '1:1040135494913:web:ee17e2c259d779bbe60f00',
+  apiKey: getSafeParam('apiKey', 'AIzaSyCAj57KTHde1XwxXmg08zNlc4knIRmqumo'),
+  authDomain: getSafeParam('authDomain', 'gen-lang-client-0057157522.firebaseapp.com'),
+  projectId: getSafeParam('projectId', 'gen-lang-client-0057157522'),
+  storageBucket: getSafeParam('storageBucket', 'gen-lang-client-0057157522.firebasestorage.app'),
+  messagingSenderId: getSafeParam('messagingSenderId', '1040135494913'),
+  appId: getSafeParam('appId', '1:1040135494913:web:eccd1c5846fe5f5de60f00'),
 };
 
-if (firebaseConfig.projectId) {
+if (firebaseConfig.projectId && firebaseConfig.apiKey) {
   try {
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps || firebase.apps.length === 0) {
+      firebase.initializeApp(firebaseConfig);
+    }
   } catch (initErr) {
     console.warn('[firebase-messaging-sw.js] App init notice:', initErr);
   }
@@ -31,6 +49,49 @@ try {
   messaging = firebase.messaging();
 } catch (err) {
   console.warn('[firebase-messaging-sw.js] Messaging init warning:', err);
+}
+
+/**
+ * Resolves deterministic category-aware Web Push notification tag (Phase 3D)
+ * Preserves category isolation so same-category notifications collapse while
+ * distinct categories remain independent.
+ */
+function resolveServiceWorkerNotificationTag(payload) {
+  // 1. Direct tag provided in payload data
+  if (payload?.data?.tag && typeof payload.data.tag === 'string' && payload.data.tag.trim().length > 0) {
+    return payload.data.tag.trim();
+  }
+
+  // 2. Infer from eventType or category if tag was omitted
+  const rawType = String(payload?.data?.eventType || payload?.data?.type || '').toUpperCase();
+  const rawCategory = String(payload?.data?.category || payload?.data?.cooldownCategory || '').toLowerCase();
+
+  if (rawType === 'LETTER_AVAILABLE' || rawCategory === 'letter' || rawCategory === 'letters') {
+    return 'starlit-letters';
+  }
+  if (rawType === 'MOMENT_AVAILABLE' || rawCategory === 'moment' || rawCategory === 'moments') {
+    return 'starlit-moments';
+  }
+  if (rawType === 'OPEN_WHEN_AVAILABLE' || rawCategory === 'open_when' || rawCategory === 'openwhen') {
+    return 'starlit-open-when';
+  }
+  if (
+    rawType === 'SECRET_UNLOCKED' ||
+    rawType === 'SECRET_UNLCOKED' ||
+    rawCategory === 'secret' ||
+    rawCategory === 'secrets'
+  ) {
+    return 'starlit-secrets';
+  }
+  if (rawType === 'BIRTHDAY' || rawCategory === 'birthday') {
+    return 'starlit-birthday';
+  }
+  if (rawType === 'GENERAL' || rawCategory === 'general' || rawType === 'TEST') {
+    return 'starlit-general';
+  }
+
+  // 3. Safe fallback tag
+  return 'starlit-general';
 }
 
 // Background push notification handler
@@ -56,7 +117,7 @@ if (messaging) {
         payload.notification?.badge ||
         payload.data?.badge ||
         '/download-7.jpg',
-      tag: payload.data?.tag || 'starlit-push-notification',
+      tag: resolveServiceWorkerNotificationTag(payload),
       renotify: true,
       data: {
         url: payload.data?.url || payload.fcmOptions?.link || '/',

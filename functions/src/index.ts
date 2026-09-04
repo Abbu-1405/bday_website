@@ -59,6 +59,36 @@ async function isGlobalNotificationPaused(): Promise<{ paused: boolean; reason?:
 }
 
 /**
+ * Resolves deterministic category-aware Web Push notification tag (Phase 3D)
+ */
+export function resolveNotificationTag(type?: string, category?: string): string {
+  const normalizedType = String(type || '').toUpperCase();
+  const normalizedCategory = String(category || '').toLowerCase();
+
+  if (normalizedType === 'LETTER_AVAILABLE' || normalizedCategory === 'letter' || normalizedCategory === 'letters') {
+    return 'starlit-letters';
+  }
+  if (normalizedType === 'MOMENT_AVAILABLE' || normalizedCategory === 'moment' || normalizedCategory === 'moments') {
+    return 'starlit-moments';
+  }
+  if (normalizedType === 'OPEN_WHEN_AVAILABLE' || normalizedCategory === 'open_when' || normalizedCategory === 'openwhen') {
+    return 'starlit-open-when';
+  }
+  if (
+    normalizedType === 'SECRET_UNLOCKED' ||
+    normalizedType === 'SECRET_UNLCOKED' ||
+    normalizedCategory === 'secret' ||
+    normalizedCategory === 'secrets'
+  ) {
+    return 'starlit-secrets';
+  }
+  if (normalizedType === 'BIRTHDAY' || normalizedCategory === 'birthday') {
+    return 'starlit-birthday';
+  }
+  return 'starlit-general';
+}
+
+/**
  * Checks if a given time falls within the user's configured quiet hours in their timezone
  */
 export function isInsideQuietHours(
@@ -250,6 +280,11 @@ export async function processEvent(eventId: string) {
   }
   stringifiedData.eventType = String(eventData.type || 'GENERAL');
   stringifiedData.eventId = String(eventId);
+
+  // Phase 3D: Category-aware Web Push tag alignment
+  const webPushTag = stringifiedData.tag || resolveNotificationTag(eventData.type, eventData.cooldownCategory);
+  stringifiedData.tag = webPushTag;
+
   const targetUrl = stringifiedData.url || '/';
 
   const multicastMessage: MulticastMessage = {
@@ -268,7 +303,7 @@ export async function processEvent(eventId: string) {
         body: eventData.body.slice(0, 1000),
         icon: '/download-7.jpg',
         badge: '/download-7.jpg',
-        tag: stringifiedData.eventKey || `starlit_${eventData.type}_${eventId}`,
+        tag: webPushTag,
       },
       fcmOptions: {
         link: targetUrl,

@@ -23,10 +23,32 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   public static getDerivedStateFromError(error: Error): State {
+    const msg = (error?.message || String(error)).toLowerCase();
+    if (
+      msg.includes('database is closing') ||
+      msg.includes('closing/hidden') ||
+      msg.includes('the database is closed') ||
+      msg.includes('client is offline') ||
+      (msg.includes('indexeddb') &&
+        (msg.includes('closing') || msg.includes('hidden') || msg.includes('abort') || msg.includes('invalidstate')))
+    ) {
+      return { hasError: false, error: null, errorInfo: null };
+    }
     return { hasError: true, error, errorInfo: null };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    const msg = (error?.message || String(error)).toLowerCase();
+    if (
+      msg.includes('database is closing') ||
+      msg.includes('closing/hidden') ||
+      msg.includes('the database is closed') ||
+      msg.includes('client is offline') ||
+      (msg.includes('indexeddb') &&
+        (msg.includes('closing') || msg.includes('hidden') || msg.includes('abort') || msg.includes('invalidstate')))
+    ) {
+      return;
+    }
     console.error('[STARRY CRASH SHIELD] Uncaught error caught by ErrorBoundary:', error, errorInfo);
     this.setState({ errorInfo });
     try {

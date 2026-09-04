@@ -42,9 +42,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 // Force token refresh to fetch newly assigned custom claims immediately
                 tokenResult = await user.getIdTokenResult(true);
                 hasAdminClaim = Boolean(tokenResult?.claims?.admin);
-              } catch (tokenErr) {
-                tokenResult = await user.getIdTokenResult().catch(() => null);
-                hasAdminClaim = Boolean(tokenResult?.claims?.admin);
+              } catch {
+                try {
+                  tokenResult = await user.getIdTokenResult();
+                  hasAdminClaim = Boolean(tokenResult?.claims?.admin);
+                } catch {
+                  // Fallback for backgrounding or offline states
+                }
               }
 
               // Fetch user profile from Firestore
@@ -96,6 +100,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setLoading(false);
         },
         (error) => {
+          const errMsg = (error?.message || String(error)).toLowerCase();
+          if (
+            errMsg.includes('database is closing') ||
+            errMsg.includes('closing/hidden') ||
+            errMsg.includes('the database is closed') ||
+            errMsg.includes('client is offline')
+          ) {
+            return;
+          }
           console.error('[AUTH] onAuthStateChanged error:', error);
           setCurrentUser(null);
           setUserProfile(null);

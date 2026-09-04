@@ -81,7 +81,7 @@ service cloud.firestore {
 
     // Notification Events queue (Phase 2 & Phase 4 Event Engine & Scheduler, Phase 7 Engagement Tracking, Phase 8 Smart Intelligence)
     match /notificationEvents/{eventId} {
-      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow read: if isAdmin() || (isSignedIn() && (resource == null || resource.data.userId == request.auth.uid));
       allow create: if isSignedIn() && (
         request.resource.data.userId == request.auth.uid || isAdmin()
       ) && request.resource.data.keys().hasAll(['userId', 'type', 'title', 'body', 'status', 'createdAt'])

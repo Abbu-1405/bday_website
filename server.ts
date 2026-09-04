@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
@@ -5,6 +6,7 @@ import {
   processNotificationEvent,
   processAllPendingEvents,
   startNotificationQueueListener,
+  cleanupDuplicateNotificationTokens,
 } from './server/notificationWorker';
 import { adminDb } from './server/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
@@ -93,6 +95,20 @@ async function startServer() {
     } catch (err: any) {
       console.error('[API] Error in test notification:', err);
       res.status(500).json({ success: false, error: err?.message || 'Server error' });
+    }
+  });
+
+  // Admin endpoint: Safe cleanup of duplicate or superseded notification tokens
+  app.post('/api/notifications/cleanup-tokens', async (req, res) => {
+    try {
+      const { userId } = req.body || {};
+      const result = await cleanupDuplicateNotificationTokens(
+        typeof userId === 'string' && userId.trim() ? userId.trim() : undefined
+      );
+      res.json(result);
+    } catch (err: any) {
+      console.error('[API] Error running token cleanup:', err);
+      res.status(500).json({ success: false, error: err?.message || 'Token cleanup server error' });
     }
   });
 

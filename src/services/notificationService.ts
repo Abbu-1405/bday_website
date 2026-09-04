@@ -15,9 +15,10 @@ import {
   serverTimestamp,
   increment,
   onSnapshot,
+  runTransaction,
 } from 'firebase/firestore';
 import { User } from 'firebase/auth';
-import app, { db, auth, isFirebaseConfigured, vapidKey as defaultVapidKey } from '../firebase';
+import app, { db, auth, isFirebaseConfigured, vapidKey as defaultVapidKey, firebaseConfig } from '../firebase';
 import firebaseAppletConfig from '../../firebase-applet-config.json';
 import {
   NotificationPermissionState,
@@ -189,7 +190,16 @@ async function registerServiceWorker(): Promise<ServiceWorkerRegistration | unde
     return undefined;
   }
   try {
-    const swUrl = `/firebase-messaging-sw.js?messagingSenderId=1040135494913&projectId=gen-lang-client-0057157522&appId=1:1040135494913:web:ee17e2c259d779bbe60f00`;
+    const params = new URLSearchParams();
+    if (firebaseConfig.apiKey) params.set('apiKey', firebaseConfig.apiKey);
+    if (firebaseConfig.authDomain) params.set('authDomain', firebaseConfig.authDomain);
+    if (firebaseConfig.projectId) params.set('projectId', firebaseConfig.projectId);
+    if (firebaseConfig.storageBucket) params.set('storageBucket', firebaseConfig.storageBucket);
+    if (firebaseConfig.messagingSenderId) params.set('messagingSenderId', firebaseConfig.messagingSenderId);
+    if (firebaseConfig.appId) params.set('appId', firebaseConfig.appId);
+
+    const queryString = params.toString();
+    const swUrl = queryString ? `/firebase-messaging-sw.js?${queryString}` : '/firebase-messaging-sw.js';
     const registration = await navigator.serviceWorker.register(swUrl, {
       scope: '/',
     });
@@ -292,6 +302,44 @@ export async function requestAndRegisterNotification(
     };
 
     await setDoc(tokenRef, tokenData, { merge: true });
+
+    // 8. Device context hygiene: disable older obsolete tokens for the exact same device context
+    // Preserves legitimate tokens belonging to genuinely separate devices (different platform, browser, or device UA)
+    try {
+      const tokensColRef = collection(db, 'users', user.uid, 'notificationTokens');
+      const existingSnap = await getDocs(query(tokensColRef, where('enabled', '==', true)));
+
+      const hygienePromises: Promise<any>[] = [];
+      existingSnap.forEach((docSnap) => {
+        if (docSnap.id === tokenId) return;
+
+        const exData = docSnap.data();
+        const isIdenticalToken = exData?.token === token;
+        const isSameDeviceContext =
+          exData?.platform === platform &&
+          exData?.browser === browser &&
+          exData?.userAgent === userAgent;
+
+        if (isIdenticalToken || isSameDeviceContext) {
+          hygienePromises.push(
+            updateDoc(docSnap.ref, {
+              enabled: false,
+              disabledReason: isIdenticalToken
+                ? 'superseded_identical_token'
+                : 'superseded_by_new_device_token',
+              supersededAt: nowIso,
+              updatedAt: nowIso,
+            }).catch(() => {})
+          );
+        }
+      });
+
+      if (hygienePromises.length > 0) {
+        await Promise.allSettled(hygienePromises);
+      }
+    } catch (hygieneErr) {
+      console.warn('[FCM] Notice checking token registration hygiene:', hygieneErr);
+    }
 
     // Cache locally
     localStorage.setItem(TOKEN_STORAGE_KEY, token);
@@ -486,6 +534,247 @@ const PREF_CACHE_TTL_MS = 60000; // 1 minute local cache
 // Anti-spam cooldown cache: maps `${userId}_${category}` -> timestamp of last event creation
 const cooldownTracker = new Map<string, number>();
 export const COOLDOWN_WINDOW_MS = 15 * 60 * 1000; // 15-minute cooldown per category
+
+/* ==========================================================================
+   PHASE 3C — DISCOVERY TRIGGER AVALANCHE & BURST PROTECTION
+   ========================================================================== */
+
+export const DISCOVERY_BURST_STORAGE_KEYS = {
+  moments: 'starlit_last_discovery_notif_moments',
+  open_when: 'starlit_last_discovery_notif_open_when',
+  secret: 'starlit_last_discovery_notif_secret',
+  global: 'starlit_last_discovery_notif_global',
+} as const;
+
+// In-memory burst tracker mapping `${userId}_${category}` -> timestamp
+const discoveryBurstTracker = new Map<string, number>();
+
+/**
+ * Checks whether a notification event type or cooldown category is part of the discovery system
+ */
+export function isDiscoveryNotificationType(type: string, cooldownCategory?: string): boolean {
+  if (
+    type === 'MOMENT_AVAILABLE' ||
+    type === 'OPEN_WHEN_AVAILABLE' ||
+    type === 'SECRET_UNLOCKED'
+  ) {
+    return true;
+  }
+  if (
+    cooldownCategory === 'moment' ||
+    cooldownCategory === 'moments' ||
+    cooldownCategory === 'open_when' ||
+    cooldownCategory === 'openWhen' ||
+    cooldownCategory === 'secret' ||
+    cooldownCategory === 'secretVault'
+  ) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Normalizes discovery event type or cooldown category to a standard category key
+ */
+export function resolveDiscoveryCategory(
+  type: string,
+  cooldownCategory?: string
+): 'moments' | 'open_when' | 'secret' | null {
+  if (
+    type === 'MOMENT_AVAILABLE' ||
+    cooldownCategory === 'moment' ||
+    cooldownCategory === 'moments'
+  ) {
+    return 'moments';
+  }
+  if (
+    type === 'OPEN_WHEN_AVAILABLE' ||
+    cooldownCategory === 'open_when' ||
+    cooldownCategory === 'openWhen'
+  ) {
+    return 'open_when';
+  }
+  if (
+    type === 'SECRET_UNLOCKED' ||
+    cooldownCategory === 'secret' ||
+    cooldownCategory === 'secretVault'
+  ) {
+    return 'secret';
+  }
+  return null;
+}
+
+/**
+ * Retrieves the localStorage key for a given discovery category
+ */
+export function getDiscoveryBurstStorageKey(category: string): string {
+  if (category === 'moments') return DISCOVERY_BURST_STORAGE_KEYS.moments;
+  if (category === 'open_when') return DISCOVERY_BURST_STORAGE_KEYS.open_when;
+  if (category === 'secret') return DISCOVERY_BURST_STORAGE_KEYS.secret;
+  return DISCOVERY_BURST_STORAGE_KEYS.global;
+}
+
+/**
+ * Checks if a discovery burst window is currently active for this user and category.
+ * Inspects both in-memory state and localStorage to guard across re-renders and remounts.
+ */
+export function isDiscoveryBurstActive(
+  userId: string,
+  type: string,
+  cooldownCategory?: string
+): boolean {
+  const category = resolveDiscoveryCategory(type, cooldownCategory);
+  if (!category) return false;
+
+  const memKey = `${userId}_${category}`;
+  const memTime = discoveryBurstTracker.get(memKey) || 0;
+
+  let storageTime = 0;
+  const storageKey = getDiscoveryBurstStorageKey(category);
+  if (storageKey) {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const val = localStorage.getItem(storageKey);
+        if (val) {
+          const parsed = parseInt(val, 10);
+          if (!isNaN(parsed) && parsed > 0) {
+            storageTime = parsed;
+          }
+        }
+      }
+    } catch {
+      // Safe storage fallback
+    }
+  }
+
+  const lastTime = Math.max(memTime, storageTime);
+  if (!lastTime || lastTime <= 0) return false;
+
+  const now = Date.now();
+  const elapsed = now - lastTime;
+  return elapsed >= 0 && elapsed < COOLDOWN_WINDOW_MS;
+}
+
+/**
+ * Returns remaining milliseconds in the active discovery burst window (or 0 if expired/inactive)
+ */
+export function getDiscoveryBurstRemainingMs(
+  userId: string,
+  type: string,
+  cooldownCategory?: string
+): number {
+  const category = resolveDiscoveryCategory(type, cooldownCategory);
+  if (!category) return 0;
+
+  const memKey = `${userId}_${category}`;
+  const memTime = discoveryBurstTracker.get(memKey) || 0;
+
+  let storageTime = 0;
+  const storageKey = getDiscoveryBurstStorageKey(category);
+  if (storageKey) {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const val = localStorage.getItem(storageKey);
+        if (val) {
+          const parsed = parseInt(val, 10);
+          if (!isNaN(parsed) && parsed > 0) {
+            storageTime = parsed;
+          }
+        }
+      }
+    } catch {
+      // Safe storage fallback
+    }
+  }
+
+  const lastTime = Math.max(memTime, storageTime);
+  if (!lastTime || lastTime <= 0) return 0;
+
+  const now = Date.now();
+  const elapsed = now - lastTime;
+  if (elapsed >= COOLDOWN_WINDOW_MS || elapsed < 0) return 0;
+
+  return COOLDOWN_WINDOW_MS - elapsed;
+}
+
+/**
+ * Records a discovery notification event dispatch in the burst tracker.
+ * Persists the timestamp in both in-memory map and localStorage.
+ */
+export function recordDiscoveryBurst(
+  userId: string,
+  type: string,
+  cooldownCategory?: string,
+  customTimestamp?: number
+): void {
+  const category = resolveDiscoveryCategory(type, cooldownCategory);
+  if (!category) return;
+
+  const timestamp = typeof customTimestamp === 'number' ? customTimestamp : Date.now();
+  const memKey = `${userId}_${category}`;
+  discoveryBurstTracker.set(memKey, timestamp);
+
+  const storageKey = getDiscoveryBurstStorageKey(category);
+  if (storageKey) {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(storageKey, String(timestamp));
+      }
+    } catch {
+      // Safe storage fallback
+    }
+  }
+
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(DISCOVERY_BURST_STORAGE_KEYS.global, String(timestamp));
+    }
+  } catch {
+    // Safe storage fallback
+  }
+}
+
+/**
+ * Resets discovery burst state (for testing or cache resets)
+ */
+export function resetDiscoveryBurst(userId?: string, category?: string): void {
+  if (category) {
+    const cat = resolveDiscoveryCategory(category, category) || (category as any);
+    if (userId) {
+      discoveryBurstTracker.delete(`${userId}_${cat}`);
+    } else {
+      for (const key of Array.from(discoveryBurstTracker.keys())) {
+        if (key.endsWith(`_${cat}`)) {
+          discoveryBurstTracker.delete(key);
+        }
+      }
+    }
+    const storageKey = getDiscoveryBurstStorageKey(cat);
+    if (storageKey) {
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.removeItem(storageKey);
+        }
+      } catch {}
+    }
+  } else {
+    if (userId) {
+      discoveryBurstTracker.delete(`${userId}_moments`);
+      discoveryBurstTracker.delete(`${userId}_open_when`);
+      discoveryBurstTracker.delete(`${userId}_secret`);
+    } else {
+      discoveryBurstTracker.clear();
+    }
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem(DISCOVERY_BURST_STORAGE_KEYS.moments);
+        localStorage.removeItem(DISCOVERY_BURST_STORAGE_KEYS.open_when);
+        localStorage.removeItem(DISCOVERY_BURST_STORAGE_KEYS.secret);
+        localStorage.removeItem(DISCOVERY_BURST_STORAGE_KEYS.global);
+      }
+    } catch {}
+  }
+}
 
 /**
  * Safely determines if a timezone string is valid
@@ -779,6 +1068,23 @@ function generateDeterministicEventId(
 }
 
 /**
+ * In-memory registry of in-flight notification event creations.
+ * Guarantees that concurrent invocations within the same runtime
+ * (double clicks, React component re-renders, mounting twice, rapid loops)
+ * share a single atomic execution and cannot race each other.
+ */
+const inFlightEventCreations = new Map<
+  string,
+  Promise<{
+    success: boolean;
+    eventId?: string;
+    skipped?: boolean;
+    reason?: string;
+    error?: string;
+  }>
+>();
+
+/**
  * Creates a notification event in Firestore under notificationEvents/{eventId}
  * IMPORTANT:
  * - Immediate notifications get deliveryMode: 'immediate' and status: 'pending'.
@@ -814,6 +1120,7 @@ export async function createNotificationEvent(
     cooldownCategory,
     bypassPreferences,
     bypassQuietHours,
+    bypassDiscoveryBurst,
   } = params;
 
   if (!userId || !type) {
@@ -823,6 +1130,39 @@ export async function createNotificationEvent(
     };
   }
 
+  // Derive deterministic event ID based on userId, type, and optional eventKey
+  const eventId = generateDeterministicEventId(userId, type, eventKey);
+
+  // In-flight concurrency lock: if an identical deterministic event is currently being created, share the execution
+  if (eventKey && inFlightEventCreations.has(eventId)) {
+    console.log(`[NotificationEngine] In-flight concurrent event creation detected for ${eventId}, awaiting existing promise.`);
+    return inFlightEventCreations.get(eventId)!;
+  }
+
+  // Phase 3C: Discovery Trigger Avalanche Protection
+  const isDiscovery = isDiscoveryNotificationType(type, cooldownCategory);
+  if (!bypassDiscoveryBurst && isDiscovery) {
+    if (isDiscoveryBurstActive(userId, type, cooldownCategory)) {
+      console.log(
+        `[NotificationEngine] Discovery burst active for category ${cooldownCategory || type}. Suppressing notification event for user ${userId}.`
+      );
+      return {
+        success: true,
+        skipped: true,
+        reason: 'DISCOVERY_BURST_SUPPRESSION',
+      };
+    }
+    // Synchronously reserve burst slot to protect against rapid concurrent/batch calls
+    recordDiscoveryBurst(userId, type, cooldownCategory);
+  }
+
+  const creationPromise = (async (): Promise<{
+    success: boolean;
+    eventId?: string;
+    skipped?: boolean;
+    reason?: string;
+    error?: string;
+  }> => {
   try {
     // 0. Check Global Emergency Switch
     let globalControl: NotificationGlobalControl = { globalEnabled: true, reason: '' };
@@ -898,20 +1238,23 @@ export async function createNotificationEvent(
 
     const isExplicitlyScheduled = requestedDeliveryMode === 'scheduled' || Boolean(resolvedScheduledDate);
 
-    // 3. Compute deterministic event ID
-    const eventId = generateDeterministicEventId(userId, type, eventKey);
+    // 3. Document reference for deterministic event ID
     const eventRef = doc(db, 'notificationEvents', eventId);
 
-    // 4. Deduplication check
+    // 4. Fast-path deduplication check
     if (eventKey) {
       try {
         const existingSnap = await getDoc(eventRef);
         if (existingSnap.exists()) {
+          const existingData = existingSnap.data();
+          if (isDiscovery) {
+            resetDiscoveryBurst(userId, cooldownCategory || type);
+          }
           return {
             success: true,
             eventId,
             skipped: true,
-            reason: 'Notification event already queued or delivered (deduplication matched).',
+            reason: `Notification event already queued or delivered (status: ${existingData?.status || 'existing'}).`,
           };
         }
       } catch {
@@ -1005,7 +1348,52 @@ export async function createNotificationEvent(
       eventPayload.failureReason = decisionResult.reasonExplanation;
     }
 
-    await setDoc(eventRef, eventPayload);
+    // 8. Atomic Document Creation: Protect against race conditions and concurrent double-creations
+    if (eventKey) {
+      let alreadyExists = false;
+      let existingStatus: string | null = null;
+
+      try {
+        await runTransaction(db, async (transaction) => {
+          const currentSnap = await transaction.get(eventRef);
+          if (currentSnap.exists()) {
+            alreadyExists = true;
+            existingStatus = currentSnap.data()?.status || 'existing';
+            return;
+          }
+          transaction.set(eventRef, eventPayload);
+        });
+      } catch (txErr: any) {
+        // If transaction encountered contention or check failure, verify document existence
+        try {
+          const verifySnap = await getDoc(eventRef);
+          if (verifySnap.exists()) {
+            alreadyExists = true;
+            existingStatus = verifySnap.data()?.status || 'existing';
+          } else {
+            throw txErr;
+          }
+        } catch {
+          throw txErr;
+        }
+      }
+
+      if (alreadyExists) {
+        if (isDiscovery) {
+          resetDiscoveryBurst(userId, cooldownCategory || type);
+        }
+        console.log(`[NotificationEngine] Atomic transaction prevented duplicate event creation for ${eventId} (status: ${existingStatus})`);
+        return {
+          success: true,
+          eventId,
+          skipped: true,
+          reason: `Notification event already queued or delivered (status: ${existingStatus || 'existing'}).`,
+        };
+      }
+    } else {
+      // Ad-hoc/test notification without deterministic eventKey
+      await setDoc(eventRef, eventPayload);
+    }
 
     // Update client cooldown tracker
     const categoryKey = cooldownCategory || type;
@@ -1037,11 +1425,26 @@ export async function createNotificationEvent(
     };
   } catch (err: any) {
     console.warn('[NotificationEngine] Non-blocking event creation notice:', err);
+    if (isDiscovery) {
+      resetDiscoveryBurst(userId, cooldownCategory || type);
+    }
     return {
       success: false,
       error: err?.message || 'Failed to create notification event.',
     };
   }
+  })();
+
+  if (eventKey) {
+    inFlightEventCreations.set(eventId, creationPromise);
+    try {
+      return await creationPromise;
+    } finally {
+      inFlightEventCreations.delete(eventId);
+    }
+  }
+
+  return await creationPromise;
 }
 
 /**

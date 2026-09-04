@@ -1,51 +1,60 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth } from 'firebase/auth';
+import {
+  getAuth,
+  initializeAuth,
+  browserLocalPersistence,
+  browserSessionPersistence,
+  inMemoryPersistence,
+  Auth,
+} from 'firebase/auth';
 import { getFirestore, Firestore, setLogLevel } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
 import firebaseAppletConfig from '../../firebase-applet-config.json';
 
+const clientEnv = (typeof import.meta !== 'undefined' && (import.meta as any)?.env) || {};
+
 const rawApiKey =
-  import.meta.env.VITE_FIREBASE_API_KEY ||
+  clientEnv.VITE_FIREBASE_API_KEY ||
   (firebaseAppletConfig as any)?.apiKey ||
   '';
 
 const projectId =
-  import.meta.env.VITE_FIREBASE_PROJECT_ID ||
+  clientEnv.VITE_FIREBASE_PROJECT_ID ||
   (firebaseAppletConfig as any)?.projectId ||
   'gen-lang-client-0057157522';
 
 const authDomain =
-  import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ||
+  clientEnv.VITE_FIREBASE_AUTH_DOMAIN ||
   (firebaseAppletConfig as any)?.authDomain ||
   `${projectId}.firebaseapp.com`;
 
 const storageBucket =
-  import.meta.env.VITE_FIREBASE_STORAGE_BUCKET ||
+  clientEnv.VITE_FIREBASE_STORAGE_BUCKET ||
   (firebaseAppletConfig as any)?.storageBucket ||
   `${projectId}.firebasestorage.app`;
 
 const messagingSenderId =
-  import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ||
+  clientEnv.VITE_FIREBASE_MESSAGING_SENDER_ID ||
   (firebaseAppletConfig as any)?.messagingSenderId ||
   '1040135494913';
 
 const appId =
-  import.meta.env.VITE_FIREBASE_APP_ID ||
+  clientEnv.VITE_FIREBASE_APP_ID ||
   (firebaseAppletConfig as any)?.appId ||
-  '1:1040135494913:web:ee17e2c259d779bbe60f00';
+  '1:1040135494913:web:eccd1c5846fe5f5de60f00';
 
 const firestoreDatabaseId =
-  import.meta.env.VITE_FIREBASE_DATABASE_ID ||
+  clientEnv.VITE_FIREBASE_DATABASE_ID ||
   (firebaseAppletConfig as any)?.firestoreDatabaseId ||
   'ai-studio-remixstarlitlett-45632027-0698-4661-bfb7-6fea5b923b2b';
 
 export const vapidKey: string =
-  (import.meta.env.VITE_FIREBASE_VAPID_KEY && import.meta.env.VITE_FIREBASE_VAPID_KEY.trim()) ||
+  (clientEnv.VITE_FIREBASE_VAPID_KEY && clientEnv.VITE_FIREBASE_VAPID_KEY.trim()) ||
   (firebaseAppletConfig as any)?.vapidKey ||
   (firebaseAppletConfig as any)?.vapidPublicKey ||
-  'BBwlsm_hZXcF8gcX4XxqTVWCQtQUtyHzCBjiicv0qkQP4qBK0lBCqqMt0GpZQMn95BAuPk14VnoSdJIwPY7VNfA';
+  '';
 
-const config = {
+export const firebaseConfig = {
   apiKey: rawApiKey,
   authDomain,
   projectId,
@@ -54,6 +63,8 @@ const config = {
   appId,
   firestoreDatabaseId,
 };
+
+const config = firebaseConfig;
 
 export const isFirebaseConfigured = Boolean(
   rawApiKey &&
@@ -96,10 +107,23 @@ const app: FirebaseApp = initFirebaseApp();
 
 function initAuth(): Auth {
   try {
+    if (typeof window !== 'undefined') {
+      try {
+        return initializeAuth(app, {
+          persistence: [browserLocalPersistence, browserSessionPersistence, inMemoryPersistence],
+        });
+      } catch {
+        return getAuth(app);
+      }
+    }
     return getAuth(app);
   } catch (err) {
     console.warn('[FIREBASE] Auth initialization fallback notice:', err);
-    return {} as Auth;
+    try {
+      return getAuth(app);
+    } catch {
+      return {} as Auth;
+    }
   }
 }
 

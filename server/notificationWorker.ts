@@ -46,6 +46,36 @@ async function isGlobalNotificationPaused(): Promise<{ paused: boolean; reason?:
 }
 
 /**
+ * Resolves deterministic category-aware Web Push notification tag (Phase 3D)
+ */
+export function resolveNotificationTag(type?: string, category?: string): string {
+  const normalizedType = String(type || '').toUpperCase();
+  const normalizedCategory = String(category || '').toLowerCase();
+
+  if (normalizedType === 'LETTER_AVAILABLE' || normalizedCategory === 'letter' || normalizedCategory === 'letters') {
+    return 'starlit-letters';
+  }
+  if (normalizedType === 'MOMENT_AVAILABLE' || normalizedCategory === 'moment' || normalizedCategory === 'moments') {
+    return 'starlit-moments';
+  }
+  if (normalizedType === 'OPEN_WHEN_AVAILABLE' || normalizedCategory === 'open_when' || normalizedCategory === 'openwhen') {
+    return 'starlit-open-when';
+  }
+  if (
+    normalizedType === 'SECRET_UNLOCKED' ||
+    normalizedType === 'SECRET_UNLCOKED' ||
+    normalizedCategory === 'secret' ||
+    normalizedCategory === 'secrets'
+  ) {
+    return 'starlit-secrets';
+  }
+  if (normalizedType === 'BIRTHDAY' || normalizedCategory === 'birthday') {
+    return 'starlit-birthday';
+  }
+  return 'starlit-general';
+}
+
+/**
  * Atomically claims and processes a single notification event by event ID
  */
 export async function processNotificationEvent(eventId: string): Promise<ProcessEventResult> {
@@ -135,7 +165,8 @@ export async function processNotificationEvent(eventId: string): Promise<Process
 
   // 2. TOKEN LOOKUP: Query enabled notification tokens for the recipient user
   const userId = eventData.userId;
-  let tokens: Array<{ id: string; token: string }> = [];
+  // Map token strings to all document IDs that held this token for this user
+  const tokenToDocIds = new Map<string, string[]>();
 
   try {
     const tokensRef = adminDb.collection('users').doc(userId).collection('notificationTokens');
@@ -144,10 +175,12 @@ export async function processNotificationEvent(eventId: string): Promise<Process
     tokensSnapshot.forEach((docSnap) => {
       const tData = docSnap.data();
       if (tData?.token && typeof tData.token === 'string') {
-        tokens.push({
-          id: docSnap.id,
-          token: tData.token.trim(),
-        });
+        const cleanToken = tData.token.trim();
+        if (cleanToken.length > 0) {
+          const docIdList = tokenToDocIds.get(cleanToken) || [];
+          docIdList.push(docSnap.id);
+          tokenToDocIds.set(cleanToken, docIdList);
+        }
       }
     });
   } catch (tokenErr: any) {
@@ -165,8 +198,14 @@ export async function processNotificationEvent(eventId: string): Promise<Process
     };
   }
 
+  // Construct deduplicated recipient list (each token string appears at most once)
+  const dedupedRecipients: Array<{ token: string; docIds: string[] }> = [];
+  tokenToDocIds.forEach((docIds, token) => {
+    dedupedRecipients.push({ token, docIds });
+  });
+
   // If no enabled tokens exist for this user, mark as failed cleanly
-  if (tokens.length === 0) {
+  if (dedupedRecipients.length === 0) {
     const failureMsg = 'No enabled notification tokens registered for recipient user.';
     console.log(`[NotificationWorker] Event ${eventId}: ${failureMsg}`);
     await eventRef.update({
@@ -196,9 +235,15 @@ export async function processNotificationEvent(eventId: string): Promise<Process
   }
   stringifiedData.eventType = String(eventData.type || 'GENERAL');
   stringifiedData.eventId = String(eventId);
+
+  // Phase 3D: Category-aware Web Push tag alignment
+  const webPushTag = stringifiedData.tag || resolveNotificationTag(eventData.type, eventData.cooldownCategory);
+  stringifiedData.tag = webPushTag;
+
   const targetUrl = stringifiedData.url || '/';
 
-  const tokenStrings = tokens.map((t) => t.token);
+  // Deduplicated token strings for multicast (appears at most once per request)
+  const tokenStrings = dedupedRecipients.map((r) => r.token);
 
   const multicastMessage: MulticastMessage = {
     tokens: tokenStrings,
@@ -216,7 +261,7 @@ export async function processNotificationEvent(eventId: string): Promise<Process
         body: eventData.body.slice(0, 1000),
         icon: '/download-7.jpg',
         badge: '/download-7.jpg',
-        tag: stringifiedData.eventKey || `starlit_${eventData.type}_${eventId}`,
+        tag: webPushTag,
       },
       fcmOptions: {
         link: targetUrl,
@@ -234,6 +279,7 @@ export async function processNotificationEvent(eventId: string): Promise<Process
     console.log(`[NotificationWorker] FCM delivery response for event ${eventId}:`, {
       successCount: response.successCount,
       failureCount: response.failureCount,
+      recipientCount: dedupedRecipients.length,
     });
 
     successfulCount = response.successCount;
@@ -247,26 +293,29 @@ export async function processNotificationEvent(eventId: string): Promise<Process
         if (!resp.success) {
           const error = resp.error;
           const errorCode = error?.code;
-          const tokenObj = tokens[index];
+          const recipient = dedupedRecipients[index];
           failureReasons.push(errorCode || error?.message || 'Delivery error');
 
-          if (tokenObj && isInvalidTokenErrorCode(errorCode)) {
-            console.log(`[NotificationWorker] Disabling invalid FCM token ${tokenObj.id} (${errorCode})`);
-            const tokenDocRef = adminDb
-              .collection('users')
-              .doc(userId)
-              .collection('notificationTokens')
-              .doc(tokenObj.id);
+          if (recipient && isInvalidTokenErrorCode(errorCode)) {
+            // Disable all token documents associated with this invalid token string
+            for (const docId of recipient.docIds) {
+              console.log(`[NotificationWorker] Disabling invalid FCM token document ${docId} (${errorCode})`);
+              const tokenDocRef = adminDb
+                .collection('users')
+                .doc(userId)
+                .collection('notificationTokens')
+                .doc(docId);
 
-            updatePromises.push(
-              tokenDocRef.update({
-                enabled: false,
-                invalidReason: errorCode || 'Token unregistered',
-                invalidatedAt: FieldValue.serverTimestamp(),
-              }).catch((e) => {
-                console.warn(`[NotificationWorker] Could not disable token ${tokenObj.id}:`, e);
-              })
-            );
+              updatePromises.push(
+                tokenDocRef.update({
+                  enabled: false,
+                  invalidReason: errorCode || 'Token unregistered',
+                  invalidatedAt: FieldValue.serverTimestamp(),
+                }).catch((e) => {
+                  console.warn(`[NotificationWorker] Could not disable token ${docId}:`, e);
+                })
+              );
+            }
           }
         }
       });
@@ -281,7 +330,7 @@ export async function processNotificationEvent(eventId: string): Promise<Process
       status: 'failed',
       failureReason: sendErr?.message || 'FCM multicast execution failure',
       successfulTokenCount: 0,
-      failedTokenCount: tokens.length,
+      failedTokenCount: dedupedRecipients.length,
     });
     return {
       success: false,
@@ -458,3 +507,187 @@ export function startNotificationQueueListener(): () => void {
     return () => {};
   }
 }
+
+export interface TokenCleanupResult {
+  success: boolean;
+  usersScanned: number;
+  tokensScanned: number;
+  tokensDisabled: number;
+  details: Array<{
+    userId: string;
+    totalEnabledBefore: number;
+    disabledCount: number;
+    retainedCount: number;
+  }>;
+  error?: string;
+}
+
+/**
+ * Safely cleans up duplicate active tokens for users:
+ * 1. Groups enabled tokens by userId.
+ * 2. If identical token strings exist across multiple documents for the same user,
+ *    keeps the most recently updated document and disables older duplicate records.
+ * 3. If multiple tokens exist for the exact same device context (platform + browser + userAgent)
+ *    for the same user, keeps the most recently updated document and disables older superseded ones.
+ * 4. Genuinely distinct device tokens (e.g. Android vs Windows, Chrome vs Safari) are preserved.
+ * 5. Tokens belonging to different users are never compared or modified.
+ * 6. Disables records (enabled: false) rather than deleting them.
+ * 7. Safe to run multiple times (idempotent).
+ */
+export async function cleanupDuplicateNotificationTokens(
+  targetUserId?: string
+): Promise<TokenCleanupResult> {
+  try {
+    let querySnapshot: FirebaseFirestore.QuerySnapshot;
+    if (targetUserId) {
+      querySnapshot = await adminDb
+        .collection('users')
+        .doc(targetUserId)
+        .collection('notificationTokens')
+        .where('enabled', '==', true)
+        .get();
+    } else {
+      querySnapshot = await adminDb
+        .collectionGroup('notificationTokens')
+        .where('enabled', '==', true)
+        .get();
+    }
+
+    const userTokensMap = new Map<
+      string,
+      Array<{ id: string; ref: FirebaseFirestore.DocumentReference; data: FirebaseFirestore.DocumentData }>
+    >();
+
+    querySnapshot.forEach((docSnap) => {
+      // In collectionGroup or user subcollection, parent doc is user document
+      const parentUser = targetUserId || docSnap.ref.parent.parent?.id;
+      if (parentUser) {
+        const list = userTokensMap.get(parentUser) || [];
+        list.push({ id: docSnap.id, ref: docSnap.ref, data: docSnap.data() });
+        userTokensMap.set(parentUser, list);
+      }
+    });
+
+    let totalDisabled = 0;
+    const details: TokenCleanupResult['details'] = [];
+
+    for (const [userId, userTokens] of userTokensMap.entries()) {
+      const docsToDisable = new Map<string, { ref: FirebaseFirestore.DocumentReference; reason: string }>();
+
+      // 1. Identify duplicate token strings for this user
+      const tokenStringMap = new Map<
+        string,
+        Array<{ id: string; ref: FirebaseFirestore.DocumentReference; data: FirebaseFirestore.DocumentData }>
+      >();
+
+      userTokens.forEach((t) => {
+        const tok = (t.data?.token || '').trim();
+        if (tok) {
+          const list = tokenStringMap.get(tok) || [];
+          list.push(t);
+          tokenStringMap.set(tok, list);
+        }
+      });
+
+      tokenStringMap.forEach((docsWithSameToken) => {
+        if (docsWithSameToken.length > 1) {
+          // Sort by updatedAt or createdAt descending (latest first)
+          docsWithSameToken.sort((a, b) => {
+            const timeA = new Date(a.data?.updatedAt || a.data?.createdAt || 0).getTime();
+            const timeB = new Date(b.data?.updatedAt || b.data?.createdAt || 0).getTime();
+            return timeB - timeA;
+          });
+
+          // Keep the first (latest), disable older identical tokens
+          for (let i = 1; i < docsWithSameToken.length; i++) {
+            docsToDisable.set(docsWithSameToken[i].id, {
+              ref: docsWithSameToken[i].ref,
+              reason: 'duplicate_token_string',
+            });
+          }
+        }
+      });
+
+      // 2. Identify superseded tokens on the same device context (platform + browser + userAgent)
+      const remainingDocs = userTokens.filter((t) => !docsToDisable.has(t.id));
+      const deviceContextMap = new Map<
+        string,
+        Array<{ id: string; ref: FirebaseFirestore.DocumentReference; data: FirebaseFirestore.DocumentData }>
+      >();
+
+      remainingDocs.forEach((t) => {
+        const platform = t.data?.platform || 'Unknown';
+        const browser = t.data?.browser || 'Unknown';
+        const ua = (t.data?.userAgent || '').trim();
+        if (platform !== 'Unknown' && browser !== 'Unknown') {
+          const contextKey = `${platform}_${browser}_${ua}`;
+          const list = deviceContextMap.get(contextKey) || [];
+          list.push(t);
+          deviceContextMap.set(contextKey, list);
+        }
+      });
+
+      deviceContextMap.forEach((docsWithSameDevice) => {
+        if (docsWithSameDevice.length > 1) {
+          docsWithSameDevice.sort((a, b) => {
+            const timeA = new Date(a.data?.updatedAt || a.data?.createdAt || 0).getTime();
+            const timeB = new Date(b.data?.updatedAt || b.data?.createdAt || 0).getTime();
+            return timeB - timeA;
+          });
+
+          // Keep the first (most recently updated/used), disable older superseded tokens
+          for (let i = 1; i < docsWithSameDevice.length; i++) {
+            docsToDisable.set(docsWithSameDevice[i].id, {
+              ref: docsWithSameDevice[i].ref,
+              reason: 'superseded_device_context',
+            });
+          }
+        }
+      });
+
+      // Apply batch disable updates for this user
+      if (docsToDisable.size > 0) {
+        const batch = adminDb.batch();
+        const nowIso = new Date().toISOString();
+
+        docsToDisable.forEach(({ ref, reason }) => {
+          batch.update(ref, {
+            enabled: false,
+            disabledReason: reason,
+            disabledAt: FieldValue.serverTimestamp(),
+            updatedAt: nowIso,
+          });
+        });
+
+        await batch.commit();
+        totalDisabled += docsToDisable.size;
+      }
+
+      details.push({
+        userId,
+        totalEnabledBefore: userTokens.length,
+        disabledCount: docsToDisable.size,
+        retainedCount: userTokens.length - docsToDisable.size,
+      });
+    }
+
+    return {
+      success: true,
+      usersScanned: userTokensMap.size,
+      tokensScanned: querySnapshot.size,
+      tokensDisabled: totalDisabled,
+      details,
+    };
+  } catch (err: any) {
+    console.error('[NotificationWorker] Token cleanup error:', err);
+    return {
+      success: false,
+      usersScanned: 0,
+      tokensScanned: 0,
+      tokensDisabled: 0,
+      details: [],
+      error: err?.message || 'Token cleanup failed',
+    };
+  }
+}
+

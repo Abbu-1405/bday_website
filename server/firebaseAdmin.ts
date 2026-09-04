@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { initializeApp, getApps, getApp, App, cert } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
 import { getMessaging, Messaging } from 'firebase-admin/messaging';
@@ -14,14 +15,34 @@ if (getApps().length === 0) {
   const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY || process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
   if (serviceAccountKey) {
     try {
-      const parsedKey = typeof serviceAccountKey === 'string' ? JSON.parse(serviceAccountKey) : serviceAccountKey;
+      let parsedKey: any = serviceAccountKey;
+      if (typeof serviceAccountKey === 'string') {
+        const trimmed = serviceAccountKey.trim();
+        if (trimmed.startsWith('{')) {
+          parsedKey = JSON.parse(trimmed);
+        } else {
+          try {
+            const decoded = Buffer.from(trimmed, 'base64').toString('utf-8');
+            if (decoded.trim().startsWith('{')) {
+              parsedKey = JSON.parse(decoded);
+            } else {
+              parsedKey = JSON.parse(trimmed);
+            }
+          } catch {
+            parsedKey = JSON.parse(trimmed);
+          }
+        }
+      }
+      if (parsedKey && parsedKey.private_key && typeof parsedKey.private_key === 'string') {
+        parsedKey.private_key = parsedKey.private_key.replace(/\\n/g, '\n');
+      }
       adminApp = initializeApp({
         credential: cert(parsedKey),
         projectId: parsedKey.project_id || PROJECT_ID,
       });
       hasAdminCredentials = true;
-    } catch (e) {
-      console.warn('[firebaseAdmin] Failed to parse service account JSON:', e);
+    } catch (e: any) {
+      console.warn('[firebaseAdmin] Failed to parse or apply service account JSON notice:', e?.message || e);
       adminApp = initializeApp({ projectId: PROJECT_ID });
     }
   } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
