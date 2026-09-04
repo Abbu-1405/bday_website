@@ -116,31 +116,34 @@ export const AdminActivityOverview: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 font-mono">
       {/* Top Banner Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/90 p-5 rounded-2xl border border-slate-800 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#050811]/90 p-4 sm:p-5 rounded-xl border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.04)]">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-semibold text-slate-100 tracking-tight">
-              User Activity & Exploration
-            </h2>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-              Overview & Exploration
+            <span className="text-xs text-emerald-400 font-bold tracking-wider">
+              /users/registry
+            </span>
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[9px] font-mono font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-500/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              EXPLORATION_AUDIT
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Aggregate session metrics, exploration history, and active platform engagement across all users.
+          <h2 className="text-lg sm:text-xl font-bold text-slate-100 tracking-tight mt-0.5">
+            User Activity &amp; Exploration Registry
+          </h2>
+          <p className="text-xs text-emerald-600/90 font-mono mt-0.5">
+            // Aggregate session metrics, exploration history, and active platform engagement across all users.
           </p>
         </div>
 
         <button
           onClick={loadData}
           disabled={loading}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-all shadow-md shadow-indigo-600/20 disabled:opacity-50 shrink-0"
+          className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg bg-[#020408] hover:bg-emerald-950/40 text-emerald-300 text-xs font-mono font-medium border border-emerald-500/30 transition-all shadow-xs disabled:opacity-50 shrink-0"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          <span>Refresh Metrics</span>
+          <RefreshCw className={`w-3.5 h-3.5 text-emerald-400 ${loading ? 'animate-spin' : ''}`} />
+          <span>POLL_SYNC</span>
         </button>
       </div>
 

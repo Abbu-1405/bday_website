@@ -125,23 +125,29 @@ export default function Admin() {
 
   const [selectedUserDetailId, setSelectedUserDetailId] = useState<string | null>(null);
 
-  const navItems: { id: AdminTab; label: string; icon: React.ElementType; badge?: string }[] = [
-    { id: 'overview' as AdminTab, label: 'Overview', icon: LayoutDashboard },
-    { id: 'live_activity' as AdminTab, label: 'Live Activity', icon: Radio, badge: 'LIVE' },
-    { id: 'activity' as AdminTab, label: 'Activity Log', icon: Activity },
-    { id: 'bts' as AdminTab, label: 'BTS Activity', icon: Film, badge: 'NEW' },
-    { id: 'doodles' as AdminTab, label: 'Doodles', icon: Pen },
-    { id: 'notifications' as AdminTab, label: 'Notifications', icon: Bell, badge: 'QUEUE' },
-    { id: 'users' as AdminTab, label: 'Users & Activity', icon: Users },
-    { id: 'feelings' as AdminTab, label: 'Feelings', icon: Heart },
-    { id: 'letters' as AdminTab, label: 'Letters', icon: Mail },
-    { id: 'content' as AdminTab, label: 'Content', icon: FolderKanban },
-    { id: 'preview' as AdminTab, label: '365 Preview', icon: Eye, badge: 'TEST' },
-    { id: 'settings' as AdminTab, label: 'Settings', icon: SettingsIcon },
+  const navItems: { id: AdminTab; code: string; label: string; icon: React.ElementType; badge?: string }[] = [
+    { id: 'overview' as AdminTab, code: '[01]', label: 'OVERVIEW', icon: LayoutDashboard },
+    { id: 'live_activity' as AdminTab, code: '[02]', label: 'LIVE ACTIVITY', icon: Radio, badge: 'LIVE' },
+    { id: 'activity' as AdminTab, code: '[03]', label: 'ALL ACTIVITY', icon: Activity },
+    { id: 'users' as AdminTab, code: '[04]', label: 'USER DIRECTORY', icon: Users },
+    { id: 'bts' as AdminTab, code: '[05]', label: 'BTS HUB', icon: Film, badge: 'HUB' },
+    { id: 'doodles' as AdminTab, code: '[06]', label: 'DOODLES & ART', icon: Pen },
+    { id: 'notifications' as AdminTab, code: '[07]', label: 'NOTIFICATIONS', icon: Bell, badge: 'QUEUE' },
+    { id: 'feelings' as AdminTab, code: '[08]', label: 'FEELINGS INBOX', icon: Heart },
+    { id: 'letters' as AdminTab, code: '[09]', label: 'LETTERS INBOX', icon: Mail },
+    { id: 'content' as AdminTab, code: '[10]', label: 'CONTENT HUB', icon: FolderKanban },
+    { id: 'preview' as AdminTab, code: '[11]', label: '365 PREVIEW', icon: Eye, badge: 'TEST' },
+    { id: 'settings' as AdminTab, code: '[12]', label: 'SYS SETTINGS', icon: SettingsIcon },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans select-none antialiased">
+    <div className="min-h-screen bg-[#020408] text-slate-100 flex flex-col font-mono select-none antialiased relative">
+      {/* Background scanline effect */}
+      <div
+        className="pointer-events-none fixed inset-0 opacity-[0.025] z-50 bg-[radial-gradient(#00ff66_1px,transparent_1px)] [background-size:16px_16px]"
+        aria-hidden="true"
+      />
+
       {/* Admin Top Header with Dedicated Responsive Layout */}
       <AdminHeader
         isMobileMenuOpen={isMobileMenuOpen}
@@ -149,45 +155,65 @@ export default function Admin() {
       />
 
       {/* Main Admin Workspace Container */}
-      <div className="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-4 sm:p-6 gap-6">
+      <div className="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-3 sm:p-5 gap-5">
         {/* Navigation Sidebar */}
         <aside
           className={`${
             isMobileMenuOpen ? 'block' : 'hidden'
-          } sm:block w-full md:w-56 shrink-0 space-y-1 bg-slate-900/60 p-3 rounded-2xl border border-slate-800/80 h-fit`}
+          } sm:block w-full md:w-60 shrink-0 space-y-1.5 bg-[#050811]/90 p-3 rounded-xl border border-emerald-500/20 h-fit shadow-[0_0_15px_rgba(16,185,129,0.04)]`}
         >
-          <div className="px-3 py-2 text-[11px] font-mono text-slate-500 uppercase tracking-wider font-semibold">
-            Navigation
+          <div className="px-2 py-1.5 text-[10px] font-mono text-emerald-500/80 uppercase tracking-wider font-semibold border-b border-emerald-950/60 flex items-center justify-between">
+            <span>/system/nav</span>
+            <span className="text-[9px] text-slate-400">12 MODS</span>
           </div>
 
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const active = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setActiveTab(item.id);
-                  setIsMobileMenuOpen(false);
-                }}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
-                  active
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                    : 'text-slate-400 hover:bg-slate-800/80 hover:text-slate-200'
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
-                </div>
-                {item.badge && (
-                  <span className="text-[9px] font-mono font-semibold px-1.5 py-0.5 rounded bg-slate-800 text-indigo-300 border border-slate-700">
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+          <div className="space-y-1 pt-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const active = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-all text-left group ${
+                    active
+                      ? 'bg-emerald-950/70 text-emerald-200 border border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.18)] font-semibold'
+                      : 'text-slate-400 hover:bg-emerald-950/20 hover:text-emerald-300 border border-transparent hover:border-emerald-500/20'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span
+                      className={`text-[10px] font-mono shrink-0 ${
+                        active ? 'text-emerald-400 font-bold' : 'text-slate-400 group-hover:text-emerald-400'
+                      }`}
+                    >
+                      {active ? '>' : item.code}
+                    </span>
+                    <Icon
+                      className={`w-3.5 h-3.5 shrink-0 ${
+                        active ? 'text-cyan-400' : 'text-slate-400 group-hover:text-emerald-400'
+                      }`}
+                    />
+                    <span className="truncate tracking-wide text-[11px]">{item.label}</span>
+                  </div>
+                  {item.badge && (
+                    <span
+                      className={`text-[9px] font-mono font-semibold px-1 py-0.2 rounded border shrink-0 ${
+                        active
+                          ? 'bg-emerald-900/80 text-emerald-200 border-emerald-400/60'
+                          : 'bg-[#020408] text-slate-400 border-emerald-950 group-hover:border-emerald-500/40 group-hover:text-emerald-400'
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </aside>
 
         {/* Main Content Body */}
@@ -202,6 +228,14 @@ export default function Admin() {
               onNavigateToBts={() => setActiveTab('bts')}
               onNavigateToFeelings={() => setActiveTab('feelings')}
               onNavigateToLetters={() => setActiveTab('letters')}
+              onNavigateToNotifications={() => setActiveTab('notifications')}
+              onNavigateToContent={() => setActiveTab('content')}
+              onNavigateToSettings={() => setActiveTab('settings')}
+              activities={activities}
+              users={users}
+              adminEmail={currentUser?.email || undefined}
+              adminUid={currentUser?.uid || undefined}
+              adminName={currentUser?.displayName || undefined}
             />
           )}
 
