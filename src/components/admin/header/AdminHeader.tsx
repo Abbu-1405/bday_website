@@ -48,32 +48,35 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
         {/* Title & Console Metadata */}
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-xs sm:text-sm font-semibold tracking-wider text-emerald-300 whitespace-nowrap">
-              STARLIT LETTERS
+            <h1 className="text-xs sm:text-sm font-bold tracking-wider text-emerald-300 whitespace-nowrap">
+              STARLIT LETTERS <span className="text-cyan-400 font-normal">v2.4.0</span>
             </h1>
-            <span className="text-[10px] text-cyan-400 px-1.5 py-0.5 rounded bg-cyan-950/40 border border-cyan-500/30 shrink-0 tracking-widest">
-              ADMIN_CONSOLE v2.4
-            </span>
-            <span className="hidden md:inline-flex items-center gap-1 text-[10px] text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-950/30 border border-emerald-500/20 shrink-0">
+            <span className="hidden sm:inline-flex items-center gap-1 text-[9px] text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/40 shrink-0 tracking-wider">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_#10b981]" />
               SYS:ONLINE
             </span>
+            <span className="hidden lg:inline-flex text-[9px] text-cyan-400 px-1.5 py-0.5 rounded bg-cyan-950/40 border border-cyan-500/30 shrink-0 tracking-wider">
+              AUTH:ROOT
+            </span>
+            <span className="hidden xl:inline-flex text-[9px] text-slate-400 px-1.5 py-0.5 rounded bg-[#020408] border border-emerald-950 shrink-0 tracking-wider">
+              NODE:STLR-ADMIN
+            </span>
           </div>
           <p className="text-[10px] text-emerald-600/90 truncate hidden xs:block sm:block tracking-wide">
-            // PRIVATE UNIVERSE TELEMETRY // AUTHORIZED PERSONNEL ONLY
+            // PRIVATE UNIVERSE // SECURE OPERATIONS TERMINAL
           </p>
         </div>
       </div>
 
-      {/* Center Live System Time (Hidden on small mobile) */}
-      <div className="hidden lg:flex items-center gap-4 text-[11px] text-emerald-400/80 border-x border-emerald-500/20 px-4 py-1">
+      {/* Center Live System Time & Protocol (Hidden on small mobile) */}
+      <div className="hidden md:flex items-center gap-3 text-[10px] text-emerald-400/80 border-x border-emerald-500/20 px-3 py-1">
         <div className="flex items-center gap-1.5">
           <Wifi className="w-3.5 h-3.5 text-cyan-400" />
-          <span className="text-slate-400">PROTO:</span>
-          <span className="text-cyan-300">WSS/TLS1.3</span>
+          <span className="text-slate-500">PROTO:</span>
+          <span className="text-cyan-300 font-semibold">WSS/TLS1.3</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="text-slate-400">CLOCK:</span>
+          <span className="text-slate-500">CLOCK:</span>
           <span className="text-emerald-300 font-medium tracking-tight">
             {currentTime || 'SYNCHRONIZING...'}
           </span>

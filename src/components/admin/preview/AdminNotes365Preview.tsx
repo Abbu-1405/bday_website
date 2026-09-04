@@ -1,56 +1,38 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Calendar,
-  Search,
-  Filter,
   Eye,
-  ArrowUpDown,
-  Sparkles,
-  Image as ImageIcon,
-  Video as VideoIcon,
-  Music as MusicIcon,
-  FileText,
-  CheckCircle2,
-  ShieldCheck,
+  Sliders,
+  Play,
   RotateCcw,
-  LayoutGrid,
-  List,
-  Layers,
+  Sparkles,
   ChevronLeft,
   ChevronRight,
-  FolderKanban,
-  Star,
+  ShieldCheck,
+  Terminal,
+  Cpu,
+  Lock,
+  Unlock,
+  Radio,
+  Clock,
+  Compass,
+  Zap,
+  Edit3,
+  Shuffle,
+  FileText,
+  Layers,
+  ArrowRight,
+  CheckCircle2,
 } from 'lucide-react';
-import { Note365, NoteMediaItem } from '../../../types';
+import { Note365 } from '../../../types';
 import { sampleNotes365 } from '../../../data';
-import { getManagedNotes365 } from '../../../services/contentService';
-import { AdminNotePreviewModal } from './AdminNotePreviewModal';
+import { getManagedNotes365, saveContentItem } from '../../../services/contentService';
+import { ContentItemEditorModal } from '../content/ContentItemEditorModal';
 import { useSfx } from '../../../contexts';
-
-type SortOption = 'day-asc' | 'day-desc' | 'date-asc' | 'date-desc' | 'title-asc' | 'media-first';
-type FilterType = 'all' | 'milestone' | 'has-image' | 'has-video' | 'has-audio' | 'has-doc' | 'text-only';
-type StatusFilter = 'all' | 'unopened' | 'previewed';
 
 interface AdminNotes365PreviewProps {
   onNavigateToContent?: () => void;
 }
-
-const MONTH_OPTIONS = [
-  { value: 'all', label: 'All Months (12)' },
-  { value: '2026-09', label: 'Sep 2026 (Launch)' },
-  { value: '2026-10', label: 'Oct 2026' },
-  { value: '2026-11', label: 'Nov 2026' },
-  { value: '2026-12', label: 'Dec 2026' },
-  { value: '2027-01', label: 'Jan 2027' },
-  { value: '2027-02', label: 'Feb 2027' },
-  { value: '2027-03', label: 'Mar 2027' },
-  { value: '2027-04', label: 'Apr 2027' },
-  { value: '2027-05', label: 'May 2027' },
-  { value: '2027-06', label: 'Jun 2027' },
-  { value: '2027-07', label: 'Jul 2027' },
-  { value: '2027-08', label: 'Aug 2027' },
-  { value: '2027-09', label: 'Sep 2027 (Finale)' },
-];
 
 export const AdminNotes365Preview: React.FC<AdminNotes365PreviewProps> = ({
   onNavigateToContent,
@@ -59,35 +41,37 @@ export const AdminNotes365Preview: React.FC<AdminNotes365PreviewProps> = ({
   const [notes, setNotes] = useState<Note365[]>(sampleNotes365);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Search & Filters
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedMonth, setSelectedMonth] = useState<string>('all');
-  const [selectedTypeFilter, setSelectedTypeFilter] = useState<FilterType>('all');
-  const [selectedStatusFilter, setSelectedStatusFilter] = useState<StatusFilter>('all');
-  const [sortBy, setSortBy] = useState<SortOption>('day-asc');
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  // Simulation controls state
+  const [simulatedDay, setSimulatedDay] = useState<number>(42);
+  const [isLeapYear, setIsLeapYear] = useState<boolean>(false);
+  const [warpInputDay, setWarpInputDay] = useState<string>('42');
+  const [simulatedDate, setSimulatedDate] = useState<string>('2026-10-12');
+  const [selectedNote, setSelectedNote] = useState<Note365 | null>(null);
 
-  // Pagination
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(50);
+  // Decryption effect state
+  const [isDecrypting, setIsDecrypting] = useState<boolean>(false);
+  const [decryptionProgress, setDecryptionProgress] = useState<number>(100);
 
-  // Ephemeral admin preview state (strictly in-memory for testing, isolated from user data)
-  const [previewedNoteIds, setPreviewedNoteIds] = useState<Set<string>>(new Set());
-  const [sessionFavorites, setSessionFavorites] = useState<Set<string>>(new Set());
-  const [activePreviewNote, setActivePreviewNote] = useState<Note365 | null>(null);
+  // Editor Modal
+  const [editingNote, setEditingNote] = useState<Note365 | null>(null);
 
-  // Load existing notes and any Firestore overrides from Content Hub
+  // Hovered day tooltip
+  const [hoveredNote, setHoveredNote] = useState<Note365 | null>(null);
+
+  const totalDays = isLeapYear ? 366 : 365;
+
+  // Load live managed notes dataset
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
     getManagedNotes365()
       .then((managedNotes) => {
-        if (isMounted) {
+        if (isMounted && managedNotes && managedNotes.length > 0) {
           setNotes(managedNotes);
         }
       })
       .catch((err) => {
-        console.warn('Error fetching managed notes dataset for admin preview:', err);
+        console.warn('Error loading notes for chronometric simulator:', err);
       })
       .finally(() => {
         if (isMounted) setLoading(false);
@@ -98,675 +82,491 @@ export const AdminNotes365Preview: React.FC<AdminNotes365PreviewProps> = ({
     };
   }, []);
 
-  // Helpers to inspect note media
-  const getNoteMediaItems = (note: Note365): NoteMediaItem[] => {
-    if (note.mediaItems && note.mediaItems.length > 0) return note.mediaItems;
-    if (note.media && note.media.type !== 'none') return [note.media];
-    return [];
+  // Set initial selected note
+  useEffect(() => {
+    if (notes.length > 0 && !selectedNote) {
+      const match = notes.find((n) => (n.dayIndex ?? 1) === simulatedDay) || notes[0];
+      setSelectedNote(match);
+    }
+  }, [notes, simulatedDay, selectedNote]);
+
+  // Handle note selection with decryption animation
+  const handleSelectDay = (dayIndex: number) => {
+    playSfx('letterOpen');
+    setSimulatedDay(dayIndex);
+    setWarpInputDay(String(dayIndex));
+
+    const found = notes.find((n) => (n.dayIndex ?? 1) === dayIndex);
+    if (found) {
+      setSelectedNote(found);
+      triggerDecryptionSequence();
+    }
   };
 
-  const hasMediaType = (note: Note365, type: string): boolean => {
-    const items = getNoteMediaItems(note);
-    return items.some((item) => item.type === type);
+  const triggerDecryptionSequence = () => {
+    setIsDecrypting(true);
+    setDecryptionProgress(0);
+    const interval = setInterval(() => {
+      setDecryptionProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setIsDecrypting(false);
+          return 100;
+        }
+        return prev + 25;
+      });
+    }, 45);
   };
 
-  // Metric summaries
-  const metrics = useMemo(() => {
-    let totalWithMedia = 0;
-    let totalWithImages = 0;
-    let totalWithVideos = 0;
-    let totalWithAudio = 0;
-    let totalWithDocs = 0;
+  // Jump to real today
+  const handleJumpToToday = () => {
+    playSfx('pageTurn');
+    const startOfYear = new Date(new Date().getFullYear(), 0, 1);
+    const today = new Date();
+    const diff = Math.floor((today.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const bounded = Math.min(Math.max(diff, 1), totalDays);
+    handleSelectDay(bounded);
+    setSimulatedDate(today.toISOString().split('T')[0]);
+  };
 
-    notes.forEach((n) => {
-      const items = getNoteMediaItems(n);
-      if (items.length > 0) {
-        totalWithMedia++;
-        if (items.some((i) => i.type === 'image')) totalWithImages++;
-        if (items.some((i) => i.type === 'video')) totalWithVideos++;
-        if (items.some((i) => i.type === 'audio')) totalWithAudio++;
-        if (items.some((i) => i.type === 'document')) totalWithDocs++;
-      }
-    });
+  // Jump to random day
+  const handleRandomDay = () => {
+    playSfx('navigation');
+    const rand = Math.floor(Math.random() * totalDays) + 1;
+    handleSelectDay(rand);
+  };
+
+  // Step prev / next
+  const handleStepDay = (step: number) => {
+    playSfx('pageTurn');
+    const nextDay = Math.min(Math.max(simulatedDay + step, 1), totalDays);
+    handleSelectDay(nextDay);
+  };
+
+  // Handle manual day warp
+  const handleApplyWarp = (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsed = parseInt(warpInputDay, 10);
+    if (!isNaN(parsed) && parsed >= 1 && parsed <= totalDays) {
+      handleSelectDay(parsed);
+    }
+  };
+
+  // Calculate emotional resonance score mathematically
+  const resonanceTelemetry = useMemo(() => {
+    if (!selectedNote) return { score: 0, tone: 'NEUTRAL', wordCount: 0, charCount: 0 };
+    const text = (selectedNote.content || '') + ' ' + (selectedNote.preview || '');
+    const words = text.trim().split(/\s+/).filter(Boolean);
+    const wordCount = words.length;
+    const charCount = text.length;
+
+    // Sentiment weight lookup
+    const emotionalRegex = /\b(love|forever|heart|cherish|stars|celestial|promise|eternity|always|miss|hold|warmth|sweet|gentle|smile|darling|infinite|dream|remember|breathe|tender)\b/gi;
+    const matches = text.match(emotionalRegex) || [];
+    const intensity = matches.length;
+
+    // Formula yields between 82.0% and 99.8%
+    let baseScore = 84.5 + Math.min(intensity * 1.8, 12.0) + Math.min(wordCount * 0.03, 3.3);
+    if (baseScore > 99.8) baseScore = 99.8;
+
+    let tone = 'AFFECTIONATE';
+    if (intensity > 5) tone = 'DEEP_DEVOTION';
+    else if (/miss|hold|remember/i.test(text)) tone = 'NOSTALGIC_LONGING';
+    else if (/stars|universe|celestial/i.test(text)) tone = 'COSMIC_INTIMACY';
+    else if (intensity <= 2) tone = 'GENTLE_REFLECTION';
 
     return {
-      total: notes.length,
-      totalWithMedia,
-      totalWithImages,
-      totalWithVideos,
-      totalWithAudio,
-      totalWithDocs,
-      previewedCount: previewedNoteIds.size,
+      score: baseScore.toFixed(1),
+      tone,
+      wordCount,
+      charCount,
     };
-  }, [notes, previewedNoteIds]);
+  }, [selectedNote]);
 
-  // Derived filtered notes
-  const filteredNotes = useMemo(() => {
-    return notes.filter((n) => {
-      // 1. Month filter
-      if (selectedMonth !== 'all') {
-        if (!n.date.startsWith(selectedMonth)) return false;
-      }
+  // Milestone check
+  const isMilestoneDay = (day: number) => {
+    return day === 1 || day === 100 || day === 200 || day === 300 || day === 365 || day === 366;
+  };
 
-      // 2. Type / category filter
-      if (selectedTypeFilter === 'milestone') {
-        const d = n.dayIndex ?? 1;
-        const isSpecial = d <= 5 || d === 100 || d === 200 || d === 300 || d === 365;
-        if (!isSpecial) return false;
-      } else if (selectedTypeFilter === 'has-image') {
-        if (!hasMediaType(n, 'image')) return false;
-      } else if (selectedTypeFilter === 'has-video') {
-        if (!hasMediaType(n, 'video')) return false;
-      } else if (selectedTypeFilter === 'has-audio') {
-        if (!hasMediaType(n, 'audio')) return false;
-      } else if (selectedTypeFilter === 'has-doc') {
-        if (!hasMediaType(n, 'document')) return false;
-      } else if (selectedTypeFilter === 'text-only') {
-        if (getNoteMediaItems(n).length > 0) return false;
-      }
-
-      // 3. Preview session status filter
-      const isPreviewed = previewedNoteIds.has(n.id);
-      if (selectedStatusFilter === 'unopened' && isPreviewed) return false;
-      if (selectedStatusFilter === 'previewed' && !isPreviewed) return false;
-
-      // 4. Search query
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim();
-        const formattedIndex = `#${String(n.dayIndex ?? '').padStart(3, '0')}`;
-        const rawIndex = String(n.dayIndex ?? '');
-
-        const matchesIndex =
-          formattedIndex.toLowerCase().includes(q) ||
-          rawIndex === q ||
-          `note ${rawIndex}`.includes(q);
-        const matchesDate = n.date.toLowerCase().includes(q);
-        const matchesDisplayDate = (n.displayDate || '').toLowerCase().includes(q);
-        const matchesTitle = n.title.toLowerCase().includes(q);
-        const matchesPreview = (n.preview || '').toLowerCase().includes(q);
-        const matchesContent = (n.content || '').toLowerCase().includes(q);
-        const matchesCategory = (n.category || '').toLowerCase().includes(q);
-
-        if (
-          !matchesIndex &&
-          !matchesDate &&
-          !matchesDisplayDate &&
-          !matchesTitle &&
-          !matchesPreview &&
-          !matchesContent &&
-          !matchesCategory
-        ) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  }, [
-    notes,
-    selectedMonth,
-    selectedTypeFilter,
-    selectedStatusFilter,
-    searchQuery,
-    previewedNoteIds,
-  ]);
-
-  // Derived sorted notes
-  const sortedNotes = useMemo(() => {
-    const list = [...filteredNotes];
-    switch (sortBy) {
-      case 'day-asc':
-        return list.sort((a, b) => (a.dayIndex ?? 0) - (b.dayIndex ?? 0));
-      case 'day-desc':
-        return list.sort((a, b) => (b.dayIndex ?? 0) - (a.dayIndex ?? 0));
-      case 'date-asc':
-        return list.sort((a, b) => a.date.localeCompare(b.date));
-      case 'date-desc':
-        return list.sort((a, b) => b.date.localeCompare(a.date));
-      case 'title-asc':
-        return list.sort((a, b) => a.title.localeCompare(b.title));
-      case 'media-first':
-        return list.sort((a, b) => {
-          const aCount = getNoteMediaItems(a).length;
-          const bCount = getNoteMediaItems(b).length;
-          if (aCount !== bCount) return bCount - aCount;
-          return (a.dayIndex ?? 0) - (b.dayIndex ?? 0);
-        });
-      default:
-        return list;
+  // Generate 365 day slots
+  const allDaysList = useMemo(() => {
+    const list = [];
+    for (let i = 1; i <= totalDays; i++) {
+      const noteMatch = notes.find((n) => (n.dayIndex ?? 1) === i);
+      list.push({
+        dayIndex: i,
+        note: noteMatch,
+        isUnlocked: i <= simulatedDay,
+        isCurrent: i === simulatedDay,
+        isMilestone: isMilestoneDay(i),
+      });
     }
-  }, [filteredNotes, sortBy]);
-
-  // Reset pagination when filter/search changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, selectedMonth, selectedTypeFilter, selectedStatusFilter, sortBy, itemsPerPage]);
-
-  // Paginated slice
-  const paginatedNotes = useMemo(() => {
-    if (itemsPerPage === -1) return sortedNotes;
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return sortedNotes.slice(startIndex, startIndex + itemsPerPage);
-  }, [sortedNotes, currentPage, itemsPerPage]);
-
-  const totalPages = itemsPerPage === -1 ? 1 : Math.max(1, Math.ceil(sortedNotes.length / itemsPerPage));
-
-  // Open note in Admin Preview Mode
-  const handleOpenPreview = (note: Note365) => {
-    playSfx('letterOpen');
-    // Record previewed state strictly in local admin session
-    setPreviewedNoteIds((prev) => {
-      const next = new Set(prev);
-      next.add(note.id);
-      return next;
-    });
-    setActivePreviewNote(note);
-  };
-
-  const handleToggleSessionFavorite = (noteId: string) => {
-    playSfx('favorite');
-    setSessionFavorites((prev) => {
-      const next = new Set(prev);
-      if (next.has(noteId)) {
-        next.delete(noteId);
-      } else {
-        next.add(noteId);
-      }
-      return next;
-    });
-  };
-
-  const handleResetFilters = () => {
-    setSearchQuery('');
-    setSelectedMonth('all');
-    setSelectedTypeFilter('all');
-    setSelectedStatusFilter('all');
-    setSortBy('day-asc');
-  };
-
-  const isFiltered =
-    searchQuery.trim() !== '' ||
-    selectedMonth !== 'all' ||
-    selectedTypeFilter !== 'all' ||
-    selectedStatusFilter !== 'all' ||
-    sortBy !== 'day-asc';
+    return list;
+  }, [totalDays, simulatedDay, notes]);
 
   return (
-    <div className="space-y-6 select-none font-sans text-slate-100 pb-12">
-      {/* Top Banner & Overview Card */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                ADMIN TESTING / PREVIEW
+    <div className="space-y-4 font-mono select-none" id="admin-365-chronometric-simulator">
+      {/* Header */}
+      <div className="bg-[#050811]/90 border border-emerald-500/20 rounded-xl p-4 sm:p-5 shadow-[0_0_20px_rgba(16,185,129,0.03)] space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex items-center space-x-3">
+            <div className="w-9 h-9 rounded-lg bg-[#020408] border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 shadow-[0_0_12px_rgba(16,185,129,0.15)]">
+              <Compass className="w-4 h-4 text-emerald-400 animate-spin" style={{ animationDuration: '24s' }} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs text-emerald-400 font-bold tracking-wider">
+                  [CHRONOMETRIC_SIMULATOR // 365_NOTES_PREVIEW]
+                </span>
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-500/40">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  TEMPORAL_CLOCK::SYNCED
+                </span>
+                <span className="text-[10px] text-cyan-300 font-mono px-1.5 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/30">
+                  [SANDBOX_MODE // READ_ONLY]
+                </span>
+              </div>
+              <p className="text-[11px] text-emerald-600/90 font-mono mt-0.5">
+                // Simulating user-side chronometric unlock state, memory block allocation, and decryption forensics.
+              </p>
+            </div>
+          </div>
+
+          {onNavigateToContent && (
+            <button
+              onClick={onNavigateToContent}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#020408] hover:bg-emerald-950/40 text-emerald-300 text-xs font-mono border border-emerald-500/30 transition-colors cursor-pointer self-start md:self-auto"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>[RETURN_TO_CONTENT_DEPOT]</span>
+            </button>
+          )}
+        </div>
+
+        {/* Simulation Control Header */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 pt-3 border-t border-emerald-950/60">
+          {/* Simulated Day Counter */}
+          <div className="bg-[#020408] p-3 rounded-lg border border-emerald-950 flex flex-col justify-between">
+            <span className="text-[10px] text-slate-400 uppercase font-semibold">SIMULATED CHRONO DAY</span>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-xl font-bold text-cyan-300">
+                DAY [{String(simulatedDay).padStart(3, '0')} / {totalDays}]
               </span>
-              <span className="text-xs font-mono text-slate-400">
-                Total: 365 Notes Available Immediately
+              <span className="text-[10px] text-emerald-400">
+                ({((simulatedDay / totalDays) * 100).toFixed(0)}% UNLOCKED)
               </span>
             </div>
-            <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-slate-100 flex items-center gap-2">
-              365 NOTES — ADMIN PREVIEW
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
-              Preview every note without affecting user progress or unlock state. Immediate access
-              to all 365 calendar entries for quality testing and content verification.
-            </p>
+            <div className="w-full bg-[#050811] h-1.5 rounded-full mt-2 overflow-hidden border border-emerald-950">
+              <div
+                className="bg-cyan-400 h-full transition-all duration-300 shadow-[0_0_8px_rgba(6,182,212,0.8)]"
+                style={{ width: `${(simulatedDay / totalDays) * 100}%` }}
+              />
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 self-start md:self-auto">
-            {onNavigateToContent && (
+          {/* Temporal Warp Controls */}
+          <div className="bg-[#020408] p-3 rounded-lg border border-emerald-950 lg:col-span-2 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-emerald-400 uppercase font-semibold">
+                TEMPORAL JUMP // WARP CONTROLS
+              </span>
+              <div className="flex items-center gap-1.5 text-[10px]">
+                <button
+                  onClick={() => setIsLeapYear(!isLeapYear)}
+                  className={`px-1.5 py-0.5 rounded border transition-colors cursor-pointer ${
+                    isLeapYear
+                      ? 'bg-amber-950 text-amber-300 border-amber-500/40 font-bold'
+                      : 'bg-[#050811] text-slate-400 border-emerald-950'
+                  }`}
+                >
+                  LEAP_YEAR: {isLeapYear ? '366d' : '365d'}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
               <button
-                onClick={onNavigateToContent}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-slate-100 text-xs font-medium transition-colors border border-slate-700"
+                onClick={handleJumpToToday}
+                className="px-2.5 py-1 rounded bg-[#050811] hover:bg-cyan-950/40 text-cyan-300 border border-cyan-500/30 text-xs font-mono transition-colors cursor-pointer"
               >
-                <FolderKanban className="w-3.5 h-3.5 text-indigo-400" />
-                Content Hub
+                [TODAY]
               </button>
-            )}
-          </div>
-        </div>
 
-        {/* Quick Metric Stats Chips */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-800/80">
-          <div className="bg-slate-950/70 p-3 rounded-xl border border-slate-800/90">
-            <span className="text-[11px] text-slate-400 block">Total Notes</span>
-            <span className="text-lg font-mono font-semibold text-slate-100">
-              {metrics.total}
-            </span>
+              <button
+                onClick={handleRandomDay}
+                className="px-2.5 py-1 rounded bg-[#050811] hover:bg-purple-950/40 text-purple-300 border border-purple-500/30 text-xs font-mono transition-colors cursor-pointer"
+              >
+                [RANDOM_DAY]
+              </button>
+
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => handleStepDay(-1)}
+                  className="px-2 py-1 rounded bg-[#050811] hover:bg-emerald-950 text-emerald-300 border border-emerald-950 text-xs cursor-pointer"
+                >
+                  &lt; -1D
+                </button>
+                <button
+                  onClick={() => handleStepDay(1)}
+                  className="px-2 py-1 rounded bg-[#050811] hover:bg-emerald-950 text-emerald-300 border border-emerald-950 text-xs cursor-pointer"
+                >
+                  +1D &gt;
+                </button>
+              </div>
+
+              {/* Form for manual day warp */}
+              <form onSubmit={handleApplyWarp} className="flex items-center gap-1">
+                <input
+                  type="number"
+                  min="1"
+                  max={totalDays}
+                  value={warpInputDay}
+                  onChange={(e) => setWarpInputDay(e.target.value)}
+                  className="w-16 px-1.5 py-1 bg-[#050811] border border-emerald-500/30 text-emerald-200 text-xs rounded focus:outline-none focus:border-emerald-400 font-mono text-center"
+                />
+                <button
+                  type="submit"
+                  className="px-2 py-1 rounded bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/40 text-xs cursor-pointer font-bold"
+                >
+                  [WARP]
+                </button>
+              </form>
+            </div>
           </div>
 
-          <div className="bg-slate-950/70 p-3 rounded-xl border border-slate-800/90">
-            <span className="text-[11px] text-slate-400 block">With Rich Media</span>
-            <span className="text-lg font-mono font-semibold text-indigo-400">
-              {metrics.totalWithMedia}
-            </span>
-          </div>
-
-          <div className="bg-slate-950/70 p-3 rounded-xl border border-slate-800/90">
-            <span className="text-[11px] text-slate-400 block">Previewed (This Session)</span>
-            <span className="text-lg font-mono font-semibold text-emerald-400">
-              {metrics.previewedCount} / 365
-            </span>
-          </div>
-
-          <div className="bg-slate-950/70 p-3 rounded-xl border border-slate-800/90">
-            <span className="text-[11px] text-slate-400 block">Isolated State</span>
-            <span className="text-xs font-mono font-medium text-amber-300 block mt-1">
-              ZERO USER MUTATION
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Search, Filter & View Controls */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4">
-        {/* Search Bar Row */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          {/* Quick Date Simulation */}
+          <div className="bg-[#020408] p-3 rounded-lg border border-emerald-950 space-y-1">
+            <span className="text-[10px] text-slate-400 uppercase font-semibold">SIMULATED CALENDAR DATE</span>
             <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by note number (e.g. #001 or 27), date, title, or content..."
-              className="w-full pl-9 pr-8 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-xs sm:text-sm text-slate-100 placeholder-slate-500 transition-colors outline-none"
+              type="date"
+              value={simulatedDate}
+              onChange={(e) => {
+                setSimulatedDate(e.target.value);
+                const d = new Date(e.target.value);
+                if (!isNaN(d.getTime())) {
+                  const startOfYear = new Date(d.getFullYear(), 0, 1);
+                  const diff = Math.floor((d.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                  const bounded = Math.min(Math.max(diff, 1), totalDays);
+                  handleSelectDay(bounded);
+                }
+              }}
+              className="w-full bg-[#050811] border border-emerald-500/30 rounded px-2 py-1 text-xs text-emerald-200 font-mono focus:outline-none focus:border-emerald-400 cursor-pointer"
             />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-1 shrink-0">
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-1.5 rounded-lg transition-colors ${
-                  viewMode === 'list'
-                    ? 'bg-indigo-600 text-white shadow-xs'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-                title="Compact list view"
-                aria-label="Compact list view"
-              >
-                <List className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg transition-colors ${
-                  viewMode === 'grid'
-                    ? 'bg-indigo-600 text-white shadow-xs'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-                title="Grid view"
-                aria-label="Grid view"
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-            </div>
-
-            {isFiltered && (
-              <button
-                onClick={handleResetFilters}
-                className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors border border-slate-700"
-                title="Reset all filters"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Reset</span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Filter Dropdowns Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
-          {/* Month Selector */}
-          <div>
-            <label className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
-              Month Scope
-            </label>
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none focus:border-indigo-500 transition-colors"
-            >
-              {MONTH_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Category / Media Type Selector */}
-          <div>
-            <label className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
-              Content / Media
-            </label>
-            <select
-              value={selectedTypeFilter}
-              onChange={(e) => setSelectedTypeFilter(e.target.value as FilterType)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none focus:border-indigo-500 transition-colors"
-            >
-              <option value="all">All Content</option>
-              <option value="milestone">Milestones & Specials</option>
-              <option value="has-image">Has Image Photos</option>
-              <option value="has-video">Has Video Clips</option>
-              <option value="has-audio">Has Audio Ambient</option>
-              <option value="has-doc">Has PDF Documents</option>
-              <option value="text-only">Text Only (No Media)</option>
-            </select>
-          </div>
-
-          {/* Session Preview Status */}
-          <div>
-            <label className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
-              Testing Status
-            </label>
-            <select
-              value={selectedStatusFilter}
-              onChange={(e) => setSelectedStatusFilter(e.target.value as StatusFilter)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none focus:border-indigo-500 transition-colors"
-            >
-              <option value="all">All (Unopened & Previewed)</option>
-              <option value="unopened">Unopened in Preview</option>
-              <option value="previewed">Previewed this Session</option>
-            </select>
-          </div>
-
-          {/* Sorting */}
-          <div>
-            <label className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
-              Order / Sorting
-            </label>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none focus:border-indigo-500 transition-colors"
-            >
-              <option value="day-asc">Oldest First (#001 → #365)</option>
-              <option value="day-desc">Newest First (#365 → #001)</option>
-              <option value="date-asc">Date (Ascending)</option>
-              <option value="date-desc">Date (Descending)</option>
-              <option value="title-asc">Title (A → Z)</option>
-              <option value="media-first">Rich Media First</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Results Bar */}
-        <div className="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-800/80">
-          <div>
-            Showing <span className="font-mono font-semibold text-slate-200">{sortedNotes.length}</span> of{' '}
-            <span className="font-mono text-slate-400">{notes.length}</span> notes
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] text-slate-500">Per page:</span>
-            <select
-              value={itemsPerPage}
-              onChange={(e) => setItemsPerPage(Number(e.target.value))}
-              className="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs text-slate-300 outline-none"
-            >
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-              <option value={-1}>All (365)</option>
-            </select>
+            <p className="text-[9px] text-slate-400">Target unlock timestamp</p>
           </div>
         </div>
       </div>
 
-      {/* Note List / Grid */}
-      {loading ? (
-        <div className="space-y-3">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div
-              key={i}
-              className="h-16 rounded-2xl bg-slate-900/60 border border-slate-800 animate-pulse"
-            />
-          ))}
-        </div>
-      ) : sortedNotes.length === 0 ? (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center space-y-3">
-          <Calendar className="w-8 h-8 text-slate-600 mx-auto" />
-          <h3 className="text-sm font-semibold text-slate-200">No notes match your filters</h3>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto">
-            Try adjusting your search terms, clearing selected categories, or resetting filters.
-          </p>
-          <button
-            onClick={handleResetFilters}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-colors"
-          >
-            Reset Filters
-          </button>
-        </div>
-      ) : viewMode === 'list' ? (
-        /* Compact List View */
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl divide-y divide-slate-800/80 overflow-hidden shadow-sm">
-          {paginatedNotes.map((note) => {
-            const formattedIndex = `#${String(note.dayIndex ?? 1).padStart(3, '0')}`;
-            const mediaItems = getNoteMediaItems(note);
-            const isPreviewed = previewedNoteIds.has(note.id);
-            const isFav = sessionFavorites.has(note.id) || note.isFavorite;
+      {/* Main Split-View: Timeline Memory Map & Decrypted Note Inspector */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* Memory Allocation Map (Left/Top: 7 columns on desktop) */}
+        <div className="lg:col-span-7 bg-[#050811]/90 border border-emerald-500/20 rounded-xl p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Cpu className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs font-bold text-emerald-300">
+                // CHRONOMETRIC_MEMORY_MAP [365_BLOCKS]
+              </span>
+            </div>
 
-            return (
-              <div
-                key={note.id}
-                className={`p-3 sm:p-4 hover:bg-slate-800/50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                  isPreviewed ? 'bg-slate-900/40' : ''
-                }`}
-              >
-                <div className="flex items-start sm:items-center space-x-3 min-w-0">
-                  {/* Note Number Badge */}
-                  <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-950 text-indigo-400 border border-slate-800 shrink-0">
-                    {formattedIndex}
-                  </span>
+            {/* Legend */}
+            <div className="flex items-center gap-2 text-[9px] text-slate-400 flex-wrap justify-end">
+              <span className="inline-flex items-center gap-1">
+                <span className="w-2.5 h-2.5 rounded-xs bg-cyan-400 border border-cyan-300 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
+                [TODAY]
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="w-2.5 h-2.5 rounded-xs bg-emerald-950 border border-emerald-500/40" />
+                [UNLOCKED]
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="w-2.5 h-2.5 rounded-xs bg-amber-950 border border-amber-500/50" />
+                [MILESTONE]
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="w-2.5 h-2.5 rounded-xs bg-[#020408] border border-emerald-950" />
+                [LOCKED]
+              </span>
+            </div>
+          </div>
 
-                  <div className="min-w-0 space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-mono font-medium text-slate-400 flex items-center gap-1 shrink-0">
-                        <Calendar className="w-3 h-3 text-slate-500" />
-                        {note.displayDate || note.date}
-                      </span>
+          {/* Memory Grid Allocation Map */}
+          <div className="bg-[#020408] p-3 rounded-lg border border-emerald-950/80 overflow-y-auto max-h-[500px]">
+            <div className="grid grid-cols-14 sm:grid-cols-18 md:grid-cols-20 lg:grid-cols-15 xl:grid-cols-18 gap-1.5">
+              {allDaysList.map(({ dayIndex, note, isUnlocked, isCurrent, isMilestone }) => {
+                let cellClass = 'bg-[#020408] text-slate-700 border-emerald-950/40 hover:border-emerald-800';
 
-                      {/* Media Badges */}
-                      {mediaItems.map((m, idx) => {
-                        if (m.type === 'image') {
-                          return (
-                            <span
-                              key={idx}
-                              className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20"
-                            >
-                              <ImageIcon className="w-3 h-3" /> Photo
-                            </span>
-                          );
-                        }
-                        if (m.type === 'video') {
-                          return (
-                            <span
-                              key={idx}
-                              className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                            >
-                              <VideoIcon className="w-3 h-3" /> Video
-                            </span>
-                          );
-                        }
-                        if (m.type === 'audio') {
-                          return (
-                            <span
-                              key={idx}
-                              className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                            >
-                              <MusicIcon className="w-3 h-3" /> Audio
-                            </span>
-                          );
-                        }
-                        if (m.type === 'document') {
-                          return (
-                            <span
-                              key={idx}
-                              className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20"
-                            >
-                              <FileText className="w-3 h-3" /> PDF
-                            </span>
-                          );
-                        }
-                        return null;
-                      })}
+                if (isCurrent) {
+                  cellClass =
+                    'bg-cyan-950 text-cyan-300 border-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.7)] animate-pulse font-bold scale-105';
+                } else if (isMilestone && isUnlocked) {
+                  cellClass =
+                    'bg-amber-950/90 text-amber-300 border-amber-500/60 shadow-[0_0_8px_rgba(245,158,11,0.3)] font-bold';
+                } else if (isMilestone && !isUnlocked) {
+                  cellClass =
+                    'bg-amber-950/30 text-amber-700 border-amber-900/40';
+                } else if (isUnlocked) {
+                  cellClass =
+                    'bg-emerald-950/80 text-emerald-400 border-emerald-500/30 hover:border-emerald-400 hover:text-emerald-200';
+                }
 
-                      {isPreviewed && (
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
-                          <CheckCircle2 className="w-2.5 h-2.5" /> Previewed
-                        </span>
-                      )}
+                const isSelected = (selectedNote?.dayIndex ?? 1) === dayIndex;
+                if (isSelected && !isCurrent) {
+                  cellClass += ' ring-2 ring-emerald-400 font-bold';
+                }
 
-                      {isFav && (
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-pink-500/10 text-pink-400 border border-pink-500/20 flex items-center gap-1">
-                          <Star className="w-2.5 h-2.5 fill-current" /> Favorited
-                        </span>
-                      )}
-                    </div>
-
-                    <h4 className="text-sm font-semibold text-slate-100 truncate">
-                      {note.title}
-                    </h4>
-
-                    <p className="text-xs text-slate-400 line-clamp-1">
-                      {note.preview || note.content}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Right Actions */}
-                <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                return (
                   <button
-                    onClick={() => handleOpenPreview(note)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white text-xs font-medium transition-all shadow-sm"
+                    key={dayIndex}
+                    onClick={() => handleSelectDay(dayIndex)}
+                    onMouseEnter={() => setHoveredNote(note || null)}
+                    onMouseLeave={() => setHoveredNote(null)}
+                    className={`h-7 rounded text-[10px] font-mono border transition-all flex items-center justify-center cursor-pointer relative ${cellClass}`}
+                    title={`Day ${dayIndex}: ${note?.title || 'Note Locked'}`}
                   >
-                    <Eye className="w-3.5 h-3.5" />
-                    Preview
+                    {dayIndex}
                   </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        /* Grid Card View */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {paginatedNotes.map((note) => {
-            const formattedIndex = `#${String(note.dayIndex ?? 1).padStart(3, '0')}`;
-            const mediaItems = getNoteMediaItems(note);
-            const isPreviewed = previewedNoteIds.has(note.id);
-            const isFav = sessionFavorites.has(note.id) || note.isFavorite;
+                );
+              })}
+            </div>
+          </div>
 
-            return (
-              <div
-                key={note.id}
-                onClick={() => handleOpenPreview(note)}
-                className={`group bg-slate-900 hover:bg-slate-800/80 border border-slate-800 hover:border-indigo-500/40 rounded-2xl p-4 flex flex-col justify-between transition-all duration-200 cursor-pointer shadow-sm space-y-3 ${
-                  isPreviewed ? 'border-emerald-500/20' : ''
-                }`}
+          {/* Hover Telemetry Footer */}
+          <div className="h-6 flex items-center justify-between text-[10px] text-slate-400 px-1">
+            {hoveredNote ? (
+              <span className="text-cyan-400 truncate">
+                &gt; HOVER::DAY_{hoveredNote.dayIndex}: "{hoveredNote.title}" // DATE: {hoveredNote.date}
+              </span>
+            ) : (
+              <span className="text-slate-400">
+                &gt; HOVER OVER ANY MEMORY BLOCK TO PREVIEW REGISTER METADATA
+              </span>
+            )}
+            <span className="text-emerald-500 shrink-0">MEMORY_BLOCKS: {totalDays}</span>
+          </div>
+        </div>
+
+        {/* Note Inspector Panel (Right/Bottom: 5 columns on desktop) */}
+        <div className="lg:col-span-5 bg-[#050811]/90 border border-emerald-500/20 rounded-xl p-4 flex flex-col justify-between space-y-3">
+          <div>
+            {/* Decryption Header */}
+            <div className="flex items-center justify-between pb-2 border-b border-emerald-950">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs font-bold text-emerald-300">
+                  {isDecrypting
+                    ? `[DECRYPTING_DAY_${selectedNote?.dayIndex || simulatedDay}...]`
+                    : `[PAYLOAD_DECRYPTED // DAY_${selectedNote?.dayIndex || simulatedDay}]`}
+                </span>
+              </div>
+              <button
+                onClick={() => selectedNote && setEditingNote(selectedNote)}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#020408] hover:bg-emerald-950 text-emerald-300 border border-emerald-500/40 text-[10px] transition-colors cursor-pointer"
               >
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-slate-950 text-indigo-400 border border-slate-800">
-                      {formattedIndex}
-                    </span>
+                <Edit3 className="w-3 h-3" />
+                <span>[EDIT_PAYLOAD]</span>
+              </button>
+            </div>
 
-                    <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1">
-                      <Calendar className="w-3 h-3 text-slate-500" />
-                      {note.displayDate || note.date}
-                    </span>
-                  </div>
+            {/* Decryption Progress Bar */}
+            {isDecrypting && (
+              <div className="w-full bg-[#020408] h-1 rounded-full my-2 overflow-hidden">
+                <div
+                  className="bg-cyan-400 h-full transition-all duration-75"
+                  style={{ width: `${decryptionProgress}%` }}
+                />
+              </div>
+            )}
 
-                  <h4 className="text-sm font-semibold text-slate-100 group-hover:text-indigo-300 transition-colors line-clamp-1">
-                    {note.title}
-                  </h4>
-
-                  <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                    {note.preview || note.content}
-                  </p>
-                </div>
-
-                <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1">
-                    {mediaItems.map((m, idx) => (
-                      <span
-                        key={idx}
-                        className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
-                      >
-                        {m.type}
-                      </span>
-                    ))}
-                    {mediaItems.length === 0 && (
-                      <span className="text-[10px] text-slate-500 italic">Text</span>
-                    )}
-                  </div>
-
-                  <span className="text-xs text-indigo-400 group-hover:translate-x-0.5 transition-transform font-medium">
-                    Preview →
-                  </span>
+            {/* Note Metadata Telemetry */}
+            <div className="grid grid-cols-2 gap-2 my-3 text-[10px]">
+              <div className="bg-[#020408] p-2 rounded border border-emerald-950">
+                <span className="text-slate-400">UNLOCK_SCHEDULE:</span>
+                <div className="text-cyan-300 font-bold mt-0.5">
+                  {selectedNote?.date || 'SCHEDULED'}
                 </div>
               </div>
-            );
-          })}
-        </div>
-      )}
+              <div className="bg-[#020408] p-2 rounded border border-emerald-950">
+                <span className="text-slate-400">EMOTIONAL_RESONANCE:</span>
+                <div className="text-amber-300 font-bold mt-0.5">
+                  {resonanceTelemetry.score}% // {resonanceTelemetry.tone}
+                </div>
+              </div>
+              <div className="bg-[#020408] p-2 rounded border border-emerald-950">
+                <span className="text-slate-400">WORD / CHAR COUNT:</span>
+                <div className="text-emerald-300 font-bold mt-0.5">
+                  {resonanceTelemetry.wordCount} words / {resonanceTelemetry.charCount} chars
+                </div>
+              </div>
+              <div className="bg-[#020408] p-2 rounded border border-emerald-950">
+                <span className="text-slate-400">SIMULATION_STATUS:</span>
+                <div className="text-cyan-400 font-bold mt-0.5">
+                  {(selectedNote?.dayIndex ?? 1) <= simulatedDay ? '[UNLOCKED_LIVE]' : '[CHRONO_LOCKED]'}
+                </div>
+              </div>
+            </div>
 
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="text-xs text-slate-400">
-            Page <span className="font-mono font-semibold text-slate-200">{currentPage}</span> of{' '}
-            <span className="font-mono font-semibold text-slate-200">{totalPages}</span>
+            {/* Decrypted Payload Content */}
+            <div className="bg-[#020408] p-4 rounded-lg border border-emerald-500/30 space-y-2 overflow-y-auto max-h-[320px]">
+              <div className="text-[11px] text-cyan-400 font-bold">
+                PAYLOAD::"{selectedNote?.title || 'Untitled Note'}"
+              </div>
+
+              {selectedNote?.preview && (
+                <div className="p-2 rounded bg-[#050811] text-[11px] text-amber-300/90 italic border border-emerald-950/80">
+                  "{selectedNote.preview}"
+                </div>
+              )}
+
+              <div className="text-xs text-emerald-100 whitespace-pre-wrap leading-relaxed select-text font-mono pt-1">
+                {selectedNote?.content || 'No text content decoded for this chronological register.'}
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center space-x-2">
+          {/* Quick Navigation Footer Controls */}
+          <div className="pt-2 border-t border-emerald-950 flex items-center justify-between text-xs">
             <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-xs text-slate-200 transition-colors border border-slate-700"
+              onClick={() => handleStepDay(-1)}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#020408] hover:bg-emerald-950 text-emerald-300 border border-emerald-950 transition-colors cursor-pointer"
             >
-              <ChevronLeft className="w-4 h-4" />
-              <span>Previous</span>
+              <ChevronLeft className="w-3.5 h-3.5" />
+              <span>[PREV_DAY]</span>
             </button>
 
             <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-xs text-slate-200 transition-colors border border-slate-700"
+              onClick={handleJumpToToday}
+              className="px-3 py-1.5 rounded-lg bg-[#020408] hover:bg-cyan-950 text-cyan-300 border border-cyan-500/30 transition-colors cursor-pointer text-xs"
             >
-              <span>Next</span>
-              <ChevronRight className="w-4 h-4" />
+              [TODAY]
+            </button>
+
+            <button
+              onClick={() => handleStepDay(1)}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#020408] hover:bg-emerald-950 text-emerald-300 border border-emerald-950 transition-colors cursor-pointer"
+            >
+              <span>[NEXT_DAY]</span>
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Admin Note Preview Modal */}
-      <AdminNotePreviewModal
-        note={activePreviewNote}
-        allNotes={sortedNotes.length > 0 ? sortedNotes : notes}
-        sessionFavorites={sessionFavorites}
-        onToggleSessionFavorite={handleToggleSessionFavorite}
-        onClose={() => setActivePreviewNote(null)}
-        onSelectNote={(nextNote) => {
-          setPreviewedNoteIds((prev) => {
-            const next = new Set(prev);
-            next.add(nextNote.id);
-            return next;
-          });
-          setActivePreviewNote(nextNote);
-        }}
-      />
+      {/* Content Editor Modal if launched from simulator */}
+      {editingNote && (
+        <ContentItemEditorModal
+          category="notes"
+          item={editingNote}
+          isOpen={!!editingNote}
+          onClose={() => setEditingNote(null)}
+          onSaveSuccess={(updated) => {
+            setNotes((prev) => prev.map((n) => (n.id === updated.id ? { ...n, ...updated } : n)));
+            if (selectedNote?.id === updated.id) {
+              setSelectedNote((prev) => (prev ? { ...prev, ...updated } : null));
+            }
+          }}
+        />
+      )}
     </div>
   );
 };

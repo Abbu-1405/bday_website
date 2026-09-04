@@ -43,6 +43,7 @@ import { AdminDoodlesDashboard } from '../components/admin/doodles';
 import { AdminNotes365Preview } from '../components/admin/preview';
 import { AdminNotificationQueue } from '../components/admin/AdminNotificationQueue';
 import { AdminHeader } from '../components/admin/header';
+import { AdminSystemSettings } from '../components/admin/AdminSystemSettings';
 import { Radio } from 'lucide-react';
 
 type AdminTab =
@@ -178,16 +179,16 @@ export default function Admin() {
                     setActiveTab(item.id);
                     setIsMobileMenuOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-all text-left group ${
+                  className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-all text-left group font-mono ${
                     active
-                      ? 'bg-emerald-950/70 text-emerald-200 border border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.18)] font-semibold'
+                      ? 'bg-emerald-950/80 text-emerald-200 border border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.18)] font-semibold'
                       : 'text-slate-400 hover:bg-emerald-950/20 hover:text-emerald-300 border border-transparent hover:border-emerald-500/20'
                   }`}
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <span
                       className={`text-[10px] font-mono shrink-0 ${
-                        active ? 'text-emerald-400 font-bold' : 'text-slate-400 group-hover:text-emerald-400'
+                        active ? 'text-emerald-400 font-bold' : 'text-emerald-700 group-hover:text-emerald-400'
                       }`}
                     >
                       {active ? '>' : item.code}
@@ -199,17 +200,15 @@ export default function Admin() {
                     />
                     <span className="truncate tracking-wide text-[11px]">{item.label}</span>
                   </div>
-                  {item.badge && (
-                    <span
-                      className={`text-[9px] font-mono font-semibold px-1 py-0.2 rounded border shrink-0 ${
-                        active
-                          ? 'bg-emerald-900/80 text-emerald-200 border-emerald-400/60'
-                          : 'bg-[#020408] text-slate-400 border-emerald-950 group-hover:border-emerald-500/40 group-hover:text-emerald-400'
-                      }`}
-                    >
+                  {active ? (
+                    <span className="text-[8px] font-mono font-bold px-1 py-0.2 rounded border bg-emerald-900/90 text-emerald-200 border-emerald-400/60 shrink-0">
+                      {item.badge ? `[${item.badge}]` : '[CONNECTED]'}
+                    </span>
+                  ) : item.badge ? (
+                    <span className="text-[8px] font-mono font-semibold px-1 py-0.2 rounded border bg-[#020408] text-slate-400 border-emerald-950 group-hover:border-emerald-500/40 group-hover:text-emerald-400 shrink-0">
                       {item.badge}
                     </span>
-                  )}
+                  ) : null}
                 </button>
               );
             })}
@@ -284,56 +283,10 @@ export default function Admin() {
           )}
 
           {activeTab === 'settings' && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6">
-              <div>
-                <h3 className="text-base font-semibold text-slate-100">Admin Authorization Settings</h3>
-                <p className="text-xs text-slate-400 mt-1">
-                  Active Firebase Authentication session & Security Claim Details.
-                </p>
-              </div>
-
-              <div className="space-y-3 text-xs">
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
-                  <span className="text-slate-400">Admin Email</span>
-                  <span className="font-mono text-slate-200">{currentUser?.email || 'N/A'}</span>
-                </div>
-
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
-                  <span className="text-slate-400">Admin UID</span>
-                  <span className="font-mono text-slate-200">{currentUser?.uid || 'N/A'}</span>
-                </div>
-
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
-                  <span className="text-slate-400">Authorization Mechanism</span>
-                  <span className="font-mono text-emerald-400 font-semibold">Firebase Security Rules / Custom Claims</span>
-                </div>
-
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
-                  <span className="text-slate-400">Firestore Access Rule</span>
-                  <span className="font-mono text-indigo-400">isAdmin() Rule Enforced</span>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-slate-800 flex justify-between items-center">
-                <a
-                  href="/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  Open Public Starlit Letters Website
-                </a>
-
-                <button
-                  onClick={handleLogout}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-medium transition-colors"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  End Admin Session
-                </button>
-              </div>
-            </div>
+            <AdminSystemSettings
+              currentUser={currentUser}
+              onLogout={handleLogout}
+            />
           )}
         </main>
       </div>

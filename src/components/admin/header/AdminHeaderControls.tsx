@@ -433,17 +433,17 @@ export const AdminHeaderControls: React.FC<AdminHeaderControlsProps> = ({ classN
       </div>
 
       {/* ──────────────────────────────────────────────────
-          4. DESKTOP QUICK SIGN OUT BUTTON
+          4. QUICK TERMINAL SIGN OUT BUTTON
           ────────────────────────────────────────────────── */}
       <button
         type="button"
         onClick={handleSignOut}
-        aria-label="Sign Out"
-        title="Sign Out of Admin Portal"
-        className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#050811] hover:bg-rose-950/60 hover:text-rose-300 text-slate-400 text-xs font-medium border border-emerald-500/20 hover:border-rose-900/50 transition-colors shadow-xs"
+        aria-label="Exit Console"
+        title="Terminate Admin Session"
+        className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#020408] hover:bg-rose-950/70 text-rose-400 hover:text-rose-200 text-xs font-mono font-medium border border-rose-500/30 hover:border-rose-400/60 transition-all shadow-xs"
       >
-        <LogOut className="w-3.5 h-3.5 shrink-0" />
-        <span>Exit</span>
+        <LogOut className="w-3.5 h-3.5 shrink-0 text-rose-400" />
+        <span>[EXIT]</span>
       </button>
     </div>
   );

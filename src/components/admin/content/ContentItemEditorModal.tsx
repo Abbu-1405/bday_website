@@ -8,6 +8,7 @@ import {
   AlertCircle,
   Sparkles,
   Lock,
+  Terminal,
 } from 'lucide-react';
 import { ContentCategory, saveContentItem } from '../../../services/contentService';
 import { useAuth, useStarlitCatBridge } from '../../../hooks';
@@ -151,10 +152,10 @@ export function ContentItemEditorModal({
       };
 
       setIsDirty(false);
-      setSuccessMessage('Content saved successfully to production!');
+      setSuccessMessage('Content payload saved successfully to production!');
       onSaveSuccess(mergedUpdatedItem);
 
-      // Phase 4: Event bridge notification on save (safe metadata only)
+      // Event bridge notification on save
       if (status === 'draft') {
         emitLetter('saved', { itemId: item.id });
       } else {
@@ -182,92 +183,92 @@ export function ContentItemEditorModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#020408]/85 backdrop-blur-sm animate-in fade-in duration-200 select-none font-mono"
       onClick={handleAttemptClose}
       role="dialog"
       aria-modal="true"
     >
       <div
-        className="relative w-full max-w-2xl max-h-[90vh] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-slate-100"
+        className="relative w-full max-w-2xl max-h-[90vh] bg-[#050811] border border-emerald-500/30 rounded-xl shadow-2xl flex flex-col overflow-hidden text-slate-100"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="px-6 py-4 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase font-semibold">
+        <div className="px-5 py-3.5 bg-[#020408] border-b border-emerald-950 flex items-center justify-between">
+          <div className="flex items-center space-x-2.5">
+            <span className="text-xs font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30 uppercase font-semibold">
               {category} / {item.id}
             </span>
             {isDirty && (
-              <span className="text-[11px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                Unsaved Changes
+              <span className="text-[10px] font-mono text-amber-300 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-500/30">
+                [UNCOMMITTED_CHANGES]
               </span>
             )}
           </div>
 
           <div className="flex items-center space-x-2">
             {/* Tab Toggle */}
-            <div className="flex bg-slate-800 p-1 rounded-xl text-xs font-medium border border-slate-700">
+            <div className="flex bg-[#020408] p-0.5 rounded-lg text-xs font-medium border border-emerald-950">
               <button
                 type="button"
                 onClick={() => setActiveTab('edit')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-colors ${
+                className={`flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-mono transition-colors cursor-pointer ${
                   activeTab === 'edit'
-                    ? 'bg-indigo-600 text-white shadow-xs'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40'
+                    : 'text-slate-400 hover:text-emerald-300'
                 }`}
               >
-                <Edit3 className="w-3.5 h-3.5" />
-                Editor
+                <Edit3 className="w-3 h-3" />
+                [EDITOR]
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('preview')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-colors ${
+                className={`flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-mono transition-colors cursor-pointer ${
                   activeTab === 'preview'
-                    ? 'bg-indigo-600 text-white shadow-xs'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40'
+                    : 'text-slate-400 hover:text-emerald-300'
                 }`}
               >
-                <Eye className="w-3.5 h-3.5" />
-                Preview
+                <Eye className="w-3 h-3" />
+                [PREVIEW]
               </button>
             </div>
 
             <button
               onClick={handleAttemptClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors"
+              className="p-1 rounded bg-[#020408] text-slate-400 hover:text-emerald-300 border border-emerald-950 transition-colors cursor-pointer"
               aria-label="Close modal"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto flex-1 space-y-5">
+        <div className="p-5 overflow-y-auto flex-1 space-y-4 text-xs">
           {/* Messages */}
           {errorMessage && (
-            <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+            <div className="p-3 rounded-lg bg-[#020408] border border-rose-500/40 text-rose-300 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
               <span>{errorMessage}</span>
             </div>
           )}
 
           {successMessage && (
-            <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+            <div className="p-3 rounded-lg bg-[#020408] border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
               <span>{successMessage}</span>
             </div>
           )}
 
           {activeTab === 'edit' ? (
-            <form id="content-edit-form" onSubmit={handleSave} className="space-y-4">
+            <form id="content-edit-form" onSubmit={handleSave} className="space-y-3.5">
               {/* Title Field */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-slate-300 flex items-center justify-between">
-                  <span>Content Title *</span>
-                  <span className="text-[10px] text-slate-500 font-mono">
-                    ID Immutable: {item.id}
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 flex items-center justify-between uppercase">
+                  <span>PAYLOAD_TITLE *</span>
+                  <span className="text-[9px] text-cyan-400 font-mono">
+                    IMMUTABLE_ID: {item.id}
                   </span>
                 </label>
                 <input
@@ -275,34 +276,34 @@ export function ContentItemEditorModal({
                   value={title}
                   onChange={(e) => handleFieldChange(setTitle, e.target.value)}
                   placeholder="Enter title..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-colors font-serif"
+                  className="w-full px-3 py-2 rounded-lg bg-[#020408] border border-emerald-500/30 text-emerald-100 text-xs focus:outline-none focus:border-emerald-500 transition-colors font-mono"
                 />
               </div>
 
               {/* Subtitle / Preview / Short Description */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-slate-300">
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 uppercase">
                   {category === 'notes'
-                    ? 'Note Preview / Summary'
+                    ? 'NOTE_PREVIEW / SUMMARY'
                     : category === 'moments'
-                    ? 'Short Description'
-                    : 'Short Overview'}
+                    ? 'SHORT_DESCRIPTION'
+                    : 'SHORT_OVERVIEW'}
                 </label>
                 <textarea
                   rows={2}
                   value={previewText}
                   onChange={(e) => handleFieldChange(setPreviewText, e.target.value)}
                   placeholder="Enter short description or preview snippet..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-colors font-serif resize-none"
+                  className="w-full px-3 py-2 rounded-lg bg-[#020408] border border-emerald-500/30 text-emerald-100 text-xs focus:outline-none focus:border-emerald-500 transition-colors font-mono resize-none"
                 />
               </div>
 
               {/* Main Body Content */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-slate-300 flex items-center justify-between">
-                  <span>{category === 'moments' ? 'Story Content *' : 'Main Content Body *'}</span>
-                  <span className="text-[10px] text-slate-500 font-mono">
-                    {content.length} chars
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 flex items-center justify-between uppercase">
+                  <span>{category === 'moments' ? 'STORY_CONTENT *' : 'PAYLOAD_BODY *'}</span>
+                  <span className="text-[9px] text-emerald-500 font-mono">
+                    {content.length} CHARS
                   </span>
                 </label>
                 <textarea
@@ -310,99 +311,98 @@ export function ContentItemEditorModal({
                   value={content}
                   onChange={(e) => handleFieldChange(setContent, e.target.value)}
                   placeholder="Enter full text content..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-colors font-serif leading-relaxed"
+                  className="w-full px-3 py-2 rounded-lg bg-[#020408] border border-emerald-500/30 text-emerald-100 text-xs focus:outline-none focus:border-emerald-500 transition-colors font-mono leading-relaxed"
                 />
               </div>
 
               {/* Metadata row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-800/80">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-emerald-950">
                 {(category === 'wishes' ||
                   category === 'openWhen' ||
                   category === 'adore' ||
                   category === 'moments') && (
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-slate-300">
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-slate-400 uppercase">
                       {category === 'wishes' || category === 'adore'
-                        ? 'Category Tag'
+                        ? 'CATEGORY_TAG'
                         : category === 'openWhen'
-                        ? 'Trigger Condition'
-                        : 'Location'}
+                        ? 'TRIGGER_CONDITION'
+                        : 'LOCATION'}
                     </label>
                     <input
                       type="text"
                       value={metaCategory}
                       onChange={(e) => handleFieldChange(setMetaCategory, e.target.value)}
                       placeholder="Category / Location / Trigger..."
-                      className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-colors"
+                      className="w-full px-3 py-1.5 rounded-lg bg-[#020408] border border-emerald-500/30 text-emerald-100 text-xs focus:outline-none focus:border-emerald-500 transition-colors font-mono"
                     />
                   </div>
                 )}
 
                 {(category === 'moments' || category === 'secrets') && (
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-slate-300">
-                      {category === 'moments' ? 'Date String' : 'Secret Discovery Hint'}
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-slate-400 uppercase">
+                      {category === 'moments' ? 'DATE_STRING' : 'SECRET_HINT'}
                     </label>
                     <input
                       type="text"
                       value={extraMeta}
                       onChange={(e) => handleFieldChange(setExtraMeta, e.target.value)}
                       placeholder="Date / Hint..."
-                      className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-colors"
+                      className="w-full px-3 py-1.5 rounded-lg bg-[#020408] border border-emerald-500/30 text-emerald-100 text-xs focus:outline-none focus:border-emerald-500 transition-colors font-mono"
                     />
                   </div>
                 )}
 
                 {/* Status Selector */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-slate-300">Publishing Status</label>
+                <div className="space-y-1">
+                  <label className="text-[10px] text-slate-400 uppercase">DEPLOYMENT_STATUS</label>
                   <select
                     value={status}
                     onChange={(e) =>
                       handleFieldChange(setStatus, e.target.value as 'published' | 'draft')
                     }
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
+                    className="w-full px-3 py-1.5 rounded-lg bg-[#020408] border border-emerald-500/30 text-emerald-100 text-xs focus:outline-none focus:border-emerald-500 transition-colors cursor-pointer font-mono"
                   >
-                    <option value="published">Published (Visible to Users)</option>
-                    <option value="draft">Draft (Hidden in Admin)</option>
+                    <option value="published" className="bg-[#050811] text-emerald-300">PUBLISHED (ACTIVE_PRODUCTION)</option>
+                    <option value="draft" className="bg-[#050811] text-amber-300">DRAFT (STAGED_INTERNAL)</option>
                   </select>
                 </div>
               </div>
             </form>
           ) : (
-            /* Live Public Preview Approximation */
-            <div className="p-5 rounded-2xl bg-amber-50/5 border border-slate-700/60 text-slate-200 space-y-4 font-serif">
-              <div className="flex items-center justify-between border-b border-slate-700/60 pb-3">
+            /* Live Public Preview */
+            <div className="p-4 rounded-lg bg-[#020408] border border-emerald-500/30 text-slate-200 space-y-3 font-mono">
+              <div className="flex items-center justify-between border-b border-emerald-950 pb-2">
                 <div className="space-y-0.5">
-                  <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                    <Sparkles className="w-3 h-3 text-amber-400" />
-                    <span>Public Preview View</span>
-                  </div>
-                  <h3 className="text-base font-bold text-slate-100 tracking-tight pt-1">
-                    {title || 'Untitled'}
+                  <span className="text-[10px] text-cyan-400 font-bold">
+                    // PAYLOAD_STAGING_PREVIEW //
+                  </span>
+                  <h3 className="text-sm font-bold text-emerald-200 pt-0.5">
+                    {title || 'UNTITLED_PAYLOAD'}
                   </h3>
                 </div>
                 {metaCategory && (
-                  <span className="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-sans border border-slate-700">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-[#050811] text-cyan-300 border border-emerald-950">
                     {metaCategory}
                   </span>
                 )}
               </div>
 
               {previewText && (
-                <p className="text-xs text-amber-200/80 italic bg-amber-500/5 p-3 rounded-xl border border-amber-500/10">
+                <p className="text-xs text-amber-300/90 italic bg-[#050811] p-2.5 rounded border border-emerald-950">
                   "{previewText}"
                 </p>
               )}
 
-              <div className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
-                {content || 'No content written yet.'}
+              <div className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap select-text">
+                {content || 'NO_CONTENT_BODY'}
               </div>
 
               {extraMeta && (
-                <div className="pt-3 border-t border-slate-800 text-[11px] font-sans text-slate-400 flex items-center gap-1.5">
-                  <Lock className="w-3 h-3 text-indigo-400" />
-                  <span>Metadata: {extraMeta}</span>
+                <div className="pt-2 border-t border-emerald-950 text-[10px] text-slate-400 flex items-center gap-1.5">
+                  <Lock className="w-3 h-3 text-cyan-400" />
+                  <span>METADATA: {extraMeta}</span>
                 </div>
               )}
             </div>
@@ -410,27 +410,27 @@ export function ContentItemEditorModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-4 bg-slate-900 border-t border-slate-800 flex items-center justify-between">
+        <div className="px-5 py-3 bg-[#020408] border-t border-emerald-950 flex items-center justify-between">
           <button
             type="button"
             onClick={handleAttemptClose}
-            className="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+            className="px-3 py-1.5 rounded-lg text-xs font-mono text-slate-400 hover:text-slate-200 hover:bg-[#050811] transition-colors border border-emerald-950 cursor-pointer"
           >
-            Cancel
+            [DISCARD]
           </button>
 
           <button
             type="submit"
             form="content-edit-form"
             disabled={saving || !isDirty}
-            className={`inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-medium text-white transition-all ${
+            className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-mono transition-all ${
               saving || !isDirty
-                ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
-                : 'bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/30 cursor-pointer'
+                ? 'bg-[#020408] text-slate-600 cursor-not-allowed border border-emerald-950'
+                : 'bg-emerald-950 hover:bg-emerald-900 text-emerald-200 border border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.25)] cursor-pointer'
             }`}
           >
             <Save className="w-3.5 h-3.5" />
-            {saving ? 'Saving...' : isDirty ? 'Save Changes' : 'Saved'}
+            {saving ? '[COMMITTING...]' : isDirty ? '[COMMIT_CHANGES]' : '[COMMITTED]'}
           </button>
         </div>
       </div>
