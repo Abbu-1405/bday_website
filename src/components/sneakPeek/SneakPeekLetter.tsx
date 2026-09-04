@@ -256,13 +256,11 @@ export const SneakPeekLetter: React.FC<SneakPeekLetterProps> = ({
             <span className="text-[12.5px]">With all my love</span>
           </div>
 
-          {/* Clean, Restrained "Enter Starlit Letters" Action Button */}
+          {/* Clean, Restrained "Get Started" Action Button */}
           <div
-            className={`transition-all duration-500 ease-out ${
+            className={`transition-all duration-400 ease-out ${
               showGetStarted
-                ? isClosing
-                  ? 'opacity-0 translate-y-1 pointer-events-none'
-                  : 'opacity-100 translate-y-0'
+                ? 'opacity-100 translate-y-0'
                 : 'opacity-0 translate-y-2 pointer-events-none'
             }`}
           >
@@ -270,11 +268,10 @@ export const SneakPeekLetter: React.FC<SneakPeekLetterProps> = ({
               type="button"
               id="sneak-peek-get-started-btn"
               onClick={onGetStarted}
-              disabled={isClosing}
-              className="group relative inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-2.5 rounded-full bg-[#FAF6EE] hover:bg-[#FFFDF9] text-[#362920] font-serif text-sm tracking-wide border border-[#DFCFC0] shadow-[0_3px_12px_rgba(70,45,30,0.1)] hover:shadow-[0_5px_16px_rgba(70,45,30,0.15)] active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8C6B5E] cursor-pointer select-none disabled:opacity-70 disabled:pointer-events-none"
+              className="group relative inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-2.5 rounded-full bg-[#FAF6EE] hover:bg-[#FFFDF9] text-[#362920] font-serif text-sm tracking-wide border border-[#DFCFC0] shadow-[0_3px_12px_rgba(70,45,30,0.1)] hover:shadow-[0_5px_16px_rgba(70,45,30,0.15)] active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8C6B5E] cursor-pointer select-none"
             >
               <span className="relative z-10 flex items-center gap-1.5 text-[#3A2D24]">
-                <span>Enter Starlit Letters &rarr;</span>
+                <span>Get Started</span>
                 <Sparkles className="w-3.5 h-3.5 text-[#8C6B5E]" />
               </span>
             </button>

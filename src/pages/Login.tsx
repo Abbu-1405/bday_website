@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { Navigate, useLocation, useNavigate, Link } from 'react-router-dom';
-import { Sparkles, Loader2, AlertCircle, ArrowLeft, Lock } from 'lucide-react';
+import { Sparkles, Loader2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../hooks';
 import { ROUTES } from '../constants';
@@ -141,26 +141,17 @@ export default function Login() {
         className="relative z-10 w-full max-w-md mx-auto"
       >
         <div className="bg-[#FAF6EE] border border-[#E3D7C7] rounded-3xl p-6 sm:p-10 shadow-[0_12px_40px_rgba(70,45,30,0.1)] text-center">
-          {/* Subtle parchment postmark seal emblem */}
-          <div className="relative mb-6 inline-flex flex-col items-center justify-center">
-            <div className="relative p-3.5 rounded-full bg-[#F4EDE2] border border-[#DFCFC0] shadow-[0_2px_8px_rgba(70,45,30,0.06)]">
-              <Sparkles className="w-5 h-5 text-[#8C6B5E]" />
-              <div
-                className="absolute -inset-1 rounded-full border border-dashed border-[#D5C2B0]/60 pointer-events-none"
-                aria-hidden="true"
-              />
-            </div>
-            <span className="mt-2.5 text-[10px] uppercase tracking-[0.2em] font-serif text-[#A08878] select-none">
-              Private Sanctuary
-            </span>
+          {/* Subtle emblem */}
+          <div className="mb-6 inline-flex items-center justify-center p-3 rounded-full bg-[#F3ECE0] border border-[#DFCFC0] shadow-sm">
+            <Sparkles className="w-5 h-5 text-[#8C6B5E]" />
           </div>
 
           {/* Title */}
           <h1 className="text-2xl sm:text-3xl font-serif font-normal italic text-[#382B22] tracking-tight mb-2">
             Starlit Letters
           </h1>
-          <p className="text-sm font-serif italic text-[#7D6B5E] mb-7 leading-relaxed max-w-xs mx-auto">
-            A quiet sanctuary reserved for letters, memories, and little constellations. Please sign in to enter.
+          <p className="text-sm font-serif italic text-[#7D6B5E] mb-8 leading-relaxed">
+            Please sign in with Google to enter your private constellation of memories.
           </p>
 
           {/* Error display */}
@@ -214,12 +205,6 @@ export default function Login() {
               </>
             )}
           </button>
-
-          {/* Privacy reassurance badge */}
-          <div className="mt-3.5 flex items-center justify-center gap-1.5 text-[11px] font-serif italic text-[#A08878]">
-            <Lock className="w-3 h-3 text-[#B09888]" />
-            <span>Private &amp; protected access</span>
-          </div>
 
           {/* Deep link note if arriving from a protected page */}
           {!isIntentionalLogout && fromLocation && fromLocation.pathname !== ROUTES.HOME && (

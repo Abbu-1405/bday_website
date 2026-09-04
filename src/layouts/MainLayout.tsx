@@ -19,6 +19,7 @@ import {
   CatAudioAutoplayPrompt,
   CatEasterEggToast,
   ScrollProgress,
+  SneakPeekEntrance,
 } from '../components';
 import { MagicalWandCursor } from '../components/whimsical/MagicalWandCursor';
 import { evaluateBadges } from '../services/badgeService';
@@ -46,6 +47,7 @@ export const MainLayout: React.FC = () => {
   const isLetterArchive = theme === 'letter-archive';
   const isCatMeme = theme === 'cat-meme';
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const [showSneakPeekEntrance, setShowSneakPeekEntrance] = useState<boolean>(false);
   const [celebrationBadge, setCelebrationBadge] = useState<BadgeItem | null>(null);
   const [showNotificationPrompt, setShowNotificationPrompt] = useState<boolean>(false);
   const [showCatTransition, setShowCatTransition] = useState<boolean>(false);
@@ -342,7 +344,7 @@ export const MainLayout: React.FC = () => {
       <CatInteractionEngine enabled={isCatMeme && !isAdminRoute} />
 
       {/* Top-Right Floating Controls Bar (Public pages only - Admin has dedicated header layout) */}
-      {!isAdminRoute && (
+      {!isAdminRoute && !showSneakPeekEntrance && (
         <div className="fixed top-4 right-4 z-40 flex items-center gap-2">
           <FloatingAuthButton className="static" />
           <AudioButton className="static" />
@@ -350,11 +352,21 @@ export const MainLayout: React.FC = () => {
         </div>
       )}
 
-      <main className="relative z-10 opacity-100">
+      <main
+        className={`relative z-10 ${
+          showSneakPeekEntrance ? 'pointer-events-none opacity-0' : 'opacity-100'
+        }`}
+        aria-hidden={showSneakPeekEntrance}
+      >
         <Outlet />
       </main>
-      {!isAdminRoute && <FloatingNavigation />}
-      {!isAdminRoute && <VintageInkPot />}
+      {!isAdminRoute && !showSneakPeekEntrance && <FloatingNavigation />}
+      {!isAdminRoute && !showSneakPeekEntrance && <VintageInkPot />}
+
+      {/* Sneak a Peek Dedicated Entrance Overlay (Every website visit) */}
+      {showSneakPeekEntrance && (
+        <SneakPeekEntrance onComplete={() => setShowSneakPeekEntrance(false)} />
+      )}
 
       {/* One Brain Cell Theme Placeholder Decorative Cat Element (Unobtrusive & Non-blocking) */}
       {isCatMeme && !isAdminRoute && (

@@ -51,7 +51,7 @@ export const SneakPeekLanding: React.FC<SneakPeekLandingProps> = ({
           onClick={onSkip}
           className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-xs font-serif italic tracking-wider text-[#7D6B5E] hover:text-[#382B22] transition-colors duration-200 px-4 rounded focus:outline-none focus-visible:ring-1 focus-visible:ring-[#7D6B5E] hover:underline underline-offset-4 cursor-pointer select-none"
         >
-          Skip to Sign In &rarr;
+          Skip &rarr;
         </button>
       </div>
     </div>
