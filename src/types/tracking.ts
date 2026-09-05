@@ -159,6 +159,18 @@ export interface TrackedUserOverview {
   browser?: string;
   os?: string;
   activeSessionId?: string;
+  activitySummary?: {
+    notesOpened?: number;
+    wishesCollected?: number;
+    momentsOpened?: number;
+    openWhenOpened?: number;
+    secretsDiscovered?: number;
+    feelingsSubmitted?: number;
+    lettersSubmitted?: number;
+    badgesUnlocked?: number;
+    mediaViewed?: number;
+    [key: string]: any;
+  };
 }
 
 export interface TrackingSummaryMetrics {

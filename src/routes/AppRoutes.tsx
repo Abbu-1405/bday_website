@@ -65,6 +65,7 @@ export const AppRoutes: React.FC = () => {
         }
       >
         <Route path={ROUTES.ADMIN} element={<Admin />} />
+        <Route path="/admin/users/:uid" element={<Admin />} />
       </Route>
 
       {/* Catch-all fallback */}

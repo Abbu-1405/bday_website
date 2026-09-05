@@ -1,6 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import {
   Activity,
+  BookOpen,
+  Sparkles,
+  Heart,
+  Mail,
+  Award,
+  KeyRound,
   Filter,
   Eye,
   Calendar,
@@ -8,11 +14,7 @@ import {
   Hash,
   X,
   Search,
-  Radio,
-  Clock,
-  Terminal,
-  Layers,
-  Users,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { AdminActivityItem, AdminUserItem } from '../../services/adminService';
 
@@ -33,7 +35,6 @@ export const AdminActivityFeed: React.FC<AdminActivityFeedProps> = ({
   onFilterChange,
   onSelectActivity,
 }) => {
-  const [searchKeyword, setSearchKeyword] = useState('');
   const [uidFilter, setUidFilter] = useState('');
   const [displayNameFilter, setDisplayNameFilter] = useState('');
 
@@ -50,48 +51,82 @@ export const AdminActivityFeed: React.FC<AdminActivityFeedProps> = ({
     return map;
   }, [users]);
 
-  // Telemetry metrics
-  const uniqueUsersCount = useMemo(() => {
-    const set = new Set<string>();
-    activities.forEach((a) => {
-      if (a.userId) set.add(a.userId);
-    });
-    return set.size;
-  }, [activities]);
-
-  const uniqueEventTypesCount = useMemo(() => {
-    const set = new Set<string>();
-    activities.forEach((a) => {
-      if (a.type) set.add(a.type);
-    });
-    return set.size;
-  }, [activities]);
-
-  const liveUsersCount = useMemo(() => {
-    const fifteenMinAgo = Date.now() - 15 * 60 * 1000;
-    return users.filter((u) => {
-      if (!u.lastSeenAt) return false;
-      const seenTime = new Date(u.lastSeenAt).getTime();
-      return !isNaN(seenTime) && seenTime >= fifteenMinAgo;
-    }).length;
-  }, [users]);
-
   const filterOptions = [
-    { id: 'all', label: 'ALL' },
-    { id: 'notes', label: 'NOTES' },
-    { id: 'wishes', label: 'WISHES' },
-    { id: 'moments', label: 'MOMENTS' },
-    { id: 'open_when', label: 'OPEN_WHEN' },
-    { id: 'feelings', label: 'FEELINGS' },
-    { id: 'letters', label: 'LETTERS' },
-    { id: 'secrets', label: 'SECRETS' },
-    { id: 'achievements', label: 'ACHIEVEMENTS' },
-    { id: 'streaks', label: 'STREAKS' },
+    { id: 'all', label: 'All Events' },
+    { id: 'notes', label: 'Notes' },
+    { id: 'wishes', label: 'Wishes' },
+    { id: 'moments', label: 'Moments' },
+    { id: 'open_when', label: 'Open When' },
+    { id: 'feelings', label: 'Feelings' },
+    { id: 'letters', label: 'Letters' },
+    { id: 'secrets', label: 'Secrets' },
+    { id: 'achievements', label: 'Achievements' },
+    { id: 'streaks', label: 'Streaks' },
   ];
+
+  const getEventBadge = (type: string) => {
+    switch (type) {
+      case 'note_opened':
+        return {
+          label: 'Note Opened',
+          icon: BookOpen,
+          color: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+        };
+      case 'wish_collected':
+        return {
+          label: 'Wish Collected',
+          icon: Sparkles,
+          color: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
+        };
+      case 'moment_opened':
+        return {
+          label: 'Moment Opened',
+          icon: Activity,
+          color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
+        };
+      case 'open_when_opened':
+        return {
+          label: 'Open When Opened',
+          icon: Mail,
+          color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
+        };
+      case 'feeling_submitted':
+        return {
+          label: 'Feeling Submitted',
+          icon: Heart,
+          color: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+        };
+      case 'letter_submitted':
+        return {
+          label: 'Letter Submitted',
+          icon: Mail,
+          color: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+        };
+      case 'secret_discovered':
+        return {
+          label: 'Secret Discovered',
+          icon: KeyRound,
+          color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+        };
+      case 'badge_unlocked':
+      case 'milestone_unlocked':
+        return {
+          label: 'Badge Unlocked',
+          icon: Award,
+          color: 'text-teal-400 bg-teal-500/10 border-teal-500/20',
+        };
+      default:
+        return {
+          label: type,
+          icon: Activity,
+          color: 'text-slate-400 bg-slate-500/10 border-slate-500/20',
+        };
+    }
+  };
 
   // Resolve user display name authoritative helper
   const resolveUserDisplayName = (userId: string, fallbackFromItem?: string): string => {
-    if (!userId) return 'anonymous';
+    if (!userId) return 'Unknown User';
     const profile = usersMap.get(userId);
     if (profile && profile.displayName && profile.displayName.trim() !== '') {
       return profile.displayName;
@@ -99,28 +134,16 @@ export const AdminActivityFeed: React.FC<AdminActivityFeedProps> = ({
     if (fallbackFromItem && fallbackFromItem.trim() !== '') {
       return fallbackFromItem;
     }
-    if (userId === 'admin') return 'root_admin';
-    return 'anonymous';
+    if (userId === 'admin') return 'Admin';
+    return 'Unknown User';
   };
 
-  // Filtered activities computation (Category + UID + Display Name + Keyword)
+  // Filtered activities computation (Category + UID + Display Name)
   const filteredActivities = useMemo(() => {
     return activities.filter((act) => {
       const resolvedName = resolveUserDisplayName(act.userId, act.userDisplayName);
 
-      // 1. Keyword search (details, itemId, section, type)
-      if (searchKeyword.trim()) {
-        const q = searchKeyword.trim().toLowerCase();
-        const details = (act.metadata?.details || act.metadata?.title || act.metadata?.action || '').toLowerCase();
-        const itemId = (act.itemId || '').toLowerCase();
-        const sec = (act.section || '').toLowerCase();
-        const typ = (act.type || '').toLowerCase();
-        if (!details.includes(q) && !itemId.includes(q) && !sec.includes(q) && !typ.includes(q)) {
-          return false;
-        }
-      }
-
-      // 2. UID Filter
+      // 1. UID Filter
       if (uidFilter.trim()) {
         const qUid = uidFilter.trim().toLowerCase();
         const actUid = (act.userId || '').toLowerCase();
@@ -129,7 +152,7 @@ export const AdminActivityFeed: React.FC<AdminActivityFeedProps> = ({
         }
       }
 
-      // 3. Display Name Filter
+      // 2. Display Name Filter
       if (displayNameFilter.trim()) {
         const qName = displayNameFilter.trim().toLowerCase();
         const dName = resolvedName.toLowerCase();
@@ -140,162 +163,66 @@ export const AdminActivityFeed: React.FC<AdminActivityFeedProps> = ({
 
       return true;
     });
-  }, [activities, searchKeyword, uidFilter, displayNameFilter, usersMap]);
+  }, [activities, uidFilter, displayNameFilter, usersMap]);
 
-  const isFiltered =
-    searchKeyword.trim() !== '' ||
-    uidFilter.trim() !== '' ||
-    displayNameFilter.trim() !== '' ||
-    selectedFilter !== 'all';
+  const isUserFiltered = uidFilter.trim() !== '' || displayNameFilter.trim() !== '';
 
   const handleClearAllFilters = () => {
-    setSearchKeyword('');
     setUidFilter('');
     setDisplayNameFilter('');
     onFilterChange('all');
   };
 
   return (
-    <div className="space-y-4 font-mono select-none">
-      {/* Header with Telemetry Indicators */}
-      <div className="bg-[#050811]/90 border border-emerald-500/20 rounded-xl p-4 sm:p-5 shadow-[0_0_20px_rgba(16,185,129,0.03)] space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-[#020408] border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
-              <Terminal className="w-4 h-4 text-cyan-400" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs text-emerald-400 font-bold tracking-wider">
-                  [ ACTIVITY_STREAM // ALL_EVENTS ]
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-500/40">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  STREAM::LIVE
-                </span>
-                <span className="text-[10px] text-slate-400 px-1.5 py-0.5 rounded bg-[#020408] border border-emerald-950">
-                  [TAILING LOG]
-                </span>
-                <span className="text-[10px] text-cyan-300 px-1.5 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/30">
-                  [EVENTS: {activities.length}]
-                </span>
-              </div>
-              <p className="text-[11px] text-emerald-600/90 font-mono mt-0.5">
-                // Real-time event telemetry from authenticated users.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Telemetry Metric Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-emerald-950/60">
-          <div className="bg-[#020408] rounded-lg p-3 border border-emerald-950 flex items-center justify-between">
-            <div>
-              <div className="text-[10px] font-semibold text-emerald-500 uppercase tracking-wider">
-                TOTAL EVENTS
-              </div>
-              <div className="text-lg font-bold text-emerald-400 mt-0.5">{activities.length}</div>
-            </div>
-            <div className="w-7 h-7 rounded bg-emerald-950/80 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-              <Activity className="w-3.5 h-3.5" />
-            </div>
-          </div>
-
-          <div className="bg-[#020408] rounded-lg p-3 border border-emerald-950 flex items-center justify-between">
-            <div>
-              <div className="text-[10px] font-semibold text-cyan-500 uppercase tracking-wider">
-                UNIQUE USERS
-              </div>
-              <div className="text-lg font-bold text-cyan-400 mt-0.5">{uniqueUsersCount}</div>
-            </div>
-            <div className="w-7 h-7 rounded bg-cyan-950/60 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-              <Users className="w-3.5 h-3.5" />
-            </div>
-          </div>
-
-          <div className="bg-[#020408] rounded-lg p-3 border border-emerald-950 flex items-center justify-between">
-            <div>
-              <div className="text-[10px] font-semibold text-teal-500 uppercase tracking-wider">
-                EVENT TYPES
-              </div>
-              <div className="text-lg font-bold text-teal-300 mt-0.5">{uniqueEventTypesCount}</div>
-            </div>
-            <div className="w-7 h-7 rounded bg-teal-950/60 border border-teal-500/30 flex items-center justify-center text-teal-400">
-              <Layers className="w-3.5 h-3.5" />
-            </div>
-          </div>
-
-          <div className="bg-[#020408] rounded-lg p-3 border border-emerald-950 flex items-center justify-between">
-            <div>
-              <div className="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">
-                LIVE ONLINE
-              </div>
-              <div className="text-lg font-bold text-emerald-300 mt-0.5">{liveUsersCount}</div>
-            </div>
-            <div className="w-7 h-7 rounded bg-emerald-950 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filter & Search Bar */}
-      <div className="bg-[#050811]/90 border border-emerald-500/20 rounded-xl p-3.5 space-y-3 shadow-xs">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-          {/* Keyword Search */}
+    <div className="space-y-4">
+      {/* Search & User Filter Bar */}
+      <div className="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 space-y-3.5 shadow-sm">
+        {/* User Search Inputs Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* UID Filter Input */}
           <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600" />
+            <label htmlFor="activity-uid-input" className="sr-only">
+              Filter Activity by User UID
+            </label>
+            <Hash className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-indigo-400" />
             <input
+              id="activity-uid-input"
               type="text"
-              placeholder="Search keyword, item ID, action..."
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-              className="w-full pl-9 pr-8 py-1.5 rounded-lg bg-[#020408] border border-emerald-500/30 text-xs text-emerald-200 placeholder-emerald-800 focus:outline-none focus:border-emerald-400 font-mono transition-colors"
-            />
-            {searchKeyword && (
-              <button
-                onClick={() => setSearchKeyword('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-300"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-
-          {/* UID Filter */}
-          <div className="relative">
-            <Hash className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-cyan-500" />
-            <input
-              type="text"
-              placeholder="Filter by user UID..."
+              placeholder="Filter by User UID (e.g. abc123)..."
               value={uidFilter}
               onChange={(e) => setUidFilter(e.target.value)}
-              className="w-full pl-9 pr-8 py-1.5 rounded-lg bg-[#020408] border border-emerald-500/30 text-xs text-cyan-200 placeholder-emerald-800 focus:outline-none focus:border-cyan-400 font-mono transition-colors"
+              className="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-950/60 border border-slate-800 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors font-mono"
             />
             {uidFilter && (
               <button
                 onClick={() => setUidFilter('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-300"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                aria-label="Clear UID filter"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
 
-          {/* Display Name Filter */}
+          {/* Display Name Filter Input */}
           <div className="relative">
-            <User className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-teal-400" />
+            <label htmlFor="activity-displayname-input" className="sr-only">
+              Filter Activity by Display Name
+            </label>
+            <User className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-indigo-400" />
             <input
+              id="activity-displayname-input"
               type="text"
-              placeholder="Filter by display name..."
+              placeholder="Filter by Display Name (e.g. Thanmai)..."
               value={displayNameFilter}
               onChange={(e) => setDisplayNameFilter(e.target.value)}
-              className="w-full pl-9 pr-8 py-1.5 rounded-lg bg-[#020408] border border-emerald-500/30 text-xs text-teal-200 placeholder-emerald-800 focus:outline-none focus:border-teal-400 font-mono transition-colors"
+              className="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-950/60 border border-slate-800 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
             />
             {displayNameFilter && (
               <button
                 onClick={() => setDisplayNameFilter('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-300"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                aria-label="Clear Display Name filter"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -303,12 +230,12 @@ export const AdminActivityFeed: React.FC<AdminActivityFeedProps> = ({
           </div>
         </div>
 
-        {/* Categories row */}
-        <div className="pt-2 border-t border-emerald-950/60 flex flex-wrap items-center justify-between gap-2">
+        {/* Category Filters Row */}
+        <div className="pt-2 border-t border-slate-800/60 flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] text-emerald-600 mr-1 flex items-center gap-1 font-semibold">
-              <Filter className="w-3 h-3 text-emerald-500" />
-              TYPE:
+            <span className="text-[11px] font-medium text-slate-400 mr-1 flex items-center gap-1">
+              <Filter className="w-3.5 h-3.5 text-indigo-400" />
+              Category:
             </span>
             {filterOptions.map((opt) => {
               const active = selectedFilter === opt.id;
@@ -316,154 +243,132 @@ export const AdminActivityFeed: React.FC<AdminActivityFeedProps> = ({
                 <button
                   key={opt.id}
                   onClick={() => onFilterChange(opt.id)}
-                  className={`px-2 py-0.5 rounded text-[10px] font-mono font-medium transition-all ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                     active
-                      ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/60 shadow-[0_0_8px_rgba(16,185,129,0.2)]'
-                      : 'bg-[#020408] text-slate-400 hover:text-emerald-300 hover:bg-emerald-950/30 border border-emerald-950'
+                      ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/30'
+                      : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-slate-100 border border-slate-700/60'
                   }`}
                 >
-                  [{opt.label}]
+                  {opt.label}
                 </button>
               );
             })}
           </div>
 
-          {isFiltered && (
+          {(isUserFiltered || selectedFilter !== 'all') && (
             <button
               onClick={handleClearAllFilters}
-              className="px-2 py-0.5 rounded bg-[#020408] hover:bg-emerald-950/40 text-emerald-400 text-[10px] font-mono border border-emerald-500/30 flex items-center gap-1 transition-colors"
+              className="self-start md:self-auto px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 flex items-center gap-1 transition-colors shrink-0"
+              title="Clear all filters"
+              aria-label="Clear all activity filters"
             >
-              <X className="w-3 h-3 text-slate-400" />
-              <span>[RESET_FILTERS]</span>
+              <X className="w-3.5 h-3.5 text-slate-400" />
+              <span>Reset Filters</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* Terminal Log Table */}
-      <div className="bg-[#050811]/90 border border-emerald-500/20 rounded-xl overflow-hidden shadow-xs">
-        <div className="px-4 py-2.5 bg-[#020408] border-b border-emerald-950/80 flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2">
-            <Terminal className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="font-semibold text-emerald-300 tracking-wider text-[11px]">
-              /telemetry/events.log
-            </span>
-          </div>
-          <span className="text-[10px] text-slate-400 font-mono">
-            {filteredActivities.length} of {activities.length} entries
+      {/* Activity List Container */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+        <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
+            <Activity className="w-4 h-4 text-indigo-400" />
+            Recent Activity Log
+          </h3>
+          <span className="text-xs text-slate-400 font-mono">
+            {filteredActivities.length} of {activities.length} event{activities.length === 1 ? '' : 's'}
           </span>
         </div>
 
         {loading ? (
-          <div className="p-12 text-center text-emerald-400 space-y-2">
-            <div className="w-6 h-6 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-xs">&gt; BUFFERING_TELEMETRY_LOGS...</p>
+          <div className="p-8 text-center text-slate-400 space-y-2">
+            <div className="w-6 h-6 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto" />
+            <p className="text-xs">Loading activity events...</p>
           </div>
         ) : filteredActivities.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 text-xs space-y-2 font-mono">
-            <p className="text-emerald-500/80">&gt; QUERY COMPLETE</p>
-            <p className="text-slate-400">0 EVENTS MATCHING FILTER MATRIX</p>
-            <p className="text-[11px] text-slate-400">&gt; AWAITING INCOMING TELEMETRY STREAM...</p>
-            {isFiltered && (
+          <div className="p-12 text-center text-slate-500 text-xs space-y-2">
+            <p>No activity events found matching the filter criteria.</p>
+            {(isUserFiltered || selectedFilter !== 'all') && (
               <button
                 onClick={handleClearAllFilters}
-                className="px-3 py-1 rounded bg-[#020408] hover:bg-emerald-950/40 text-emerald-300 text-xs border border-emerald-500/30 transition-colors mt-2"
+                className="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition-colors mt-2"
               >
-                [CLEAR_ALL_FILTERS]
+                Clear all filters
               </button>
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs divide-y divide-emerald-950/60 font-mono">
-              <thead className="bg-[#020408]/80 text-[10px] text-emerald-500/80 uppercase tracking-wider font-semibold border-b border-emerald-950/80">
-                <tr>
-                  <th className="py-2.5 px-3">TIME</th>
-                  <th className="py-2.5 px-3">UID / USER</th>
-                  <th className="py-2.5 px-3">EVENT</th>
-                  <th className="py-2.5 px-3">MODULE</th>
-                  <th className="py-2.5 px-3">DETAILS</th>
-                  <th className="py-2.5 px-3">STATUS</th>
-                  <th className="py-2.5 px-3 text-right">ACTION</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-emerald-950/40">
-                {filteredActivities.map((act) => {
-                  const resolvedName = resolveUserDisplayName(act.userId, act.userDisplayName);
-                  const isRoot = act.userId === 'admin' || usersMap.get(act.userId)?.role === 'admin';
-                  const cleanTime = act.createdAt || 'N/A';
+          <div className="divide-y divide-slate-800/80">
+            {filteredActivities.map((act) => {
+              const badge = getEventBadge(act.type);
+              const IconComponent = badge.icon;
+              const resolvedDisplayName = resolveUserDisplayName(act.userId, act.userDisplayName);
+              const userProfile = usersMap.get(act.userId);
 
-                  return (
-                    <tr
-                      key={act.id}
-                      className="hover:bg-emerald-950/20 transition-colors group text-[11px]"
+              return (
+                <div
+                  key={act.id}
+                  className="p-4 hover:bg-slate-800/40 transition-colors flex flex-col sm:flex-row sm:items-start justify-between gap-3 text-xs"
+                >
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div
+                      className={`w-8 h-8 rounded-xl flex items-center justify-center border shrink-0 mt-0.5 ${badge.color}`}
                     >
-                      {/* TIME */}
-                      <td className="py-2 px-3 text-slate-400 whitespace-nowrap">
+                      <IconComponent className="w-4 h-4" />
+                    </div>
+                    <div className="space-y-1.5 min-w-0">
+                      {/* 1. User Identity Header: DISPLAY NAME on top, UID directly underneath */}
+                      <div className="flex flex-col pb-1 mb-0.5 border-b border-slate-800/50">
                         <div className="flex items-center gap-1.5">
-                          <Clock className="w-3 h-3 text-emerald-600" />
-                          <span>{cleanTime}</span>
-                        </div>
-                      </td>
-
-                      {/* UID / USER */}
-                      <td className="py-2 px-3 whitespace-nowrap">
-                        <div className="flex flex-col">
-                          <span className="text-emerald-200 font-semibold flex items-center gap-1">
-                            {resolvedName}
-                            {isRoot && (
-                              <span className="text-[8px] px-1 rounded bg-amber-950 text-amber-300 border border-amber-500/40">
-                                ROOT
-                              </span>
-                            )}
+                          <User className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                          <span className="font-semibold text-slate-100 text-xs">
+                            {resolvedDisplayName}
                           </span>
-                          <span className="text-[9px] text-slate-400 select-all font-mono">
-                            {act.userId ? `${act.userId.substring(0, 10)}...` : 'anonymous'}
-                          </span>
+                          {userProfile?.role === 'admin' && (
+                            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                              Admin
+                            </span>
+                          )}
                         </div>
-                      </td>
-
-                      {/* EVENT */}
-                      <td className="py-2 px-3 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#020408] border border-emerald-500/30 text-emerald-300 text-[10px]">
-                          {act.type}
+                        <span className="font-mono text-[10px] text-slate-400 pl-5">
+                          UID: <span className="text-slate-300 select-all">{act.userId || 'unknown'}</span>
                         </span>
-                      </td>
+                      </div>
 
-                      {/* MODULE / SECTION */}
-                      <td className="py-2 px-3 whitespace-nowrap">
-                        <span className="text-cyan-300 text-[10px] px-1.5 py-0.5 rounded bg-cyan-950/40 border border-cyan-500/20 uppercase tracking-wider">
-                          {act.section || 'global'}
+                      {/* 2. Activity Badge & Section */}
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-slate-200">{badge.label}</span>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-slate-400 uppercase tracking-wider">
+                          {act.section}
                         </span>
-                      </td>
+                      </div>
 
-                      {/* DETAILS */}
-                      <td className="py-2 px-3 text-slate-300 max-w-[240px] truncate">
-                        {act.metadata?.details || act.metadata?.title || (act.itemId ? `item #${act.itemId}` : 'interaction logged')}
-                      </td>
-
-                      {/* STATUS */}
-                      <td className="py-2 px-3 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1 text-[9px] text-emerald-400">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                          OK::LOGGED
+                      {/* 3. Section / Item ID & Timestamp */}
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-slate-400 text-[11px]">
+                        {act.itemId && (
+                          <span className="flex items-center gap-1 font-mono">
+                            ID: <strong className="text-slate-300 font-normal">{act.itemId}</strong>
+                          </span>
+                        )}
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3 text-slate-500" />
+                          {act.createdAt}
                         </span>
-                      </td>
+                      </div>
+                    </div>
+                  </div>
 
-                      {/* ACTION */}
-                      <td className="py-2 px-3 text-right whitespace-nowrap">
-                        <button
-                          onClick={() => onSelectActivity(act)}
-                          className="px-2 py-0.5 rounded bg-[#020408] hover:bg-emerald-950/60 text-emerald-400 hover:text-emerald-200 text-[10px] font-mono border border-emerald-500/30 transition-colors"
-                        >
-                          &gt; INSPECT
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  <button
+                    onClick={() => onSelectActivity(act)}
+                    className="self-start sm:self-center shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition-colors"
+                  >
+                    <Eye className="w-3.5 h-3.5 text-indigo-400" />
+                    Details
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

@@ -301,6 +301,7 @@ export async function fetchTrackedUsersOverview(): Promise<TrackedUserOverview[]
         browser: deviceObj.browser,
         os: deviceObj.os,
         activeSessionId: latestSession?.sessionId,
+        activitySummary: userData.activitySummary || {},
       });
     });
 
@@ -930,6 +931,7 @@ export async function fetchTrackedUserDetail(userId: string): Promise<TrackedUse
       browser: latestDevice.browser,
       os: latestDevice.os,
       activeSessionId: latestSessionObj?.sessionId,
+      activitySummary: userData?.activitySummary || {},
     };
 
     return {

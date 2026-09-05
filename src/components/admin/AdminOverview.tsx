@@ -1,16 +1,19 @@
 import React from 'react';
-import { RefreshCw, Activity, Terminal, Shield, Sparkles } from 'lucide-react';
 import {
-  AdminOverviewStats,
-  AdminActivityItem,
-  AdminUserItem,
-} from '../../services/adminService';
-import { TerminalMetricsGrid } from './overview/TerminalMetricsGrid';
-import { TerminalAnalyticsChart } from './overview/TerminalAnalyticsChart';
-import { TerminalLiveStream } from './overview/TerminalLiveStream';
-import { TerminalSecurityPanel } from './overview/TerminalSecurityPanel';
+  Users,
+  Activity,
+  BookOpen,
+  Sparkles,
+  Heart,
+  Mail,
+  Award,
+  KeyRound,
+  RefreshCw,
+  Film,
+} from 'lucide-react';
+import { AdminOverviewStats } from '../../services/adminService';
 
-export interface AdminOverviewProps {
+interface AdminOverviewProps {
   stats: AdminOverviewStats;
   loading: boolean;
   onRefresh: () => void;
@@ -19,14 +22,6 @@ export interface AdminOverviewProps {
   onNavigateToFeelings?: () => void;
   onNavigateToLetters?: () => void;
   onNavigateToBts?: () => void;
-  onNavigateToNotifications?: () => void;
-  onNavigateToContent?: () => void;
-  onNavigateToSettings?: () => void;
-  activities?: AdminActivityItem[];
-  users?: AdminUserItem[];
-  adminEmail?: string;
-  adminUid?: string;
-  adminName?: string;
 }
 
 export const AdminOverview: React.FC<AdminOverviewProps> = ({
@@ -38,143 +33,132 @@ export const AdminOverview: React.FC<AdminOverviewProps> = ({
   onNavigateToFeelings,
   onNavigateToLetters,
   onNavigateToBts,
-  onNavigateToNotifications,
-  onNavigateToContent,
-  onNavigateToSettings,
-  activities = [],
-  users = [],
-  adminEmail,
-  adminUid,
-  adminName = 'ADMINISTRATOR',
 }) => {
+  const statCards = [
+    {
+      label: 'Authenticated Users',
+      value: stats.totalUsers,
+      icon: Users,
+      color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
+      onClick: onNavigateToUsers,
+    },
+    {
+      label: 'Total Activity Events',
+      value: stats.totalActivities,
+      icon: Activity,
+      color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
+      onClick: onNavigateToActivity,
+    },
+    {
+      label: 'BTS Activity Hub',
+      value: 'Live',
+      icon: Film,
+      color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+      onClick: onNavigateToBts,
+    },
+    {
+      label: 'Notes Opened',
+      value: stats.notesOpened,
+      icon: BookOpen,
+      color: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+      onClick: undefined,
+    },
+    {
+      label: 'Wishes Collected',
+      value: stats.wishesCollected,
+      icon: Sparkles,
+      color: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
+      onClick: undefined,
+    },
+    {
+      label: 'Secrets Discovered',
+      value: stats.secretsDiscovered,
+      icon: KeyRound,
+      color: 'text-teal-400 bg-teal-500/10 border-teal-500/20',
+      onClick: undefined,
+    },
+    {
+      label: 'Feelings Submitted',
+      value: stats.feelingsSubmitted,
+      icon: Heart,
+      color: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+      onClick: onNavigateToFeelings,
+    },
+    {
+      label: 'Letters Submitted',
+      value: stats.lettersSubmitted,
+      icon: Mail,
+      color: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+      onClick: onNavigateToLetters,
+    },
+    {
+      label: 'Badges Unlocked',
+      value: stats.badgesUnlocked,
+      icon: Award,
+      color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
+      onClick: undefined,
+    },
+  ];
+
   return (
-    <div className="space-y-5 font-mono">
-      {/* ──────────────────────────────────────────────────
-          1. SYSTEM OVERVIEW HEADER (/home)
-          ────────────────────────────────────────────────── */}
-      <div className="bg-[#050811]/95 border border-emerald-500/20 rounded-xl p-4 sm:p-5 shadow-[0_0_20px_rgba(16,185,129,0.05)]">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-emerald-400 font-bold tracking-wider">
-                /home [SYS:CORE]
-              </span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/40 text-emerald-400 font-semibold">
-                ROOT_CONSOLE
-              </span>
-            </div>
-
-            <h2 className="text-lg sm:text-xl font-bold text-slate-100 tracking-tight">
-              WELCOME BACK,{' '}
-              <span className="text-emerald-400">
-                {(adminName || 'COMMANDER').toUpperCase()}
-              </span>
-            </h2>
-
-            <p className="text-xs text-emerald-600/90 font-mono">
-              // Constellation monitor active. Telemetry linked to private universe.
-            </p>
-          </div>
-
-          {/* Quick Controls & Status Bar */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#020408] border border-emerald-950 text-[11px] text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#10b981]" />
-              <span>SUBSYSTEMS: 5/5 ONLINE</span>
-            </div>
-
-            <button
-              onClick={onRefresh}
-              disabled={loading}
-              title="Re-query Firestore metrics"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#020408] hover:bg-emerald-950/40 text-emerald-300 text-xs border border-emerald-500/30 transition-all cursor-pointer shadow-xs disabled:opacity-50"
-            >
-              <RefreshCw
-                className={`w-3.5 h-3.5 text-emerald-400 ${loading ? 'animate-spin' : ''}`}
-              />
-              <span>POLL_SYNC</span>
-            </button>
-
-            <button
-              onClick={onNavigateToActivity}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-900 text-emerald-200 text-xs border border-emerald-500/50 transition-all cursor-pointer shadow-[0_0_12px_rgba(16,185,129,0.2)]"
-            >
-              <Activity className="w-3.5 h-3.5 text-cyan-400" />
-              <span>LIVE_ACTIVITY</span>
-            </button>
-          </div>
+    <div className="space-y-6">
+      {/* Overview Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 p-5 rounded-2xl border border-slate-800">
+        <div>
+          <h2 className="text-xl font-semibold text-slate-100 tracking-tight">System Overview</h2>
+          <p className="text-xs text-slate-400 mt-1">
+            Real-time aggregate activity metrics from authenticated user interactions.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onRefresh}
+            disabled={loading}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-400 ${loading ? 'animate-spin' : ''}`} />
+            Refresh Data
+          </button>
+          <button
+            onClick={onNavigateToActivity}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-colors shadow-lg shadow-indigo-600/20"
+          >
+            <Activity className="w-3.5 h-3.5" />
+            View Activity Feed
+          </button>
         </div>
       </div>
 
-      {/* ──────────────────────────────────────────────────
-          2. TERMINAL METRICS MONITORING GRID (9 CARDS)
-          ────────────────────────────────────────────────── */}
-      <TerminalMetricsGrid
-        stats={stats}
-        loading={loading}
-        onNavigateToActivity={onNavigateToActivity}
-        onNavigateToUsers={onNavigateToUsers}
-        onNavigateToFeelings={onNavigateToFeelings}
-        onNavigateToLetters={onNavigateToLetters}
-        onNavigateToBts={onNavigateToBts}
-      />
-
-      {/* ──────────────────────────────────────────────────
-          3. TWO-COLUMN OPERATIONAL CONSOLE
-          Left: Luminous Chart & Live Activity Stream
-          Right: System Status, Security & Quick Actions
-          ────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Left Column (2 spans): Analytics & Live Stream */}
-        <div className="lg:col-span-2 space-y-5">
-          <TerminalAnalyticsChart
-            activities={activities}
-            stats={stats}
-            loading={loading}
-          />
-
-          <TerminalLiveStream
-            activities={activities}
-            loading={loading}
-            onNavigateToActivity={onNavigateToActivity}
-            onRefresh={onRefresh}
-          />
-        </div>
-
-        {/* Right Column (1 span): System & Security Panel + Quick Actions */}
-        <div className="lg:col-span-1">
-          <TerminalSecurityPanel
-            adminEmail={adminEmail}
-            adminUid={adminUid}
-            totalUsersCount={users.length || stats.totalUsers}
-            onNavigateToNotifications={onNavigateToNotifications}
-            onNavigateToUsers={onNavigateToUsers}
-            onNavigateToContent={onNavigateToContent}
-            onNavigateToActivity={onNavigateToActivity}
-            onNavigateToLetters={onNavigateToLetters}
-            onNavigateToFeelings={onNavigateToFeelings}
-            onNavigateToBts={onNavigateToBts}
-            onNavigateToSettings={onNavigateToSettings}
-          />
-        </div>
-      </div>
-
-      {/* ──────────────────────────────────────────────────
-          4. TERMINAL FOOTER
-          ────────────────────────────────────────────────── */}
-      <div className="bg-[#050811]/90 border border-emerald-500/20 rounded-xl p-3.5 text-xs text-slate-400 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-[0_0_15px_rgba(16,185,129,0.03)]">
-        <div className="flex items-center gap-2 text-emerald-600 font-mono text-[11px]">
-          <span>// PRIVATE SYSTEM //</span>
-          <span className="hidden sm:inline">// AUTHORIZED PERSONNEL ONLY //</span>
-          <span>// STARLIT LETTERS //</span>
-        </div>
-
-        <div className="flex items-center gap-1.5 text-emerald-400 font-mono text-[11px] bg-[#020408] px-2.5 py-1 rounded border border-emerald-950">
-          <span className="text-cyan-400">root@starlit-letters</span>
-          <span className="text-slate-500">:</span>
-          <span className="text-emerald-300">~#</span>
-          <span className="w-2 h-3.5 bg-emerald-400 animate-pulse inline-block align-middle ml-0.5" />
-        </div>
+      {/* Metrics Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {statCards.map((card) => {
+          const IconComponent = card.icon;
+          return (
+            <div
+              key={card.label}
+              onClick={card.onClick}
+              className={`bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm transition-colors ${
+                card.onClick ? 'hover:border-slate-700 cursor-pointer hover:bg-slate-800/40' : ''
+              }`}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-medium text-slate-400">{card.label}</span>
+                <div
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center border ${card.color}`}
+                >
+                  <IconComponent className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-slate-100 font-mono tracking-tight">
+                {loading ? (
+                  <span className="text-slate-600 animate-pulse">...</span>
+                ) : (
+                  card.value.toLocaleString()
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
