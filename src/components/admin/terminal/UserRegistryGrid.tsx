@@ -283,10 +283,17 @@ export const UserRegistryGrid: React.FC<UserRegistryGridProps> = ({
             const indexFormatted = String(idx + 1).padStart(2, '0');
             const summary = user.activitySummary || {};
 
-            const notesVal = summary.notesOpened ?? null;
-            const momentsVal = summary.momentsOpened ?? null;
-            const wishesVal = summary.wishesCollected ?? null;
-            const secretsVal = summary.secretsDiscovered ?? null;
+            const hasNotes = typeof summary.notesOpened === 'number';
+            const notesVal = hasNotes ? (summary.notesOpened as number) : null;
+
+            const hasMoments = typeof summary.momentsOpened === 'number';
+            const momentsVal = hasMoments ? (summary.momentsOpened as number) : null;
+
+            const hasWishes = typeof summary.wishesCollected === 'number';
+            const wishesVal = hasWishes ? (summary.wishesCollected as number) : null;
+
+            const hasSecrets = typeof summary.secretsDiscovered === 'number';
+            const secretsVal = hasSecrets ? (summary.secretsDiscovered as number) : null;
 
             return (
               <div
@@ -397,40 +404,40 @@ export const UserRegistryGrid: React.FC<UserRegistryGridProps> = ({
                     <span className="text-zinc-500">NOTES</span>
                     <span
                       className={`font-semibold ${
-                        notesVal !== null && notesVal > 0 ? 'text-emerald-400' : 'text-zinc-500'
+                        notesVal !== null && notesVal > 0 ? 'text-emerald-400' : 'text-zinc-400'
                       }`}
                     >
-                      {notesVal !== null && notesVal > 0 ? notesVal : '[ NO DATA ]'}
+                      {notesVal !== null ? notesVal : '[ NO DATA ]'}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-zinc-500">MOMENTS</span>
                     <span
                       className={`font-semibold ${
-                        momentsVal !== null && momentsVal > 0 ? 'text-cyan-400' : 'text-zinc-500'
+                        momentsVal !== null && momentsVal > 0 ? 'text-cyan-400' : 'text-zinc-400'
                       }`}
                     >
-                      {momentsVal !== null && momentsVal > 0 ? momentsVal : '[ NO DATA ]'}
+                      {momentsVal !== null ? momentsVal : '[ NO DATA ]'}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-zinc-500">WISHES</span>
                     <span
                       className={`font-semibold ${
-                        wishesVal !== null && wishesVal > 0 ? 'text-amber-400' : 'text-zinc-500'
+                        wishesVal !== null && wishesVal > 0 ? 'text-amber-400' : 'text-zinc-400'
                       }`}
                     >
-                      {wishesVal !== null && wishesVal > 0 ? wishesVal : '[ NO DATA ]'}
+                      {wishesVal !== null ? wishesVal : '[ NO DATA ]'}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-zinc-500">SECRETS</span>
                     <span
                       className={`font-semibold ${
-                        secretsVal !== null && secretsVal > 0 ? 'text-purple-400' : 'text-zinc-500'
+                        secretsVal !== null && secretsVal > 0 ? 'text-purple-400' : 'text-zinc-400'
                       }`}
                     >
-                      {secretsVal !== null && secretsVal > 0 ? secretsVal : '[ NO DATA ]'}
+                      {secretsVal !== null ? secretsVal : '[ NO DATA ]'}
                     </span>
                   </div>
                 </div>

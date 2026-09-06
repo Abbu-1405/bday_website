@@ -55,17 +55,25 @@ export const UserInspectionTerminal: React.FC<UserInspectionTerminalProps> = ({
 }) => {
   const [data, setData] = useState<UserForensicInspection | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<InspectionModuleTab>('overview');
   const [copiedUid, setCopiedUid] = useState(false);
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
+    setData(null);
+    setLoadError(null);
+    setExpandedSessionId(null);
     try {
       const result = await fetchUserForensicInspection(userId);
+      if (!result) {
+        setLoadError('NODE NOT FOUND');
+      }
       setData(result);
     } catch (err) {
       console.error('Failed to load user forensic data:', err);
+      setLoadError('CONNECTION ERROR');
     } finally {
       setLoading(false);
     }
@@ -114,10 +122,14 @@ export const UserInspectionTerminal: React.FC<UserInspectionTerminalProps> = ({
     return (
       <div className="p-8 sm:p-12 text-center rounded-xl bg-[#0a0d12] border border-red-500/30 space-y-4 font-mono select-none">
         <div className="text-rose-400 font-bold text-base">
-          [ ERROR: UNABLE TO RESOLVE USER RECORD FOR UID: {userId} ]
+          {loadError === 'CONNECTION ERROR'
+            ? `[ CONNECTION ERROR: UNABLE TO COMMUNICATE WITH DATABASE ]`
+            : `[ NODE NOT FOUND: UID ${userId} ]`}
         </div>
         <p className="text-xs text-zinc-400">
-          The requested user document or session history could not be retrieved from the database.
+          {loadError === 'CONNECTION ERROR'
+            ? '[ DATA UNAVAILABLE ] • Verification check failed to reach database service.'
+            : '[ DATA UNAVAILABLE ] • The requested user document or session history could not be resolved.'}
         </p>
         <button
           onClick={onBack}
@@ -137,7 +149,7 @@ export const UserInspectionTerminal: React.FC<UserInspectionTerminalProps> = ({
     { id: 'overview', label: 'OVERVIEW' },
     { id: 'activity', label: 'ACTIVITY', count: timelineEvents.length },
     { id: 'notes', label: 'NOTES', count: activitySignature.notes },
-    { id: 'wishes', label: 'Wishes', count: activitySignature.wishes },
+    { id: 'wishes', label: 'WISHES', count: activitySignature.wishes },
     { id: 'moments', label: 'MOMENTS', count: activitySignature.moments },
     { id: 'secrets', label: 'SECRETS', count: activitySignature.secrets },
     { id: 'open_when', label: 'OPEN WHEN', count: activitySignature.openWhen },
@@ -512,8 +524,11 @@ export const UserInspectionTerminal: React.FC<UserInspectionTerminalProps> = ({
             </div>
 
             {timelineEvents.length === 0 ? (
-              <div className="p-8 text-center text-zinc-500 text-xs font-mono">
-                [ NO CHRONOLOGICAL EVENTS RECORDED FOR THIS USER IN DATABASE ]
+              <div className="p-8 text-center text-zinc-500 text-xs font-mono space-y-1">
+                <div className="text-zinc-400 font-semibold">[ NO ACTIVITY RECORDED ]</div>
+                <div className="text-[11px] text-zinc-600">
+                  [ NO CHRONOLOGICAL EVENTS RECORDED FOR THIS USER IN DATABASE ]
+                </div>
               </div>
             ) : (
               <div className="space-y-3 font-mono">

@@ -97,18 +97,12 @@ export default function Admin() {
   const handleSelectUser = (uid: string) => {
     setSelectedUserId(uid);
     setActiveTab('users');
-    setSearchParams({ user: uid });
+    navigate(`/admin/users/${uid}`);
   };
 
   const handleClearSelectedUser = () => {
     setSelectedUserId(null);
-    if (params.uid) {
-      navigate(ROUTES.ADMIN);
-    } else {
-      const nextParams = new URLSearchParams(searchParams);
-      nextParams.delete('user');
-      setSearchParams(nextParams);
-    }
+    navigate(ROUTES.ADMIN);
   };
 
   const handleLogout = async () => {
@@ -378,6 +372,7 @@ export default function Admin() {
           {activeTab === 'users' && (
             selectedUserId ? (
               <UserInspectionTerminal
+                key={selectedUserId}
                 userId={selectedUserId}
                 onBack={handleClearSelectedUser}
               />
