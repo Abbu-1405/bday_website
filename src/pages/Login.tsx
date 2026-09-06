@@ -14,6 +14,7 @@ export default function Login() {
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
   const isLoggingInRef = useRef<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [diagnosticInfo, setDiagnosticInfo] = useState<string | null>(null);
 
   // Check if arriving from an explicit logout
   const isIntentionalLogout = useMemo(() => {
@@ -62,7 +63,7 @@ export default function Login() {
       return 'The sign-in popup was blocked by your browser. Please allow popups for Starlit Letters and try again.';
     }
     if (code === 'auth/unauthorized-domain' || rawMsg.includes('unauthorized-domain')) {
-      return 'This domain is not configured for Google sign-in. Please contact support.';
+      return 'This domain is not configured for Google sign-in in Firebase Authentication.';
     }
     if (code === 'auth/account-exists-with-different-credential') {
       return 'An account already exists with this email using a different sign-in method.';
@@ -72,6 +73,12 @@ export default function Login() {
     }
     if (code === 'auth/user-disabled') {
       return 'This account has been disabled. Please contact support.';
+    }
+    if (code === 'auth/internal-error' || rawMsg.includes('internal-error')) {
+      return 'The authentication service encountered an internal error. Please try again shortly.';
+    }
+    if (code === 'auth/web-storage-unsupported' || rawMsg.includes('web-storage')) {
+      return 'Browser storage is disabled or restricted. Please allow cookies/site data and try again.';
     }
     // Clean any technical Firebase wrapper
     const msg = err?.message || '';
@@ -86,11 +93,20 @@ export default function Login() {
     isLoggingInRef.current = true;
     setIsLoggingIn(true);
     setErrorMessage(null);
+    setDiagnosticInfo(null);
 
     try {
       await loginWithGoogle();
       navigate(targetDestination, { replace: true });
     } catch (err: any) {
+      // Detailed console error for diagnosing authentication failures in production & dev
+      console.error('[AUTH DEBUG] Google Sign-In failure:', {
+        code: err?.code || 'unknown',
+        message: err?.message,
+        originalMessage: err?.originalMessage,
+        originalError: err?.originalError,
+      });
+
       // Improved Google popup cancellation handling checking both code and message
       const code = err?.code || '';
       const msg = (err?.message || '').toLowerCase();
@@ -105,6 +121,9 @@ export default function Login() {
 
       if (!isCancelled) {
         setErrorMessage(getFriendlyErrorMessage(err));
+        if (import.meta.env.DEV) {
+          setDiagnosticInfo(`[Diagnostic: ${code || 'generic-exception'} | ${err?.message || 'no-message'}]`);
+        }
       }
     } finally {
       isLoggingInRef.current = false;
@@ -172,6 +191,9 @@ export default function Login() {
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="leading-snug">{errorMessage}</p>
+                {diagnosticInfo && (
+                  <p className="mt-1 text-[10px] font-mono text-rose-700/80 break-all">{diagnosticInfo}</p>
+                )}
               </div>
             </div>
           )}

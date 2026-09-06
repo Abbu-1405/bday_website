@@ -108,6 +108,12 @@ export const loginWithGoogle = async (): Promise<User> => {
       case 'auth/account-exists-with-different-credential':
         friendlyMessage = 'An account already exists with the same email using a different sign-in method.';
         break;
+      case 'auth/internal-error':
+        friendlyMessage = 'Authentication service encountered an internal server error. Please try again shortly.';
+        break;
+      case 'auth/web-storage-unsupported':
+        friendlyMessage = 'Web storage is disabled or unsupported in this browser environment. Please enable cookies and storage.';
+        break;
       default:
         if (error?.message) {
           friendlyMessage = error.message;
@@ -117,6 +123,8 @@ export const loginWithGoogle = async (): Promise<User> => {
 
     const customErr = new Error(friendlyMessage);
     (customErr as any).code = error?.code;
+    (customErr as any).originalMessage = error?.message;
+    (customErr as any).originalError = error;
     throw customErr;
   } finally {
     isPopupActive = false;
