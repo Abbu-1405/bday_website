@@ -25,10 +25,13 @@ const projectId =
   (firebaseAppletConfig as any)?.projectId ||
   'gen-lang-client-0057157522';
 
+const rawAuthDomain = clientEnv.VITE_FIREBASE_AUTH_DOMAIN;
+// The Firebase OAuth handler is hosted exclusively on firebaseapp.com / web.app.
+// Prevent misconfigured Vercel environment variables (e.g. *.vercel.app) from corrupting authDomain.
 const authDomain =
-  clientEnv.VITE_FIREBASE_AUTH_DOMAIN ||
-  (firebaseAppletConfig as any)?.authDomain ||
-  `${projectId}.firebaseapp.com`;
+  rawAuthDomain && !rawAuthDomain.includes('vercel.app')
+    ? rawAuthDomain
+    : (firebaseAppletConfig as any)?.authDomain || `${projectId}.firebaseapp.com`;
 
 const storageBucket =
   clientEnv.VITE_FIREBASE_STORAGE_BUCKET ||
