@@ -2,6 +2,7 @@ import { GoogleAuthProvider, signInWithPopup, signOut, User, browserPopupRedirec
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, isFirebaseConfigured } from '../firebase';
 import { UserProfile } from '../types';
+import { isAuthorizedAdminEmail } from '../constants';
 import { userTrackingService } from './userTrackingService';
 
 let isPopupActive = false;
@@ -33,7 +34,12 @@ export const loginWithGoogle = async (): Promise<User> => {
     // Check claims to set role appropriately during profile sync
     const tokenResult = await user.getIdTokenResult(true).catch(() => null);
     const hasAdminClaim = Boolean(tokenResult?.claims?.admin);
-    const isAdminAccount = hasAdminClaim || user.uid === 'TyVula514C0YhRt1y2XiV4riB83';
+    const isAdminAccount =
+      hasAdminClaim ||
+      isAuthorizedAdminEmail(user.email) ||
+      user.uid === 'TyVula514COYthRt1y2XiV4riB83' ||
+      user.uid === 'TyVula514C0YhRt1y2XiV4riB83' ||
+      user.uid === '42V9so9YzmRNUaorj2Xn67R5NKJ2';
 
     // Async background sync of user profile to Firestore without blocking return
     getDoc(userRef)

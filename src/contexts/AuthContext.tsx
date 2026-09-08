@@ -3,6 +3,7 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from '../firebase';
 import { loginWithGoogle as googleLogin, logoutUser, getUserProfile } from '../services';
 import { AuthContextType, UserProfile } from '../types';
+import { isAuthorizedAdminEmail } from '../constants';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -55,7 +56,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               let profile = await getUserProfile(user.uid);
 
               // If profile does not exist or role needs synchronization
-              if (profile && profile.role !== 'admin' && (hasAdminClaim || user.email === 'mohammedabuzarshaik@gmail.com')) {
+              const isAllowlistedAdmin = isAuthorizedAdminEmail(user.email);
+              const isEligibleAdmin = hasAdminClaim || isAllowlistedAdmin;
+
+              if (profile && profile.role !== 'admin' && isEligibleAdmin) {
                 try {
                   const { doc, setDoc } = await import('firebase/firestore');
                   const { db } = await import('../firebase');
@@ -70,7 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 }
               }
 
-              const computedIsAdmin = hasAdminClaim || profile?.role === 'admin' || (user.email === 'mohammedabuzarshaik@gmail.com' && hasAdminClaim);
+              const computedIsAdmin = hasAdminClaim || profile?.role === 'admin' || isAllowlistedAdmin;
 
               if (process.env.NODE_ENV !== 'production' || import.meta.env.DEV) {
                 console.log('[ADMIN DEBUG]', {
