@@ -4,3 +4,4 @@ export * from './notesUnlock';
 export * from './notesProgressService';
 export * from './secretVaultStorage';
 export * from './wishesStorage';
+export * from './csvExport';

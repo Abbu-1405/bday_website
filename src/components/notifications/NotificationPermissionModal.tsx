@@ -87,7 +87,7 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
               A little magic? ✨
             </h2>
             <p className="text-sm font-serif text-[var(--color-text-secondary)] leading-relaxed px-2">
-              Starlit Letters can send you occasional little messages when something is waiting for you in your universe.
+              Starlit Letters can send you occasional little messages when something is waiting for you in your universe. Muskoni notificaions allow kottu nd chrome nunchi vache notifications silent cheyaaku,allow cheyaka pothe samputaaa😈😈🔪.
             </p>
           </div>
         </div>

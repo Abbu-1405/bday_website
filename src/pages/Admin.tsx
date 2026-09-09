@@ -28,6 +28,7 @@ import {
 } from '../services/adminService';
 import { fetchTrackedUsersOverview } from '../services/adminTrackingService';
 import { TrackedUserOverview } from '../types/tracking';
+import { exportUsersToCsv } from '../utils/csvExport';
 import { AdminOverview } from '../components/admin/AdminOverview';
 import { AdminActivityFeed } from '../components/admin/AdminActivityFeed';
 import { AdminLiveActivity } from '../components/admin/tracking';
@@ -441,6 +442,7 @@ export default function Admin() {
               onNavigateToBts={() => setActiveTab('bts')}
               onNavigateToFeelings={() => setActiveTab('feelings')}
               onNavigateToLetters={() => setActiveTab('letters')}
+              onExportUsers={() => exportUsersToCsv(trackedUsers)}
             />
           )}
 

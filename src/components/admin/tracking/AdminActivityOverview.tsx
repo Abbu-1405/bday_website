@@ -14,6 +14,7 @@ import {
   fetchTrackedUsersOverview,
   calculateTrackingSummaryMetrics,
 } from '../../../services/adminTrackingService';
+import { exportUsersToCsv } from '../../../utils/csvExport';
 import { TrackingOverviewCards } from './TrackingOverviewCards';
 import { TrackedUsersControls, UserSortOption, UserStatusFilter } from './TrackedUsersControls';
 import { TrackedUsersTable } from './TrackedUsersTable';
@@ -175,6 +176,11 @@ export const AdminActivityOverview: React.FC = () => {
         filteredCount={filteredAndSortedUsers.length}
         loading={loading}
         onRefresh={loadData}
+        onExportCsv={() => {
+          exportUsersToCsv(filteredAndSortedUsers, {
+            filename: `starlit-letters-users-${new Date().toISOString().slice(0, 10)}.csv`,
+          });
+        }}
       />
 
       {/* Detailed Users Table */}

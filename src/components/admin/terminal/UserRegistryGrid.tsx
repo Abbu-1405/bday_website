@@ -10,9 +10,11 @@ import {
   Clock,
   Sparkles,
   SlidersHorizontal,
+  Download,
 } from 'lucide-react';
 import { TrackedUserOverview } from '../../../types/tracking';
 import { TerminalStatusBar } from './TerminalStatusBar';
+import { ExportUsersModal } from './ExportUsersModal';
 
 interface UserRegistryGridProps {
   users: TrackedUserOverview[];
@@ -34,6 +36,8 @@ export const UserRegistryGrid: React.FC<UserRegistryGridProps> = ({
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [sortBy, setSortBy] = useState<SortOption>('last_active');
   const [copiedUid, setCopiedUid] = useState<string | null>(null);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [exportNotice, setExportNotice] = useState<string | null>(null);
 
   const handleCopyUid = (e: React.MouseEvent, uid: string) => {
     e.stopPropagation();
@@ -137,7 +141,24 @@ export const UserRegistryGrid: React.FC<UserRegistryGridProps> = ({
         onlineUsers={onlineCount}
         isLoading={isLoading}
         onRefresh={onRefresh}
+        onExportCsv={() => setIsExportModalOpen(true)}
       />
+
+      {/* Export Feedback Banner */}
+      {exportNotice && (
+        <div className="flex items-center justify-between px-3.5 py-2 rounded-lg bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-mono animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span>{exportNotice}</span>
+          </div>
+          <button
+            onClick={() => setExportNotice(null)}
+            className="text-zinc-400 hover:text-zinc-200 text-[10px] ml-2"
+          >
+            [DISMISS]
+          </button>
+        </div>
+      )}
 
       {/* 3. Search and Filter Bar */}
       <div className="p-3.5 sm:p-4 rounded-xl bg-zinc-950/70 border border-zinc-800/90 space-y-3">
@@ -225,17 +246,30 @@ export const UserRegistryGrid: React.FC<UserRegistryGridProps> = ({
       </div>
 
       {/* Registry Count Readout */}
-      <div className="flex items-center justify-between text-[11px] text-zinc-400 px-1">
-        <div>
-          <span>NODES INDEXED: </span>
-          <span className="text-emerald-400 font-bold">{filteredUsers.length}</span>
-          <span className="text-zinc-600"> / {users.length} TOTAL</span>
+      <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-zinc-400 px-1">
+        <div className="flex items-center gap-3">
+          <div>
+            <span>NODES INDEXED: </span>
+            <span className="text-emerald-400 font-bold">{filteredUsers.length}</span>
+            <span className="text-zinc-600"> / {users.length} TOTAL</span>
+          </div>
+          {searchTerm && (
+            <span className="text-amber-400/90 text-[10px]">
+              [QUERY: &quot;{searchTerm}&quot;]
+            </span>
+          )}
         </div>
-        {searchTerm && (
-          <span className="text-amber-400/90 text-[10px]">
-            [QUERY: &quot;{searchTerm}&quot;]
-          </span>
-        )}
+
+        <button
+          onClick={() => setIsExportModalOpen(true)}
+          disabled={users.length === 0}
+          id="btn-registry-quick-export"
+          title="Export platform user registry as CSV"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-900 hover:bg-emerald-950/40 text-zinc-300 hover:text-emerald-400 border border-zinc-800 hover:border-emerald-500/30 text-[10px] font-mono transition-all disabled:opacity-40"
+        >
+          <Download className="w-3 h-3 text-emerald-400" />
+          <span>[ EXPORT CSV ]</span>
+        </button>
       </div>
 
       {/* 4. User Profile Grid (3 cols desktop, 2 cols tablet, 1 col mobile) */}
@@ -454,6 +488,19 @@ export const UserRegistryGrid: React.FC<UserRegistryGridProps> = ({
           })}
         </div>
       )}
+
+      {/* 5. CSV Export Modal */}
+      <ExportUsersModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        allUsers={users}
+        filteredUsers={filteredUsers}
+        filterActive={statusFilter !== 'all' || Boolean(searchTerm.trim())}
+        onExportSuccess={(filename, count) => {
+          setExportNotice(`EXPORT GENERATED: ${filename} (${count} record${count === 1 ? '' : 's'})`);
+          setTimeout(() => setExportNotice(null), 6000);
+        }}
+      />
     </div>
   );
 };

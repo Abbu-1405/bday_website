@@ -10,6 +10,7 @@ import {
   Hourglass,
   User,
   Radio,
+  Download,
 } from 'lucide-react';
 
 export type UserSortOption = 'last_active' | 'total_visits' | 'total_time' | 'name';
@@ -26,6 +27,7 @@ interface TrackedUsersControlsProps {
   filteredCount: number;
   loading: boolean;
   onRefresh: () => void;
+  onExportCsv?: () => void;
 }
 
 export const TrackedUsersControls: React.FC<TrackedUsersControlsProps> = ({
@@ -39,6 +41,7 @@ export const TrackedUsersControls: React.FC<TrackedUsersControlsProps> = ({
   filteredCount,
   loading,
   onRefresh,
+  onExportCsv,
 }) => {
   const statusTabs: { id: UserStatusFilter; label: string }[] = [
     { id: 'all', label: 'All Users' },
@@ -101,16 +104,31 @@ export const TrackedUsersControls: React.FC<TrackedUsersControlsProps> = ({
           })}
         </div>
 
-        {/* Refresh Action */}
-        <button
-          id="tracked-users-refresh-btn"
-          onClick={onRefresh}
-          disabled={loading}
-          className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700/80 text-slate-200 text-xs font-medium border border-slate-700/80 transition-colors disabled:opacity-50 shrink-0"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 text-slate-400 ${loading ? 'animate-spin' : ''}`} />
-          <span>Refresh</span>
-        </button>
+        {/* Action Buttons: Export CSV & Refresh */}
+        <div className="flex items-center gap-2 shrink-0">
+          {onExportCsv && (
+            <button
+              id="tracked-users-export-btn"
+              onClick={onExportCsv}
+              disabled={loading || totalCount === 0}
+              title="Export platform user records to CSV"
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-emerald-950/40 text-slate-200 hover:text-emerald-400 text-xs font-medium border border-slate-700/80 hover:border-emerald-500/40 transition-colors disabled:opacity-50"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Export CSV</span>
+            </button>
+          )}
+
+          <button
+            id="tracked-users-refresh-btn"
+            onClick={onRefresh}
+            disabled={loading}
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700/80 text-slate-200 text-xs font-medium border border-slate-700/80 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-400 ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
+          </button>
+        </div>
       </div>
 
       {/* Bottom Row: Sort Selectors & Results Counter */}

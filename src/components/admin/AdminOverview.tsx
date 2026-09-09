@@ -10,6 +10,7 @@ import {
   KeyRound,
   RefreshCw,
   Film,
+  Download,
 } from 'lucide-react';
 import { AdminOverviewStats } from '../../services/adminService';
 
@@ -22,6 +23,7 @@ interface AdminOverviewProps {
   onNavigateToFeelings?: () => void;
   onNavigateToLetters?: () => void;
   onNavigateToBts?: () => void;
+  onExportUsers?: () => void;
 }
 
 export const AdminOverview: React.FC<AdminOverviewProps> = ({
@@ -33,6 +35,7 @@ export const AdminOverview: React.FC<AdminOverviewProps> = ({
   onNavigateToFeelings,
   onNavigateToLetters,
   onNavigateToBts,
+  onExportUsers,
 }) => {
   const statCards = [
     {
@@ -111,6 +114,18 @@ export const AdminOverview: React.FC<AdminOverviewProps> = ({
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {onExportUsers && (
+            <button
+              onClick={onExportUsers}
+              disabled={loading}
+              id="btn-overview-export-users"
+              title="Export platform users to CSV"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-emerald-950/40 text-slate-200 hover:text-emerald-400 text-xs font-medium border border-slate-700 hover:border-emerald-500/40 transition-colors disabled:opacity-50"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Export Users (CSV)</span>
+            </button>
+          )}
           <button
             onClick={onRefresh}
             disabled={loading}
