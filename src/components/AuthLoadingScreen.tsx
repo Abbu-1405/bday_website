@@ -35,7 +35,15 @@ export const AuthLoadingScreen: React.FC<AuthLoadingScreenProps> = ({
 
       {/* Atmospheric Loading Indicator */}
       <div className="relative z-10 flex flex-col items-center justify-center space-y-3.5 text-center">
-        <Loader2 className="w-8 h-8 text-[#8C6B5E] animate-spin shrink-0" />
+        <div className="relative w-12 h-12 rounded-full bg-[#050811] border border-[#E5B85A]/40 shadow-[0_4px_16px_rgba(5,8,17,0.2)] overflow-hidden flex items-center justify-center animate-pulse">
+          <img
+            src="/gaalimaatalu-favicon.png"
+            alt="Gaalimaatalu"
+            className="w-full h-full object-contain rounded-full select-none pointer-events-none"
+            referrerPolicy="no-referrer"
+          />
+        </div>
+        <Loader2 className="w-5 h-5 text-[#8C6B5E] animate-spin shrink-0" />
         <p className="text-sm font-serif italic text-[#7D6B5E] tracking-wide">
           {message}
         </p>

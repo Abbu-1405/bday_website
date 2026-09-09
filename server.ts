@@ -119,6 +119,9 @@ async function startServer() {
     console.warn('[Server] Notice initializing queue listener:', listenerErr);
   }
 
+  // Serve public assets directly
+  app.use(express.static(path.join(process.cwd(), 'public')));
+
   // Vite middleware for development vs Static files in production
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({

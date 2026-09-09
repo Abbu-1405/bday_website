@@ -26,23 +26,28 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
           {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
         </button>
 
-        {/* Shield Icon Badge */}
-        <div className="w-8 h-8 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
-          <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
+        {/* Brand Icon Badge */}
+        <div className="w-8 h-8 rounded-xl bg-[#050811] border border-[#E5B85A]/30 overflow-hidden flex items-center justify-center shrink-0">
+          <img
+            src="/gaalimaatalu-favicon.png"
+            alt="Gaalimaatalu"
+            className="w-full h-full object-contain select-none pointer-events-none"
+            referrerPolicy="no-referrer"
+          />
         </div>
 
         {/* Title & Subtitle */}
         <div className="min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
             <h1 className="text-xs sm:text-sm font-semibold text-slate-100 tracking-tight whitespace-nowrap">
-              Starlit Letters
+              Gaalimaatalu
             </h1>
-            <span className="text-[10px] sm:text-xs text-indigo-400 font-mono font-medium px-1.5 py-0.2 rounded bg-indigo-500/10 border border-indigo-500/20 shrink-0">
+            <span className="text-[10px] sm:text-xs text-[#E5B85A] font-mono font-medium px-1.5 py-0.2 rounded bg-[#E5B85A]/10 border border-[#E5B85A]/20 shrink-0">
               Admin
             </span>
           </div>
           <p className="text-[10px] sm:text-[11px] text-slate-400 truncate hidden xs:block sm:block">
-            Owner Dashboard & Monitor
+            Starlit Letters &bull; Owner Dashboard
           </p>
         </div>
       </div>
