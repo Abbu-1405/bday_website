@@ -2,9 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import {
   FloatingNavigation,
-  FloatingThemeButton,
   FloatingAuthButton,
-  AudioButton,
   AchievementCelebrationModal,
   LetterArchiveBackground,
   LetterArchiveAmbience,
@@ -343,10 +341,8 @@ export const MainLayout: React.FC = () => {
 
       {/* Top-Right Floating Controls Bar (Public pages only - Admin has dedicated header layout) */}
       {!isAdminRoute && (
-        <div className="fixed top-4 right-4 z-40 flex items-center gap-2">
+        <div className="fixed top-4 right-4 z-40 flex items-center">
           <FloatingAuthButton className="static" />
-          <AudioButton className="static" />
-          <FloatingThemeButton className="static" />
         </div>
       )}
 
