@@ -1,7 +1,7 @@
 import React, { createContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from '../firebase';
-import { loginWithGoogle as googleLogin, logoutUser, getUserProfile } from '../services';
+import { loginWithGoogle as googleLogin, logoutUser, getUserProfile, syncUserProfile } from '../services';
 import { AuthContextType, UserProfile } from '../types';
 import { isAuthorizedAdminEmail } from '../constants';
 
@@ -55,24 +55,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               // Fetch user profile from Firestore
               let profile = await getUserProfile(user.uid);
 
-              // If profile does not exist or role needs synchronization
-              const isAllowlistedAdmin = isAuthorizedAdminEmail(user.email);
-              const isEligibleAdmin = hasAdminClaim || isAllowlistedAdmin;
-
-              if (profile && profile.role !== 'admin' && isEligibleAdmin) {
+              // Self-healing check:
+              // If profile does not exist or lacks basic identity fields (e.g. from tracking stub or interrupted write),
+              // automatically recreate/synchronize the profile using syncUserProfile(user).
+              if (!profile || !profile.email) {
+                console.log(`[AUTH] Missing or incomplete /users profile for UID ${user.uid}. Executing self-healing synchronization.`);
                 try {
-                  const { doc, setDoc } = await import('firebase/firestore');
-                  const { db } = await import('../firebase');
-                  await setDoc(
-                    doc(db, 'users', user.uid),
-                    { role: 'admin' },
-                    { merge: true }
-                  );
-                  profile = await getUserProfile(user.uid);
-                } catch (syncErr) {
-                  console.warn('[AUTH] Profile role sync notice:', syncErr);
+                  profile = await syncUserProfile(user);
+                } catch (healErr) {
+                  console.error('[AUTH] Self-healing profile synchronization failed:', healErr);
+                }
+              } else {
+                // If profile exists, check if role needs synchronization (e.g. newly eligible admin)
+                const isAllowlistedAdmin = isAuthorizedAdminEmail(user.email);
+                const isEligibleAdmin = hasAdminClaim || isAllowlistedAdmin;
+
+                if (profile.role !== 'admin' && isEligibleAdmin) {
+                  try {
+                    profile = await syncUserProfile(user);
+                  } catch (syncErr) {
+                    console.warn('[AUTH] Profile role sync notice:', syncErr);
+                  }
                 }
               }
+
+              const isAllowlistedAdmin = isAuthorizedAdminEmail(user.email);
 
               const computedIsAdmin = hasAdminClaim || profile?.role === 'admin' || isAllowlistedAdmin;
 

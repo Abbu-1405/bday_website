@@ -7,6 +7,120 @@ import { userTrackingService } from './userTrackingService';
 
 let isPopupActive = false;
 
+/**
+ * Deterministically and idempotently synchronizes the Firebase Auth user
+ * with their authoritative Firestore document at /users/{uid}.
+ *
+ * Guarantees:
+ * 1. Document ID is strictly user.uid (never email).
+ * 2. If document is missing, creates it with required profile fields and ISO timestamps.
+ * 3. If document exists, updates identity metadata (lastSeenAt, email, displayName, photoURL, role)
+ *    using merge semantics without destroying existing activity counters, custom fields, or notes.
+ * 4. Awaits Firestore confirmation before returning the synchronized UserProfile.
+ */
+export const syncUserProfile = async (user: User): Promise<UserProfile> => {
+  if (!isFirebaseConfigured || !user?.uid) {
+    throw new Error('Cannot synchronize profile: Firebase or user is unconfigured.');
+  }
+
+  const userRef = doc(db, 'users', user.uid);
+  const nowISO = new Date().toISOString();
+
+  // Check claims to set role appropriately during profile sync
+  let hasAdminClaim = false;
+  try {
+    const tokenResult = await user.getIdTokenResult().catch(() => null);
+    hasAdminClaim = Boolean(tokenResult?.claims?.admin);
+  } catch {
+    // Fallback for backgrounding or offline states
+  }
+
+  const isAllowlistedAdmin = isAuthorizedAdminEmail(user.email);
+  const isAdminAccount =
+    hasAdminClaim ||
+    isAllowlistedAdmin ||
+    user.uid === 'TyVula514COYthRt1y2XiV4riB83' ||
+    user.uid === 'TyVula514C0YhRt1y2XiV4riB83' ||
+    user.uid === '42V9so9YzmRNUaorj2Xn67R5NKJ2';
+
+  try {
+    const snap = await getDoc(userRef);
+
+    if (!snap.exists()) {
+      const newProfile: UserProfile = {
+        uid: user.uid,
+        email: user.email || null,
+        displayName: user.displayName || (user.email ? user.email.split('@')[0] : 'Starlit Letters User'),
+        photoURL: user.photoURL || null,
+        role: isAdminAccount ? 'admin' : 'user',
+        createdAt: nowISO,
+        lastSeenAt: nowISO,
+      };
+
+      // Atomic idempotent write with merge: true to avoid overwriting concurrent partial writes
+      await setDoc(userRef, newProfile, { merge: true });
+      console.log(`[AUTH] Successfully created initial user profile for UID: ${user.uid}`);
+      return newProfile;
+    } else {
+      const existingData = snap.data();
+      const existingRole = existingData?.role;
+      const targetRole = isAdminAccount ? 'admin' : (existingRole || 'user');
+
+      const updates: Record<string, any> = {
+        lastSeenAt: nowISO,
+      };
+
+      // Elevate or synchronize role if needed
+      if (existingRole !== targetRole) {
+        updates.role = targetRole;
+      }
+
+      // Preserve or set createdAt if missing (e.g. from partial tracking document)
+      if (!existingData?.createdAt) {
+        updates.createdAt = nowISO;
+      }
+
+      // Update identity fields only if changed or if missing from existing document
+      if (user.displayName && user.displayName !== existingData?.displayName) {
+        updates.displayName = user.displayName;
+      } else if (!existingData?.displayName && user.displayName) {
+        updates.displayName = user.displayName;
+      }
+
+      if (user.email && user.email !== existingData?.email) {
+        updates.email = user.email;
+      } else if (!existingData?.email && user.email) {
+        updates.email = user.email;
+      }
+
+      if (user.photoURL && user.photoURL !== existingData?.photoURL) {
+        updates.photoURL = user.photoURL;
+      } else if (!existingData?.photoURL && user.photoURL) {
+        updates.photoURL = user.photoURL;
+      }
+
+      // Apply updates with merge semantics, strictly preserving all existing fields (notes, counters, sessions)
+      await setDoc(userRef, updates, { merge: true });
+      console.log(`[AUTH] Successfully synchronized existing user profile for UID: ${user.uid}`);
+
+      return {
+        uid: user.uid,
+        email: updates.email ?? existingData?.email ?? user.email ?? null,
+        displayName: updates.displayName ?? existingData?.displayName ?? user.displayName ?? null,
+        photoURL: updates.photoURL ?? existingData?.photoURL ?? user.photoURL ?? null,
+        role: targetRole,
+        createdAt: existingData?.createdAt || updates.createdAt || nowISO,
+        lastSeenAt: nowISO,
+        ...existingData,
+        ...updates,
+      } as UserProfile;
+    }
+  } catch (error: any) {
+    console.error(`[AUTH] Firestore synchronization failed for UID: ${user.uid}:`, error);
+    throw error;
+  }
+};
+
 export const loginWithGoogle = async (): Promise<User> => {
   if (!isFirebaseConfigured) {
     throw new Error('Firebase Authentication is not configured.');
@@ -28,52 +142,18 @@ export const loginWithGoogle = async (): Promise<User> => {
     console.log('[AUTH] Popup resolved successfully');
 
     const user = result.user;
-    const userRef = doc(db, 'users', user.uid);
-    const nowISO = new Date().toISOString();
 
-    // Check claims to set role appropriately during profile sync
-    const tokenResult = await user.getIdTokenResult(true).catch(() => null);
-    const hasAdminClaim = Boolean(tokenResult?.claims?.admin);
-    const isAdminAccount =
-      hasAdminClaim ||
-      isAuthorizedAdminEmail(user.email) ||
-      user.uid === 'TyVula514COYthRt1y2XiV4riB83' ||
-      user.uid === 'TyVula514C0YhRt1y2XiV4riB83' ||
-      user.uid === '42V9so9YzmRNUaorj2Xn67R5NKJ2';
-
-    // Async background sync of user profile to Firestore without blocking return
-    getDoc(userRef)
-      .then(async (snap) => {
-        if (!snap.exists()) {
-          const newProfile: UserProfile = {
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-            photoURL: user.photoURL,
-            role: isAdminAccount ? 'admin' : 'user',
-            createdAt: nowISO,
-            lastSeenAt: nowISO,
-          };
-          await setDoc(userRef, newProfile);
-        } else {
-          const existingData = snap.data();
-          const targetRole = isAdminAccount ? 'admin' : (existingData?.role || 'user');
-          await setDoc(
-            userRef,
-            {
-              lastSeenAt: nowISO,
-              displayName: user.displayName,
-              photoURL: user.photoURL,
-              email: user.email,
-              role: targetRole,
-            },
-            { merge: true }
-          );
-        }
-      })
-      .catch((dbErr) => {
-        console.warn('[AUTH] Firestore user profile sync notice:', dbErr);
-      });
+    // Deterministically await user profile synchronization before proceeding to navigation
+    try {
+      await syncUserProfile(user);
+      console.log('[AUTH] User profile synchronized deterministically for UID:', user.uid);
+    } catch (syncError: any) {
+      console.error('[AUTH] Critical: User profile synchronization failed:', syncError);
+      const friendlySyncErr = new Error('Failed to synchronize user account. Please try again.');
+      (friendlySyncErr as any).code = 'auth/sync-failed';
+      (friendlySyncErr as any).originalError = syncError;
+      throw friendlySyncErr;
+    }
 
     return user;
   } catch (error: any) {
